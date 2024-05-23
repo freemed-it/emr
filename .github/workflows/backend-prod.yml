@@ -65,9 +65,11 @@ jobs:
         working-directory: ./backend
 
     steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+        
       - name: Copy appspec.yml
-        run: 
-          cp ./appspec-prod.yml ./appspec.yml
+        run: mv ./appspec-prod.yml ./appspec.yml
 
       - name: Make zip file
         run: zip -qq -r ./prod.zip . -x "node_modules/*"
