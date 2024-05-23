@@ -9,7 +9,7 @@ on:
       - .github/**
 
 jobs:
-  build:
+  deploy:
     env:
       ENV_PATH: .env.staging
     environment: staging
@@ -55,18 +55,6 @@ jobs:
 
       - name: Build
         run: yarn build
-
-  deploy:
-    needs: build
-    environment: staging
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v3
 
       - name: Copy appspec.yml
         run: mv ./appspec-dev.yml ./appspec.yml
