@@ -1,0 +1,20 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/deploy/dev
+    overwrite: yes
+file_exists_behavior: OVERWRITE
+
+permissions:
+  - object: /home/ubuntu/deploy
+    pattern: '**'
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+
+hooks:
+  AfterInstall:
+    - location: scripts/deploy-dev.sh
+      timeout: 600
+      runas: ubuntu

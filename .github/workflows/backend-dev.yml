@@ -1,0 +1,82 @@
+name: BE Dev Deploy
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - backend/**
+      - .github/**
+
+jobs:
+  deploy:
+    env:
+      ENV_PATH: .env.staging
+    environment: staging
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+          cache-dependency-path: '**/yarn.lock'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Create .env file
+        run: |
+          touch ${{ env.ENV_PATH }}
+          echo PORT=${{ secrets.PORT }} >> ${{ env.ENV_PATH }}
+          echo DB_HOST=${{ secrets.DB_HOST }} >> ${{ env.ENV_PATH }}
+          echo DB_PORT=${{ secrets.DB_PORT }} >> ${{ env.ENV_PATH }}
+          echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> ${{ env.ENV_PATH }}
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> ${{ env.ENV_PATH }}
+          echo DB_DATABASE=${{ secrets.DB_DATABASE }} >> ${{ env.ENV_PATH }}
+          echo REDIS_BINDING_PORT=${{ secrets.REDIS_BINDING_PORT }} >> ${{ env.ENV_PATH }}
+          echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> ${{ env.ENV_PATH }}
+          echo REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} >> ${{ env.ENV_PATH }}
+          cat ${{ env.ENV_PATH }}
+
+      - name: Install Dependencies
+        run: yarn install --immutable
+
+      - name: Build
+        run: yarn build
+
+      - name: Copy appspec.yml
+        run: mv ./appspec-dev.yml ./appspec.yml
+
+      - name: Make zip file
+        run: zip -qq -r ./dev.zip . -x "node_modules/*"
+        shell: bash
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./dev.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/dev.zip
+
+      - name: Deploy to EC2 with CodeDeploy
+        run: aws deploy create-deployment
+          --deployment-config-name CodeDeployDefault.AllAtOnce
+          --application-name ${{ secrets.AWS_CODEDEPLOY_APPLICATION_NAME }}
+          --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_DEPLOYMENT_GROUP_NAME }}
+          --s3-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},bundleType=zip,key=dev.zip

@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   redis:
-    image: redis
+    image: redis:latest
     restart: always
     ports:
-      - "32769:6379"
+      - "${REDIS_BINDING_PORT}:${REDIS_PORT}"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
