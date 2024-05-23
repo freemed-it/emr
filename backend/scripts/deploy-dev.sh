@@ -7,4 +7,4 @@ REPOSITORY=/home/ubuntu/deploy/dev
 cd $REPOSITORY
 
 yarn install
-yarn start:staging
+pm2 reload emr-server.dev
