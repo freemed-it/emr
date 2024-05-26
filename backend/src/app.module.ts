@@ -8,6 +8,12 @@ import { MMedicinesModule } from './m-medicines/m-medicines.module';
 import { M_Medicines } from './m-medicines/entity/m-medicines.entity';
 import { MMedicineCategoriesModule } from './m-medicine-categories/m-medicine-categories.module';
 import { M_Medicine_Categories } from './m-medicine-categories/entity/m_medicine_categories.entity';
+import { MChartsModule } from './m-charts/m-charts.module';
+import { M_Charts } from './m-charts/entity/m-charts.entity';
+import { MComplaintsModule } from './m-complaints/m-complaints.module';
+import { M_Complaints } from './m-complaints/entity/m-complaints.entity';
+import { MPrescriptionsModule } from './m-prescriptions/m-prescriptions.module';
+import { M_Prescriptions } from './m-prescriptions/entity/m-prescriotions.entity';
 
 @Module({
   imports: [
@@ -28,10 +34,19 @@ import { M_Medicine_Categories } from './m-medicine-categories/entity/m_medicine
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [M_Medicines, M_Medicine_Categories],
+      entities: [
+        M_Charts,
+        M_Complaints,
+        M_Prescriptions,
+        M_Medicines,
+        M_Medicine_Categories,
+      ],
       synchronize: true,
     }),
     CommonModule,
+    MChartsModule,
+    MComplaintsModule,
+    MPrescriptionsModule,
     MMedicinesModule,
     MMedicineCategoriesModule,
   ],
