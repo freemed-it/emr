@@ -4,7 +4,7 @@ import { Patients } from 'src/patients/entity/patients.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
-export class PatientMemos extends BaseModel {
+export class Memos extends BaseModel {
   @OneToOne(() => Patients, {
     nullable: false,
   })

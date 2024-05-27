@@ -14,16 +14,16 @@ import { MComplaintsModule } from './m-complaints/m-complaints.module';
 import { M_Complaints } from './m-complaints/entity/m-complaints.entity';
 import { MPrescriptionsModule } from './m-prescriptions/m-prescriptions.module';
 import { M_Prescriptions } from './m-prescriptions/entity/m-prescriotions.entity';
-import { HistoriesModule } from './histories/histories.module';
-import { Histories } from './histories/entity/histories.entity';
+import { HistoriesModule } from './patients/histories/histories.module';
+import { Histories } from './patients/histories/entity/histories.entity';
 import { Users } from './users/entity/users.entity';
 import { UsersModule } from './users/users.module';
 import { Patients } from './patients/entity/patients.entity';
 import { PatientsModule } from './patients/patients.module';
 import { Orders } from './orders/entity/orders.entity';
 import { OrdersModule } from './orders/orders.module';
-import { PatientMemos } from './patient-memos/entity/patient-memos.entity';
-import { PatientMemosModule } from './patient-memos/patient-memos.module';
+import { Memos } from './patients/memos/entity/memos.entity';
+import { MemosModule } from './patients/memos/memos.module';
 import { KM_Charts } from './km-charts/entity/km-charts.entity';
 import { KmChartsModule } from './km-charts/km-charts.module';
 import { KmComplaintsModule } from './km-complaints/km-complaints.module';
@@ -60,7 +60,7 @@ import { KM_Medicines } from './km-medicines/entity/km-medicines.entity';
         M_Medicine_Categories,
         Patients,
         Histories,
-        PatientMemos,
+        Memos,
         Orders,
         Users,
         KM_Charts,
@@ -78,7 +78,7 @@ import { KM_Medicines } from './km-medicines/entity/km-medicines.entity';
     MMedicineCategoriesModule,
     PatientsModule,
     HistoriesModule,
-    PatientMemosModule,
+    MemosModule,
     OrdersModule,
     UsersModule,
     KmChartsModule,
