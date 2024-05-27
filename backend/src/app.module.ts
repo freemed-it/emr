@@ -14,6 +14,8 @@ import { MComplaintsModule } from './m-complaints/m-complaints.module';
 import { M_Complaints } from './m-complaints/entity/m-complaints.entity';
 import { MPrescriptionsModule } from './m-prescriptions/m-prescriptions.module';
 import { M_Prescriptions } from './m-prescriptions/entity/m-prescriotions.entity';
+import { HistoriesModule } from './histories/histories.module';
+import { Histories } from './histories/entity/histories.entity';
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import { M_Prescriptions } from './m-prescriptions/entity/m-prescriotions.entity
         M_Prescriptions,
         M_Medicines,
         M_Medicine_Categories,
+        Histories,
       ],
       synchronize: true,
     }),
@@ -49,6 +52,7 @@ import { M_Prescriptions } from './m-prescriptions/entity/m-prescriotions.entity
     MPrescriptionsModule,
     MMedicinesModule,
     MMedicineCategoriesModule,
+    HistoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
