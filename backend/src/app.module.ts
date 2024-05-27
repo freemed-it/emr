@@ -24,6 +24,14 @@ import { Orders } from './orders/entity/orders.entity';
 import { OrdersModule } from './orders/orders.module';
 import { PatientMemos } from './patient-memos/entity/patient-memos.entity';
 import { PatientMemosModule } from './patient-memos/patient-memos.module';
+import { KM_Charts } from './km-charts/entity/km-charts.entity';
+import { KmChartsModule } from './km-charts/km-charts.module';
+import { KmComplaintsModule } from './km-complaints/km-complaints.module';
+import { KmPrescriptionsModule } from './km-prescriptions/km-prescriptions.module';
+import { KmMedicinesModule } from './km-medicines/km-medicines.module';
+import { KM_Complaints } from './km-complaints/entity/km-complaints.entity';
+import { KM_Prescriptions } from './km-prescriptions/entity/km-prescriotions.entity';
+import { KM_Medicines } from './km-medicines/entity/km-medicines.entity';
 
 @Module({
   imports: [
@@ -55,6 +63,10 @@ import { PatientMemosModule } from './patient-memos/patient-memos.module';
         PatientMemos,
         Orders,
         Users,
+        KM_Charts,
+        KM_Complaints,
+        KM_Prescriptions,
+        KM_Medicines,
       ],
       synchronize: true,
     }),
@@ -69,6 +81,10 @@ import { PatientMemosModule } from './patient-memos/patient-memos.module';
     PatientMemosModule,
     OrdersModule,
     UsersModule,
+    KmChartsModule,
+    KmComplaintsModule,
+    KmPrescriptionsModule,
+    KmMedicinesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

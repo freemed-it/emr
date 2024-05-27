@@ -4,12 +4,13 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { Department } from '../const/department.const';
 import { Patients } from 'src/patients/entity/patients.entity';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
+import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
 
 @Entity()
 export class Orders extends BaseModel {
-  @OneToOne(() => M_Charts)
+  @OneToOne(() => M_Charts || KM_Charts)
   @JoinColumn({ name: 'chartId', referencedColumnName: 'id' })
-  chart: M_Charts;
+  chart: M_Charts | KM_Charts;
 
   @ManyToOne(() => Patients, (patient) => patient.orders, {
     nullable: false,
