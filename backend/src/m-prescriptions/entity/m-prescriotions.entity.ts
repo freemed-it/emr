@@ -35,7 +35,9 @@ export class M_Prescriptions extends BaseModel {
   @IsNumber()
   dosesTotal: number;
 
-  @Column()
+  @Column({
+    default: false,
+  })
   @IsBoolean()
   isCompleted: boolean;
 

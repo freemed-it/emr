@@ -16,6 +16,14 @@ import { MPrescriptionsModule } from './m-prescriptions/m-prescriptions.module';
 import { M_Prescriptions } from './m-prescriptions/entity/m-prescriotions.entity';
 import { HistoriesModule } from './histories/histories.module';
 import { Histories } from './histories/entity/histories.entity';
+import { Users } from './users/entity/users.entity';
+import { UsersModule } from './users/users.module';
+import { Patients } from './patients/entity/patients.entity';
+import { PatientsModule } from './patients/patients.module';
+import { Orders } from './orders/entity/orders.entity';
+import { OrdersModule } from './orders/orders.module';
+import { PatientMemos } from './patient-memos/entity/patient-memos.entity';
+import { PatientMemosModule } from './patient-memos/patient-memos.module';
 
 @Module({
   imports: [
@@ -42,7 +50,11 @@ import { Histories } from './histories/entity/histories.entity';
         M_Prescriptions,
         M_Medicines,
         M_Medicine_Categories,
+        Patients,
         Histories,
+        PatientMemos,
+        Orders,
+        Users,
       ],
       synchronize: true,
     }),
@@ -52,7 +64,11 @@ import { Histories } from './histories/entity/histories.entity';
     MPrescriptionsModule,
     MMedicinesModule,
     MMedicineCategoriesModule,
+    PatientsModule,
     HistoriesModule,
+    PatientMemosModule,
+    OrdersModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

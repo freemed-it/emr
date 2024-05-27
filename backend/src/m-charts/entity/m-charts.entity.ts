@@ -2,10 +2,16 @@ import { IsInt, IsNumber, IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { M_Complaints } from 'src/m-complaints/entity/m-complaints.entity';
 import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriotions.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Patients } from 'src/patients/entity/patients.entity';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class M_Charts extends BaseModel {
+  @ManyToOne(() => Patients, (patient) => patient.charts, {
+    nullable: false,
+  })
+  patient: Patients;
+
   @Column({
     unique: true,
   })

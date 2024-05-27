@@ -1,11 +1,16 @@
 import { IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
-import { M_Complaints } from 'src/m-complaints/entity/m-complaints.entity';
-import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriotions.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Patients } from 'src/patients/entity/patients.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
 export class Histories extends BaseModel {
+  @OneToOne(() => Patients, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'patientId', referencedColumnName: 'id' })
+  patient: Patients;
+
   @Column({
     length: 30,
     nullable: true,
@@ -152,10 +157,4 @@ export class Histories extends BaseModel {
   })
   @IsString()
   medicinePeriod: string;
-
-  @OneToMany(() => M_Complaints, (complaint) => complaint.chart)
-  complaints: M_Complaints[];
-
-  @OneToMany(() => M_Prescriptions, (prescription) => prescription.chart)
-  prescriptions: M_Prescriptions[];
 }
