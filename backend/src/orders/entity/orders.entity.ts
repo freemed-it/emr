@@ -17,7 +17,9 @@ export class Orders extends BaseModel {
   })
   patient: Patients;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   @IsInt()
   waitingNumber: number;
 
