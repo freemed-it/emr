@@ -2,10 +2,23 @@ import { IsInt, IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medicine_categories.entity';
 import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriotions.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class M_Medicines extends BaseModel {
+  @ManyToOne(() => M_Medicine_Categories, (category) => category.medicines, {
+    nullable: false,
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
+  category: M_Medicine_Categories;
+
   @Column({
     length: 40,
   })
@@ -76,13 +89,8 @@ export class M_Medicines extends BaseModel {
   })
   isExcluded: boolean;
 
-  @Column({
-    default: false,
-  })
-  isDeleted: boolean;
-
-  @ManyToOne(() => M_Medicine_Categories, (category) => category.medicines)
-  category: M_Medicine_Categories;
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   @OneToMany(() => M_Prescriptions, (prescription) => prescription.medicine)
   prescriptions: M_Prescriptions[];

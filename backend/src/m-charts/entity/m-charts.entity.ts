@@ -9,6 +9,8 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 export class M_Charts extends BaseModel {
   @ManyToOne(() => Patients, (patient) => patient.charts, {
     nullable: false,
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
   })
   patient: Patients;
 

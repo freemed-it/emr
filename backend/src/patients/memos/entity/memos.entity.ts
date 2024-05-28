@@ -7,6 +7,8 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 export class Memos extends BaseModel {
   @OneToOne(() => Patients, {
     nullable: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'patientId', referencedColumnName: 'id' })
   patient: Patients;

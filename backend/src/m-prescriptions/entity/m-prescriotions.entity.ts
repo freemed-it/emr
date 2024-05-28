@@ -8,11 +8,14 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 export class M_Prescriptions extends BaseModel {
   @ManyToOne(() => M_Charts, (chart) => chart.prescriptions, {
     nullable: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   chart: M_Charts;
 
   @ManyToOne(() => M_Medicines, (medicine) => medicine.prescriptions, {
-    nullable: false,
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
   })
   medicine: M_Medicines;
 
@@ -20,8 +23,7 @@ export class M_Prescriptions extends BaseModel {
   @IsNumber()
   doses: number;
 
-  @Column({
-    type: 'char',
+  @Column('char', {
     length: 10,
   })
   @IsString()
