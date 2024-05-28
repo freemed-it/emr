@@ -6,6 +6,13 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class M_Medicines extends BaseModel {
+  @ManyToOne(() => M_Medicine_Categories, (category) => category.medicines, {
+    nullable: false,
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
+  category: M_Medicine_Categories;
+
   @Column({
     length: 40,
   })
@@ -80,9 +87,6 @@ export class M_Medicines extends BaseModel {
     default: false,
   })
   isDeleted: boolean;
-
-  @ManyToOne(() => M_Medicine_Categories, (category) => category.medicines)
-  category: M_Medicine_Categories;
 
   @OneToMany(() => M_Prescriptions, (prescription) => prescription.medicine)
   prescriptions: M_Prescriptions[];

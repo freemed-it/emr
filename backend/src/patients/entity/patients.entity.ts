@@ -18,8 +18,7 @@ export class Patients extends BaseModel {
   @IsString()
   name: string;
 
-  @Column({
-    type: 'enum',
+  @Column('enum', {
     enum: Object.values(Gender),
   })
   @IsEnum(Gender)

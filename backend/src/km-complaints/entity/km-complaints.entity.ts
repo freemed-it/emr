@@ -7,6 +7,8 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 export class KM_Complaints extends BaseModel {
   @ManyToOne(() => KM_Charts, (chart) => chart.complaints, {
     nullable: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   chart: KM_Charts;
 
