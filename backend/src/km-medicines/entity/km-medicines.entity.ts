@@ -1,7 +1,7 @@
 import { IsInt, IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriotions.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class KM_Medicines extends BaseModel {
@@ -49,10 +49,8 @@ export class KM_Medicines extends BaseModel {
   @IsString()
   image: string;
 
-  @Column({
-    default: false,
-  })
-  isDeleted: boolean;
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   @OneToMany(() => KM_Prescriptions, (prescription) => prescription.medicine)
   prescriptions: KM_Prescriptions[];
