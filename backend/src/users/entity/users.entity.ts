@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { Column, Entity } from 'typeorm';
 
@@ -7,6 +8,9 @@ export class Users extends BaseModel {
   account: string;
 
   @Column({ length: 100 })
+  @Exclude({
+    toPlainOnly: true,
+  })
   password: string;
 
   @Column('char', { length: 4 })
