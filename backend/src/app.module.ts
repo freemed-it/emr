@@ -32,6 +32,13 @@ import { KmMedicinesModule } from './km-medicines/km-medicines.module';
 import { KM_Complaints } from './km-complaints/entity/km-complaints.entity';
 import { KM_Prescriptions } from './km-prescriptions/entity/km-prescriotions.entity';
 import { KM_Medicines } from './km-medicines/entity/km-medicines.entity';
+import {
+  ENV_DB_DATABASE_KEY,
+  ENV_DB_HOST_KEY,
+  ENV_DB_PASSWORD_KEY,
+  ENV_DB_PORT_KEY,
+  ENV_DB_USERNAME_KEY,
+} from './common/const/env-keys.const';
 
 @Module({
   imports: [
@@ -47,11 +54,11 @@ import { KM_Medicines } from './km-medicines/entity/km-medicines.entity';
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
+      host: process.env[ENV_DB_HOST_KEY],
+      port: parseInt(process.env[ENV_DB_PORT_KEY]),
+      username: process.env[ENV_DB_USERNAME_KEY],
+      password: process.env[ENV_DB_PASSWORD_KEY],
+      database: process.env[ENV_DB_DATABASE_KEY],
       entities: [
         M_Charts,
         M_Complaints,
