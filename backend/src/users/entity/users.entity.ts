@@ -1,32 +1,17 @@
-import { IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { Column, Entity } from 'typeorm';
 
 @Entity()
 export class Users extends BaseModel {
-  @Column({
-    length: 20,
-    unique: true,
-  })
-  @IsString()
+  @Column({ length: 20, unique: true })
   account: string;
 
-  @Column({
-    length: 100,
-  })
-  @IsString()
+  @Column({ length: 100 })
   password: string;
 
-  @Column('char', {
-    length: 4,
-  })
-  @IsString()
+  @Column('char', { length: 4 })
   permission: string;
 
-  @Column({
-    length: 20,
-    unique: true,
-  })
-  @IsString()
+  @Column({ length: 20, unique: true })
   name: string;
 }
