@@ -49,6 +49,8 @@ jobs:
           echo REDIS_BINDING_PORT=${{ secrets.REDIS_BINDING_PORT }} >> ${{ env.ENV_PATH }}
           echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> ${{ env.ENV_PATH }}
           echo REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} >> ${{ env.ENV_PATH }}
+          echo SWAGGER_USER=${{ secrets.SWAGGER_USER }} >> ${{ env.ENV_PATH }}
+          echo SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} >> ${{ env.ENV_PATH }}
           cat ${{ env.ENV_PATH }}
 
       - name: Install Dependencies
