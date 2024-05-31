@@ -6,9 +6,21 @@ import {
   ENV_SWAGGER_PASSWORD_KEY,
   ENV_SWAGGER_USER_KEY,
 } from './common/const/env-keys.const';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   app.use(
     ['/api/docs'],
