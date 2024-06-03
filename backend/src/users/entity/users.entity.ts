@@ -9,7 +9,7 @@ export class Users extends BaseModel {
   account: string;
 
   /** 사용자 비밀번호 */
-  @Column({ length: 100 })
+  @Column({ length: 100, select: false })
   @Exclude({
     toPlainOnly: true,
   })
