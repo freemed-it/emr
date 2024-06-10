@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import expressBasicAuth from 'express-basic-auth';
+import cookieParser from 'cookie-parser';
 import {
   ENV_SWAGGER_PASSWORD_KEY,
   ENV_SWAGGER_USER_KEY,
@@ -46,6 +47,7 @@ async function bootstrap() {
     },
   });
 
+  app.use(cookieParser());
   await app.listen(parseInt(process.env.PORT, 10) || 3000);
 }
 bootstrap();
