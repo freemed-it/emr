@@ -8,9 +8,9 @@ export abstract class BaseModel {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 }

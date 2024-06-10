@@ -39,8 +39,9 @@ import {
   ENV_DB_PORT_KEY,
   ENV_DB_USERNAME_KEY,
 } from './common/const/env-keys.const';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { AuthModule } from './auth/auth.module';
+import { AccessTokenGuard } from './auth/guard/access-token.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -76,7 +77,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
         KM_Prescriptions,
         KM_Medicines,
       ],
-      synchronize: true,
+      synchronize: false,
     }),
     CommonModule,
     MChartsModule,
@@ -93,6 +94,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     KmComplaintsModule,
     KmPrescriptionsModule,
     KmMedicinesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -100,6 +102,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard,
     },
   ],
 })
