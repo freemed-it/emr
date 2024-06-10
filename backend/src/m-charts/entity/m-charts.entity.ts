@@ -15,10 +15,11 @@ export class M_Charts extends BaseModel {
   patient: Patients;
 
   @Column({
+    type: 'bigint',
     unique: true,
   })
-  @IsInt()
-  chartNumber: number;
+  @IsString()
+  chartNumber: string;
 
   @Column({
     default: 1,
