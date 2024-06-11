@@ -1,4 +1,3 @@
-import { IsDate, IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
@@ -8,68 +7,68 @@ import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
 
 @Entity()
 export class Patients extends BaseModel {
+  /** 첫 방문일 */
   @Column()
-  @IsDate()
   firstVisit: Date;
 
+  /** 이름 */
   @Column({
     length: 10,
   })
-  @IsString()
   name: string;
 
+  /** 성별 */
   @Column('enum', {
     enum: Object.values(Gender),
   })
-  @IsEnum(Gender)
   gender: Gender;
 
+  /** 생년월월 */
   @Column('char', {
     length: 10,
   })
-  @IsString()
   birth: string;
 
+  /** 신장 */
   @Column({
     nullable: true,
   })
-  @IsInt()
   height: number;
 
+  /** 체중 */
   @Column({
     nullable: true,
   })
-  @IsInt()
   weight: number;
 
+  /** BMI */
   @Column('float', {
     nullable: true,
   })
-  @IsNumber()
   bmi: number;
 
+  /** 흡연량 */
   @Column('float', {
     nullable: true,
   })
-  @IsNumber()
   smokingAmount: number;
 
+  /** 흡연 경력 */
   @Column({
     nullable: true,
   })
-  @IsInt()
   smokingPeriod: number;
 
+  /** 음주량 */
   @Column('float', {
     nullable: true,
   })
-  @IsNumber()
   drinkingAmount: number;
 
+  /** 음주경력 */
   @Column({
     nullable: true,
   })
-  @IsInt()
   drinkingPeriod: number;
 
   @OneToMany(() => Orders, (order) => order.patient)

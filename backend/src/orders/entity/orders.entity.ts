@@ -1,4 +1,4 @@
-import { IsEnum, IsInt } from 'class-validator';
+import { IsEnum, IsInt, IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { Department } from '../const/department.const';
@@ -8,13 +8,19 @@ import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
 
 @Entity()
 export class Orders extends BaseModel {
-  @OneToOne(() => M_Charts || KM_Charts, {
-    nullable: false,
+  @OneToOne(() => M_Charts, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'chartId', referencedColumnName: 'id' })
-  chart: M_Charts | KM_Charts;
+  @JoinColumn({ name: 'mChartId', referencedColumnName: 'id' })
+  mChart: M_Charts;
+
+  @OneToOne(() => KM_Charts, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'kmChartId', referencedColumnName: 'id' })
+  kmChart: KM_Charts;
 
   @ManyToOne(() => Patients, (patient) => patient.orders, {
     nullable: false,
@@ -36,10 +42,11 @@ export class Orders extends BaseModel {
   department: Department;
 
   @Column({
+    type: 'bigint',
     unique: true,
   })
-  @IsInt()
-  chartNumber: number;
+  @IsString()
+  chartNumber: string;
 
   @Column({
     nullable: true,
@@ -52,4 +59,5 @@ export class Orders extends BaseModel {
   })
   @IsInt()
   status: number;
+  static chartNumber: number;
 }
