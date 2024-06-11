@@ -40,7 +40,9 @@ jobs:
       - name: Create .env file
         run: |
           touch ${{ env.ENV_PATH }}
+          echo HOST=${{ secrets.HOST }} >> ${{ env.ENV_PATH }}
           echo PORT=${{ secrets.PORT }} >> ${{ env.ENV_PATH }}
+          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> ${{ env.ENV_PATH }}
           echo DB_HOST=${{ secrets.DB_HOST }} >> ${{ env.ENV_PATH }}
           echo DB_PORT=${{ secrets.DB_PORT }} >> ${{ env.ENV_PATH }}
           echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> ${{ env.ENV_PATH }}
@@ -51,6 +53,8 @@ jobs:
           echo REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} >> ${{ env.ENV_PATH }}
           echo SWAGGER_USER=${{ secrets.SWAGGER_USER }} >> ${{ env.ENV_PATH }}
           echo SWAGGER_PASSWORD=${{ secrets.SWAGGER_PASSWORD }} >> ${{ env.ENV_PATH }}
+          echo ACCESS_TOKEN_EXPIRE_SECONDS=${{ secrets.ACCESS_TOKEN_EXPIRE_SECONDS }} >> ${{ env.ENV_PATH }}
+          echo REFRESH_TOKEN_EXPIRE_SECONDS=${{ secrets.REFRESH_TOKEN_EXPIRE_SECONDS }} >> ${{ env.ENV_PATH }}
           cat ${{ env.ENV_PATH }}
 
       - name: Install Dependencies
