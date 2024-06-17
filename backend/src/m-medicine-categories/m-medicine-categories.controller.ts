@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { MMedicineCategoriesService } from './m-medicine-categories.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateMMedicineCategoryDto } from './dto/create-m-medicine-category.dto';
@@ -9,6 +9,14 @@ export class MMedicineCategoriesController {
   constructor(
     private readonly mMedicineCategoriesService: MMedicineCategoriesService,
   ) {}
+
+  @Get()
+  @ApiOperation({
+    summary: '약품 분류 조회',
+  })
+  async getMMedicineCategories() {
+    return this.mMedicineCategoriesService.getCategories();
+  }
 
   @Post()
   @ApiOperation({
