@@ -73,4 +73,23 @@ export class PatientsService {
     }
     return str;
   }
+
+  async searchByName(name: string): Promise<any> {
+    const patients = await this.patientsRepository.find({
+      where: { name: name },
+      select: ['id', 'firstVisit', 'name', 'birth'],
+    });
+
+    if (patients.length === 0) {
+      return null; // 초진
+    } else if (patients.length === 1) {
+      return patients[0]; // 재진
+    } else if (patients.length >= 2) {
+      return patients; // 동명이인
+    }
+  }
+
+  async findById(id: number): Promise<Patients> {
+    return this.patientsRepository.findOne({ where: { id } });
+  }
 }
