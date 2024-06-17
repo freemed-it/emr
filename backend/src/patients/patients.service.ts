@@ -77,7 +77,7 @@ export class PatientsService {
   async searchByName(name: string): Promise<any> {
     const patients = await this.patientsRepository.find({
       where: { name: name },
-      select: ['id', 'name', 'birth'],
+      select: ['id', 'firstVisit', 'name', 'birth'],
     });
 
     if (patients.length === 0) {
