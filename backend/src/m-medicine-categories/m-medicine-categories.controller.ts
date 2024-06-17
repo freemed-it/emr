@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -56,5 +57,15 @@ export class MMedicineCategoriesController {
       categoryId,
       updateMMedicineSubCategoryDto,
     );
+  }
+
+  @Delete('sub-category/:categoryId')
+  @ApiOperation({
+    summary: '약품 소분류 삭제',
+  })
+  async deleteMMedicineSubCategory(
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ) {
+    return this.mMedicineCategoriesService.deleteSubCategory(categoryId);
   }
 }
