@@ -11,6 +11,31 @@ export class MMedicineCategoriesService {
     private readonly mMedicineCategoriesRepository: Repository<M_Medicine_Categories>,
   ) {}
 
+  async getCategories() {
+    const categories = await this.mMedicineCategoriesRepository.find({
+      withDeleted: false,
+    });
+
+    return categories.reduce(
+      (acc, cur) =>
+        Object.keys(acc).includes(cur.mainCategory)
+          ? {
+              ...acc,
+              [cur.mainCategory]: [
+                ...acc[cur.mainCategory],
+                { id: cur.id, subCategory: cur.subCategory },
+              ],
+            }
+          : {
+              ...acc,
+              [cur.mainCategory]: [
+                { id: cur.id, subCategory: cur.subCategory },
+              ],
+            },
+      {},
+    );
+  }
+
   async createCategory(categoryDto: CreateMMedicineCategoryDto) {
     const existingCategory = await this.getCategoryByName(
       categoryDto.mainCategory,
