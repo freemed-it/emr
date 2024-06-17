@@ -26,6 +26,10 @@ export class CreatePatientDto extends PickType(Patients, [
   'drinkingAmount',
   'drinkingPeriod',
 ]) {
+  @ApiProperty({
+    description: '첫방문일',
+    example: '2018-05-25',
+  })
   @IsDate()
   firstVisit: Date;
 
@@ -37,6 +41,10 @@ export class CreatePatientDto extends PickType(Patients, [
   @Length(2, 10, { message: lengthValidationMessage })
   name: string;
 
+  @ApiProperty({
+    description: '성별',
+    example: 'female',
+  })
   @IsEnum(Gender)
   gender: Gender;
 
@@ -63,6 +71,10 @@ export class CreatePatientDto extends PickType(Patients, [
   @IsInt()
   weight: number;
 
+  @ApiProperty({
+    description: 'bmi',
+    example: '21.3',
+  })
   @IsNumber()
   bmi: number;
 
