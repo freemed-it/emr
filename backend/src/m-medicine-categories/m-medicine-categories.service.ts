@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { M_Medicine_Categories } from './entity/m_medicine_categories.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateMMedicineCategoryDto } from './dto/create-m-medicine-category.dto';
+import { UpdateMMedicineSubCategoryDto } from './dto/update-m-medicine-sub-category.dto';
 
 @Injectable()
 export class MMedicineCategoriesService {
@@ -61,5 +66,27 @@ export class MMedicineCategoriesService {
       },
       withDeleted: false,
     });
+  }
+
+  async updateSubCategory(
+    categoryId: number,
+    subCategoryDto: UpdateMMedicineSubCategoryDto,
+  ) {
+    const category = await this.mMedicineCategoriesRepository.findOne({
+      where: {
+        id: categoryId,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException();
+    }
+
+    const newCategory = await this.mMedicineCategoriesRepository.preload({
+      id: categoryId,
+      ...subCategoryDto,
+    });
+
+    return await this.mMedicineCategoriesRepository.save(newCategory);
   }
 }
