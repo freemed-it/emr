@@ -1,14 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { M_Medicine_Categories } from './entity/m_medicine_categories.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateMMedicineCategoryDto } from './dto/create-m-medicine-category.dto';
+import { UpdateMMedicineSubCategoryDto } from './dto/update-m-medicine-sub-category.dto';
+import { MMedicinesService } from 'src/m-medicines/m-medicines.service';
 
 @Injectable()
 export class MMedicineCategoriesService {
   constructor(
     @InjectRepository(M_Medicine_Categories)
     private readonly mMedicineCategoriesRepository: Repository<M_Medicine_Categories>,
+    private readonly mMedicinesService: MMedicinesService,
   ) {}
 
   async getCategories() {
@@ -61,5 +68,52 @@ export class MMedicineCategoriesService {
       },
       withDeleted: false,
     });
+  }
+
+  async updateSubCategory(
+    categoryId: number,
+    subCategoryDto: UpdateMMedicineSubCategoryDto,
+  ) {
+    const category = await this.mMedicineCategoriesRepository.findOne({
+      where: {
+        id: categoryId,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException();
+    }
+
+    const newCategory = await this.mMedicineCategoriesRepository.preload({
+      id: categoryId,
+      ...subCategoryDto,
+    });
+
+    return await this.mMedicineCategoriesRepository.save(newCategory);
+  }
+
+  async deleteSubCategory(categoryId: number) {
+    const category = await this.mMedicineCategoriesRepository.findOne({
+      where: {
+        id: categoryId,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException();
+    }
+
+    const isDeleted =
+      await this.mMedicinesService.checkDeletedMMedicinesByCategoryId(
+        categoryId,
+      );
+
+    if (!isDeleted) {
+      throw new BadRequestException('삭제되지 않은 약품이 존재합니다.');
+    }
+
+    await this.mMedicineCategoriesRepository.softDelete(categoryId);
+
+    return categoryId;
   }
 }
