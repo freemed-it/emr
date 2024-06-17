@@ -51,6 +51,13 @@ export class MMedicineCategoriesController {
   @ApiOperation({
     summary: '약품 대분류 수정',
   })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '이미 존재하는 대분류입니다.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
   async patchMMedicineMainCategory(
     @Query('category') category: string,
     @Body() updateMMedicineMainCategoryDto: UpdateMMedicineMainCategoryDto,
@@ -65,6 +72,13 @@ export class MMedicineCategoriesController {
   @ApiOperation({
     summary: '약품 대분류 삭제',
   })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '삭제되지 않은 소분류가 존재합니다.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
   async deleteMMedicineMainCategory(@Query('category') category: string) {
     return this.mMedicineCategoriesService.deleteMainCategory(category);
   }
@@ -72,6 +86,9 @@ export class MMedicineCategoriesController {
   @Patch('sub-category/:categoryId')
   @ApiOperation({
     summary: '약품 소분류 수정',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
   })
   async patchMMedicineSubCategory(
     @Param('categoryId', ParseIntPipe) categoryId: number,
@@ -86,6 +103,13 @@ export class MMedicineCategoriesController {
   @Delete('sub-category/:categoryId')
   @ApiOperation({
     summary: '약품 소분류 삭제',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '삭제되지 않은 약품이 존재합니다.',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
   })
   async deleteMMedicineSubCategory(
     @Param('categoryId', ParseIntPipe) categoryId: number,
