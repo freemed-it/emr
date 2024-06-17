@@ -54,7 +54,7 @@ export class PatientsController {
     return this.patientsService.searchByName(name);
   }
 
-  @Get(':id')
+  @Get(':patientId')
   @ApiOperation({
     summary: '참여자 상세 정보',
   })
@@ -62,7 +62,7 @@ export class PatientsController {
     status: HttpStatus.OK,
     description: '참여자 상세 정보 반환',
   })
-  async getPatientById(@Param('id', ParseIntPipe) id: number) {
+  async getPatientById(@Param('patientId', ParseIntPipe) id: number) {
     return this.patientsService.findById(id);
   }
 }
