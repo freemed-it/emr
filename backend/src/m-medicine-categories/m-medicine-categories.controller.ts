@@ -8,11 +8,13 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { MMedicineCategoriesService } from './m-medicine-categories.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateMMedicineCategoryDto } from './dto/create-m-medicine-category.dto';
 import { UpdateMMedicineSubCategoryDto } from './dto/update-m-medicine-sub-category.dto';
+import { UpdateMMedicineMainCategoryDto } from './dto/update-m-medicine-main-category.dto';
 
 @ApiTags('의과')
 @Controller('m/medicine-categories')
@@ -42,6 +44,20 @@ export class MMedicineCategoriesController {
   ) {
     return this.mMedicineCategoriesService.createCategory(
       createMMedicineCategoryDto,
+    );
+  }
+
+  @Patch('main-category')
+  @ApiOperation({
+    summary: '약품 대분류 수정',
+  })
+  async patchMMedicineMainCategory(
+    @Query('category') category: string,
+    @Body() updateMMedicineMainCategoryDto: UpdateMMedicineMainCategoryDto,
+  ) {
+    return this.mMedicineCategoriesService.updateMainCategory(
+      category,
+      updateMMedicineMainCategoryDto,
     );
   }
 
