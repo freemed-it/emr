@@ -61,6 +61,14 @@ export class MMedicineCategoriesController {
     );
   }
 
+  @Delete('main-category')
+  @ApiOperation({
+    summary: '약품 대분류 삭제',
+  })
+  async deleteMMedicineMainCategory(@Query('category') category: string) {
+    return this.mMedicineCategoriesService.deleteMainCategory(category);
+  }
+
   @Patch('sub-category/:categoryId')
   @ApiOperation({
     summary: '약품 소분류 수정',

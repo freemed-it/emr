@@ -78,17 +78,17 @@ export class MMedicineCategoriesService {
       },
     });
 
-    const existingCategory = await this.mMedicineCategoriesRepository.find({
+    if (categories.length === 0) {
+      throw new NotFoundException();
+    }
+
+    const existingCategories = await this.mMedicineCategoriesRepository.find({
       where: {
         mainCategory: mainCategoryDto.mainCategory,
       },
     });
 
-    if (categories.length === 0) {
-      throw new NotFoundException();
-    }
-
-    if (existingCategory.length > 0) {
+    if (existingCategories.length > 0) {
       throw new BadRequestException('이미 존재하는 대분류입니다.');
     }
 
@@ -100,6 +100,35 @@ export class MMedicineCategoriesService {
     }
 
     return mainCategoryDto.mainCategory;
+  }
+
+  async deleteMainCategory(category: string) {
+    const categories = await this.mMedicineCategoriesRepository.find({
+      where: {
+        mainCategory: category,
+      },
+      withDeleted: true,
+    });
+
+    if (categories.length === 0) {
+      throw new NotFoundException();
+    }
+
+    const existingCategories = await this.mMedicineCategoriesRepository.find({
+      where: {
+        mainCategory: category,
+      },
+    });
+
+    if (existingCategories.length > 0) {
+      throw new BadRequestException('삭제되지 않은 소분류가 존재합니다.');
+    }
+
+    await this.mMedicineCategoriesRepository.delete({
+      mainCategory: category,
+    });
+
+    return category;
   }
 
   async updateSubCategory(
