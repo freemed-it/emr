@@ -26,7 +26,6 @@ export class M_Medicines extends BaseModel {
   /** 성분명/함량 */
   @Column({
     length: 300,
-    nullable: true,
   })
   ingredient: string;
 
