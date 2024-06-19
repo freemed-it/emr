@@ -120,7 +120,6 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
     format: 'binary',
     required: false,
   })
-  @IsString()
   image: string;
 
   @Transform((value) => {
