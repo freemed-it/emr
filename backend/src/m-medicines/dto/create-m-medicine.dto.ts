@@ -89,7 +89,7 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
 
   @ApiProperty({
     description: '총량',
-    example: 150,
+    example: 90,
   })
   @IsInt()
   @Min(0)
