@@ -120,7 +120,7 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
     format: 'binary',
     required: false,
   })
-  image: string;
+  image: any;
 
   @Transform((value) => {
     return value.value == 'true' ? true : false;
