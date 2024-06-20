@@ -15,6 +15,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medicine_categories.entity';
+import { UpdateMMedicineDto } from './dto/update-m-medicine.dto';
 
 @Injectable()
 export class MMedicinesService {
@@ -27,12 +28,12 @@ export class MMedicinesService {
   ) {}
 
   async createMMedicine(
-    mMedicineDto: CreateMMedicineDto,
+    medicineDto: CreateMMedicineDto,
     image: Express.Multer.File,
   ) {
     const category = await this.mMedicineCategoriesRepository.findOne({
       where: {
-        id: mMedicineDto.categoryId,
+        id: medicineDto.categoryId,
       },
     });
 
@@ -40,16 +41,93 @@ export class MMedicinesService {
       throw new BadRequestException('존재하지 않는 분류입니다.');
     }
 
-    const { categoryId, ...restMMedicineDto } = mMedicineDto;
-    const imagePath = await this.uploadImage(image, mMedicineDto.name);
+    const { categoryId, ...restMedicineDto } = medicineDto;
+    const imagePath = await this.uploadImage(image, medicineDto.name);
 
     return await this.mMedicinesRepository.save({
-      ...restMMedicineDto,
+      ...restMedicineDto,
       image: imagePath,
       category: {
         id: categoryId,
       },
     });
+  }
+
+  async updateMedicine(
+    medicineId: number,
+    medicineDto: UpdateMMedicineDto,
+    image: Express.Multer.File,
+  ) {
+    const medicine = await this.mMedicinesRepository.findOne({
+      where: {
+        id: medicineId,
+      },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    const category = await this.mMedicineCategoriesRepository.findOne({
+      where: {
+        id: medicineDto.categoryId,
+      },
+    });
+
+    if (!category) {
+      throw new BadRequestException('존재하지 않는 분류입니다.');
+    }
+
+    const { categoryId, ...restMedicineDto } = medicineDto;
+
+    // 사진 변경 (이미 있으면 삭제 후 업로드)
+    if (!medicineDto.hasOwnProperty('image') && image) {
+      if (medicine.image) {
+        await this.deleteUploadedImage(medicine.image);
+      }
+      const imagePath = await this.uploadImage(image, medicineDto.name);
+      restMedicineDto.image = imagePath;
+    }
+
+    // 사진 삭제
+    if (medicineDto.hasOwnProperty('image') && !image && medicine.image) {
+      await this.deleteUploadedImage(medicine.image);
+      restMedicineDto.image = null;
+    }
+
+    const newMedicine = await this.mMedicinesRepository.preload({
+      id: medicineId,
+      ...restMedicineDto,
+      category: {
+        id: categoryId,
+      },
+    });
+
+    return await this.mMedicinesRepository.save(newMedicine);
+  }
+
+  async deleteMedicine(medicineId: number) {
+    const medicine = await this.mMedicinesRepository.findOne({
+      where: {
+        id: medicineId,
+      },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    await this.mMedicinesRepository.softDelete(medicineId);
+
+    if (medicine.image) {
+      await this.deleteUploadedImage(medicine.image);
+      await this.mMedicinesRepository.save({
+        ...medicine,
+        image: null,
+      });
+    }
+
+    return medicineId;
   }
 
   async uploadImage(image: Express.Multer.File, name: string) {
@@ -83,30 +161,6 @@ export class MMedicinesService {
     } catch (error) {
       throw new BadRequestException(error);
     }
-  }
-
-  async deleteMedicine(medicineId: number) {
-    const medicine = await this.mMedicinesRepository.findOne({
-      where: {
-        id: medicineId,
-      },
-    });
-
-    if (!medicine) {
-      throw new NotFoundException();
-    }
-
-    await this.mMedicinesRepository.softDelete(medicineId);
-
-    if (medicine.image) {
-      await this.deleteUploadedImage(medicine.image);
-      await this.mMedicinesRepository.save({
-        ...medicine,
-        image: null,
-      });
-    }
-
-    return medicineId;
   }
 
   async deleteUploadedImage(imagePath: string) {
