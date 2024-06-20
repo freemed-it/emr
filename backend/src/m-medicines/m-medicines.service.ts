@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { M_Medicines } from './entity/m-medicines.entity';
 import { CreateMMedicineDto } from './dto/create-m-medicine.dto';
 import {
+  DeleteObjectCommand,
   ObjectCannedACL,
   PutObjectCommand,
   S3Client,
@@ -75,6 +80,51 @@ export class MMedicinesService {
       );
 
       return `https://${s3ImageBucket}.s3.${s3Region}.amazonaws.com/${key}`;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  async deleteMedicine(medicineId: number) {
+    const medicine = await this.mMedicinesRepository.findOne({
+      where: {
+        id: medicineId,
+      },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    await this.mMedicinesRepository.softDelete(medicineId);
+
+    if (medicine.image) {
+      await this.deleteUploadedImage(medicine.image);
+      await this.mMedicinesRepository.save({
+        ...medicine,
+        image: null,
+      });
+    }
+
+    return medicineId;
+  }
+
+  async deleteUploadedImage(imagePath: string) {
+    const client = new S3Client({
+      region: this.configService.get('AWS_S3_REGION'),
+      credentials: {
+        accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
+      },
+    });
+
+    try {
+      await client.send(
+        new DeleteObjectCommand({
+          Key: imagePath.split('/').slice(3).join('/'),
+          Bucket: this.configService.get('AWS_S3_IMAGE_BUCKET_NAME'),
+        }),
+      );
     } catch (error) {
       throw new BadRequestException(error);
     }
