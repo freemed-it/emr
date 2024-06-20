@@ -5,6 +5,9 @@ import {
   UploadedFile,
   Body,
   HttpStatus,
+  Delete,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -40,5 +43,16 @@ export class MMedicinesController {
       createMMedicineDto,
       image,
     );
+  }
+
+  @Delete(':medicineId')
+  @ApiOperation({
+    summary: '약품 삭제',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async deleteMMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
+    return this.mMedicinesService.deleteMedicine(medicineId);
   }
 }
