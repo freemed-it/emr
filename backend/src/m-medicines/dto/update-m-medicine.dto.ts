@@ -2,33 +2,21 @@ import {
   IsBoolean,
   IsInt,
   IsNumber,
+  IsOptional,
   IsString,
   Length,
   MaxLength,
   Min,
 } from 'class-validator';
-import { M_Medicines } from '../entity/m-medicines.entity';
-import { PickType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { CreateMMedicineDto } from './create-m-medicine.dto';
+import { PartialType } from '@nestjs/mapped-types';
 
-export class CreateMMedicineDto extends PickType(M_Medicines, [
-  'name',
-  'ingredient',
-  'dosage',
-  'efficacy',
-  'stationQuantity',
-  'officeQuantity',
-  'packaging',
-  'totalAmount',
-  'dur',
-  'bottle',
-  'image',
-  'isExcluded',
-]) {
+export class UpdateMMedicineDto extends PartialType(CreateMMedicineDto) {
   @ApiProperty({
     description: '약품명',
-    example: '에스부펜정',
+    example: '수정한 에스부펜정',
   })
   @IsString()
   @Length(2, 40)
@@ -36,7 +24,7 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
 
   @ApiProperty({
     description: '성분명/함량',
-    example: 'Dexibuprofen 300mg',
+    example: 'Dexibuprofen 400mg',
   })
   @IsString()
   @Length(2, 300)
@@ -73,7 +61,7 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
 
   @ApiProperty({
     description: '서울역 재고',
-    example: 3,
+    example: 5,
   })
   @IsInt()
   @Min(0)
@@ -89,7 +77,7 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
 
   @ApiProperty({
     description: '총량',
-    example: 90,
+    example: 150,
   })
   @IsInt()
   @Min(0)
@@ -107,7 +95,7 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
 
   @ApiProperty({
     description: '약품통',
-    example: '유(23T)',
+    example: '유(21T)',
     required: false,
   })
   @IsString()
@@ -115,12 +103,14 @@ export class CreateMMedicineDto extends PickType(M_Medicines, [
   bottle: string;
 
   @ApiProperty({
-    description: '사진',
+    description:
+      "사진 - <em>image 속성 없으면 사진 변경 안 함, image='' 빈 값으로 보내면 사진 삭제</em>",
     type: 'string',
     format: 'binary',
     required: false,
   })
-  image: any;
+  @IsOptional()
+  image?: any;
 
   @Transform((value) => {
     return value.value == 'true' ? true : false;
