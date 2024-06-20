@@ -27,6 +27,23 @@ export class MMedicinesService {
     private readonly configService: ConfigService,
   ) {}
 
+  async getMedicine(medicineId: number) {
+    const medicine = await this.mMedicinesRepository.findOne({
+      where: {
+        id: medicineId,
+      },
+      relations: {
+        category: true,
+      },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    return medicine;
+  }
+
   async createMMedicine(
     medicineDto: CreateMMedicineDto,
     image: Express.Multer.File,

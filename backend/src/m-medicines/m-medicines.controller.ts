@@ -9,6 +9,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Get,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -25,6 +26,17 @@ import { UpdateMMedicineDto } from './dto/update-m-medicine.dto';
 @Controller('m/medicines')
 export class MMedicinesController {
   constructor(private readonly mMedicinesService: MMedicinesService) {}
+
+  @Get(':medicineId')
+  @ApiOperation({
+    summary: '약품 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async getMMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
+    return this.mMedicinesService.getMedicine(medicineId);
+  }
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
