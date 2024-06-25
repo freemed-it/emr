@@ -1,17 +1,32 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsNumber, IsOptional } from 'class-validator';
 
 export class BasePaginationDto {
+  @ApiPropertyOptional({
+    description: 'offset pagination',
+  })
   @IsNumber()
   @IsOptional()
-  page?: number;
+  page: number;
 
-  //정렬
-  // createdAt -> 생성된 시간의 내림차/오름차 순으로 정렬
+  @ApiPropertyOptional({
+    description: 'cursor pagination',
+  })
+  @IsNumber()
+  @IsOptional()
+  cursor: number;
+
+  @ApiPropertyOptional({
+    description: '정렬 <small>default: DESC</small>',
+    enum: ['ASC', 'DESC'],
+  })
   @IsIn(['ASC', 'DESC'])
   @IsOptional()
-  order__createdAt: 'ASC' | 'DESC' = 'ASC';
+  sort: 'ASC' | 'DESC' = 'DESC';
 
-  //몇개의 데이터를 응답을 받을지
+  @ApiPropertyOptional({
+    description: '응답 받을 데이터 개수 <small>default: 10</small>',
+  })
   @IsNumber()
   @IsOptional()
   take: number = 10;
