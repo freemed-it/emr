@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Patch,
   Get,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -21,15 +22,25 @@ import {
 import { MMedicinesService } from './m-medicines.service';
 import { CreateMMedicineDto } from './dto/create-m-medicine.dto';
 import { UpdateMMedicineDto } from './dto/update-m-medicine.dto';
+import { PaginateMMedicineDto } from './dto/paginate-m-medicine.dto';
 
 @ApiTags('의과')
 @Controller('m/medicines')
 export class MMedicinesController {
   constructor(private readonly mMedicinesService: MMedicinesService) {}
 
+  @Get()
+  @ApiOperation({
+    summary: '약품 목록 조회',
+    description: 'offset pagination - page 쿼리 파라미터를 이용해야 합니다.',
+  })
+  async getMMedicines(@Query() paginateMMedicineDto: PaginateMMedicineDto) {
+    return this.mMedicinesService.paginateMedicines(paginateMMedicineDto);
+  }
+
   @Get(':medicineId')
   @ApiOperation({
-    summary: '약품 조회',
+    summary: '약품 상세 조회',
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
