@@ -4,9 +4,13 @@ import { MMedicinesController } from './m-medicines.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { M_Medicines } from './entity/m-medicines.entity';
 import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medicine_categories.entity';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([M_Medicines, M_Medicine_Categories])],
+  imports: [
+    TypeOrmModule.forFeature([M_Medicines, M_Medicine_Categories]),
+    CommonModule,
+  ],
   controllers: [MMedicinesController],
   providers: [MMedicinesService],
   exports: [MMedicinesService],

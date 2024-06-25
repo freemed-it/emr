@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { M_Medicines } from './entity/m-medicines.entity';
 import { CreateMMedicineDto } from './dto/create-m-medicine.dto';
@@ -16,6 +16,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medicine_categories.entity';
 import { UpdateMMedicineDto } from './dto/update-m-medicine.dto';
+import { PaginateMMedicineDto } from './dto/paginate-m-medicine.dto';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class MMedicinesService {
@@ -24,8 +26,43 @@ export class MMedicinesService {
     private readonly mMedicinesRepository: Repository<M_Medicines>,
     @InjectRepository(M_Medicine_Categories)
     private readonly mMedicineCategoriesRepository: Repository<M_Medicine_Categories>,
+    private readonly commonService: CommonService,
     private readonly configService: ConfigService,
   ) {}
+
+  async paginateMedicines(paginateDto: PaginateMMedicineDto) {
+    return this.commonService.paginate(paginateDto, this.mMedicinesRepository, {
+      where: {
+        ...(paginateDto.name && { name: ILike(`%${paginateDto.name}%`) }),
+        ...(paginateDto.ingredient && {
+          ingredient: ILike(`%${paginateDto.ingredient}%`),
+        }),
+        ...(paginateDto.categoryId && {
+          category: { id: paginateDto.categoryId },
+        }),
+      },
+      relations: {
+        category: true,
+      },
+    });
+  }
+
+  async getMedicine(medicineId: number) {
+    const medicine = await this.mMedicinesRepository.findOne({
+      where: {
+        id: medicineId,
+      },
+      relations: {
+        category: true,
+      },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    return medicine;
+  }
 
   async createMMedicine(
     medicineDto: CreateMMedicineDto,

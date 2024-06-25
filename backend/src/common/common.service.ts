@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BasePaginationDto } from './dto/base-pagination.dto';
-import { FindManyOptions, FindOptionsOrder, Repository } from 'typeorm';
+import { FindManyOptions, LessThan, MoreThan, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { BaseModel } from './entity/base.entity';
 
@@ -13,62 +13,75 @@ export class CommonService {
     overrideFindOptions: FindManyOptions<T> = {},
   ) {
     if (dto.page) {
-      return this.pagePaginate(dto, repository, overrideFindOptions);
+      return this.offsetPaginate(dto, repository, overrideFindOptions);
     } else {
       return this.cursorPaginate(dto, repository, overrideFindOptions);
     }
   }
 
-  private async pagePaginate<T extends BaseModel>(
+  private async offsetPaginate<T extends BaseModel>(
     dto: BasePaginationDto,
     repository: Repository<T>,
     overrideFindOptions: FindManyOptions<T> = {},
   ) {
-    const findOptions = this.composeFindOptions<T>(dto);
-    const [data, count] = await repository.findAndCount({
-      ...findOptions,
-      ...overrideFindOptions,
-    });
+    const findOptions = this.composeFindOptions<T>(dto, overrideFindOptions);
+    const [data, count] = await repository.findAndCount(findOptions);
+
     return {
-      data,
-      total: count,
+      data: data,
+      meta: {
+        total: count,
+      },
     };
   }
 
-  private async cursorPaginate<T extends BaseModel>(
+  async cursorPaginate<T extends BaseModel>(
     dto: BasePaginationDto,
     repository: Repository<T>,
     overrideFindOptions: FindManyOptions<T> = {},
   ) {
-    const findOptions = this.composeFindOptions<T>(dto);
+    const findOptions = this.composeFindOptions<T>(dto, overrideFindOptions);
+    const [data, count] = await repository.findAndCount(findOptions);
+    let hasNext: boolean = true;
+    let cursor: number;
 
-    const results = await repository.find({
-      ...findOptions,
-      ...overrideFindOptions,
-    });
+    if (count <= dto.take || data.length <= 0) {
+      hasNext = false;
+      cursor = null;
+    } else {
+      cursor = data[data.length - 1].id;
+    }
 
     return {
-      data: results,
-      count: results.length,
+      data: data,
+      meta: {
+        count: data.length,
+        cursor,
+        hasNext,
+      },
     };
   }
 
   private composeFindOptions<T extends BaseModel>(
     dto: BasePaginationDto,
+    overrideFindOptions: FindManyOptions<T> = {},
   ): FindManyOptions<T> {
-    let order: FindOptionsOrder<T> = {};
+    const { where, order, ...restOptions } = overrideFindOptions;
 
-    for (const [key] of Object.entries(dto)) {
-      if (key.startsWith('order__')) {
-        order = {
-          ...order,
-        };
-      }
-    }
     return {
-      order,
+      where: {
+        ...(dto.cursor && {
+          id: dto.sort === 'ASC' ? MoreThan(dto.cursor) : LessThan(dto.cursor),
+        }),
+        ...where,
+      },
+      order: {
+        createdAt: dto.sort,
+        ...order,
+      },
       take: dto.take,
       skip: dto.page ? dto.take * (dto.page - 1) : null,
+      ...restOptions,
     };
   }
 }
