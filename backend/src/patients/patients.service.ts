@@ -20,11 +20,24 @@ export class PatientsService {
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
   ) {}
+
   async createPatient(
     patientDto: CreatePatientDto,
     department: Department,
+    patientId?: number,
   ): Promise<Patients> {
-    const patient = this.patientsRepository.create(patientDto);
+    let patient: Patients;
+    if (patientId) {
+      // 재진: 기존 참여자 업데이트
+      patient = await this.patientsRepository.findOne({
+        where: { id: patientId },
+      });
+      if (!patient) {
+        // 초진: 새로운 참여자 생성
+        patient = this.patientsRepository.create(patientDto);
+      }
+      this.patientsRepository.merge(patient, patientDto);
+    }
     await this.patientsRepository.save(patient);
 
     if (!patient.name || !patient.birth) {
@@ -61,11 +74,6 @@ export class PatientsService {
     return patient;
   }
 
-  /**
-   * chartNumber 랜덤숫자 생성
-   * Todo
-   * - 오늘날짜 + 진료과 + 차트번호로 생성
-   */
   private generateChartNumber(): string {
     let str = '';
     for (let i = 0; i < 10; i++) {
@@ -76,7 +84,7 @@ export class PatientsService {
 
   async searchByName(name: string): Promise<any> {
     const patients = await this.patientsRepository.find({
-      where: { name: name },
+      where: { name },
       select: ['id', 'firstVisit', 'name', 'birth'],
     });
 
@@ -84,12 +92,12 @@ export class PatientsService {
       return null; // 초진
     } else if (patients.length === 1) {
       return patients[0]; // 재진
-    } else if (patients.length >= 2) {
+    } else {
       return patients; // 동명이인
     }
   }
 
-  async findById(id: number): Promise<Patients> {
+  async getPatientById(id: number): Promise<Patients> {
     return this.patientsRepository.findOne({ where: { id } });
   }
 }

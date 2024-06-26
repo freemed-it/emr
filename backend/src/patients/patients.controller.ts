@@ -20,26 +20,40 @@ export class PatientsController {
 
   @Post('/m/receipt')
   @ApiOperation({
-    summary: '의과 참여자 접수 생성',
+    summary: '의과 참여자 접수',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: '이름/생년월일을 입력해주세요.',
   })
-  async createMedicalPatient(@Body() createPatientDto: CreatePatientDto) {
-    return this.patientsService.createPatient(createPatientDto, Department.M);
+  async createMPatient(
+    @Body() createPatientDto: CreatePatientDto,
+    @Query('patientId') patientId?: number,
+  ) {
+    return this.patientsService.createPatient(
+      createPatientDto,
+      Department.M,
+      patientId,
+    );
   }
 
   @Post('/km/receipt')
   @ApiOperation({
-    summary: '한의과 참여자 접수 생성',
+    summary: '한의과 참여자 접수',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: '이름/생년월일을 입력해주세요.',
   })
-  async createKoreanMedicalPatient(@Body() createPatientDto: CreatePatientDto) {
-    return this.patientsService.createPatient(createPatientDto, Department.KM);
+  async createKMPatient(
+    @Body() createPatientDto: CreatePatientDto,
+    @Query('patientId') patientId?: number,
+  ) {
+    return this.patientsService.createPatient(
+      createPatientDto,
+      Department.KM,
+      patientId,
+    );
   }
 
   @Get('/search')
@@ -62,7 +76,7 @@ export class PatientsController {
     status: HttpStatus.OK,
     description: '참여자 상세 정보 반환',
   })
-  async getPatientById(@Param('patientId', ParseIntPipe) id: number) {
-    return this.patientsService.findById(id);
+  async getPatient(@Param('patientId', ParseIntPipe) id: number) {
+    return this.patientsService.getPatientById(id);
   }
 }
