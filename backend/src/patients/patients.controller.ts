@@ -10,10 +10,11 @@ import {
 } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Department } from 'src/orders/const/department.const';
 import { Patients } from './entity/patients.entity';
 
+@ApiTags('참여자')
 @Controller('patients')
 export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
@@ -70,13 +71,21 @@ export class PatientsController {
 
   @Get(':patientId')
   @ApiOperation({
-    summary: '참여자 상세 정보',
+    summary: '참여자 상세 조회',
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: '참여자 상세 정보 반환',
+    description: '참여자 상세 조회',
   })
   async getPatient(@Param('patientId', ParseIntPipe) id: number) {
     return this.patientsService.getPatientById(id);
+  }
+
+  @Get(':patientId/histories')
+  @ApiOperation({
+    summary: '참여자 과거력 조회',
+  })
+  async getPatientHistory(@Param('patientId', ParseIntPipe) patientId: number) {
+    return this.patientsService.getPatientHistoryById(patientId);
   }
 }
