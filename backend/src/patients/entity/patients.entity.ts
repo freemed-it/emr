@@ -1,9 +1,10 @@
 import { BaseModel } from 'src/common/entity/base.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { Gender } from '../const/gender.const';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
 import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
+import { Histories } from '../histories/entity/histories.entity';
 
 @Entity()
 export class Patients extends BaseModel {
@@ -70,6 +71,9 @@ export class Patients extends BaseModel {
     nullable: true,
   })
   drinkingPeriod: number;
+
+  @OneToOne(() => Histories, (history) => history.patient)
+  history: Histories;
 
   @OneToMany(() => Orders, (order) => order.patient)
   orders: Orders[];

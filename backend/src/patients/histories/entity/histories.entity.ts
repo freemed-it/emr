@@ -4,14 +4,6 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
 export class Histories extends BaseModel {
-  @OneToOne(() => Patients, {
-    nullable: false,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn({ name: 'patientId', referencedColumnName: 'id' })
-  patient: Patients;
-
   @Column({
     length: 30,
     nullable: true,
@@ -137,4 +129,8 @@ export class Histories extends BaseModel {
     nullable: true,
   })
   medicinePeriod: string;
+
+  @OneToOne(() => Patients, (patient) => patient.history)
+  @JoinColumn({ name: 'patientId', referencedColumnName: 'id' })
+  patient: Patients;
 }
