@@ -14,10 +14,10 @@ export class MChartsService {
   constructor(
     @InjectRepository(M_Charts)
     private readonly chartsRepository: Repository<M_Charts>,
-    @InjectRepository(Histories)
-    private readonly historiesRepository: Repository<Histories>,
     @InjectRepository(M_Complaints)
     private readonly complaintsRepository: Repository<M_Complaints>,
+    @InjectRepository(Histories)
+    private readonly historiesRepository: Repository<Histories>,
     @InjectRepository(Orders)
     private readonly ordersRepository: Repository<Orders>,
   ) {}
@@ -47,27 +47,20 @@ export class MChartsService {
   async createHistory(chartId: number, historyDto: CreateHistoryDto) {
     const chart = await this.chartsRepository.findOne({
       where: { id: chartId },
-      relations: { patient: true },
+      relations: { patient: { history: true } },
     });
 
     if (!chart) {
       throw new NotFoundException();
     }
 
-    const existingHistory = await this.historiesRepository.findOne({
-      where: { patient: { id: chart.patient.id } },
+    return await this.historiesRepository.save({
+      patient: {
+        id: chart.patient.id,
+      },
+      ...chart.patient.history,
+      ...historyDto,
     });
-
-    if (existingHistory) {
-      Object.assign(existingHistory, historyDto);
-      return this.historiesRepository.save(existingHistory);
-    } else {
-      const newHistory = this.historiesRepository.create({
-        ...historyDto,
-        patient: { id: chart.patient.id },
-      });
-      return this.historiesRepository.save(newHistory);
-    }
   }
 
   async updateStatus(chartId: number) {
