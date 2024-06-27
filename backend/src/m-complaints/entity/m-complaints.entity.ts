@@ -1,5 +1,6 @@
 import { BaseModel } from 'src/common/entity/base.entity';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
+import { Patients } from 'src/patients/entity/patients.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
@@ -10,6 +11,13 @@ export class M_Complaints extends BaseModel {
     onUpdate: 'CASCADE',
   })
   chart: M_Charts;
+
+  @ManyToOne(() => Patients, (patient) => patient.complaints, {
+    nullable: false,
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
+  patient: Patients;
 
   @Column({
     length: 20,

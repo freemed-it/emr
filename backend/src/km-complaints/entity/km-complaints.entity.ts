@@ -1,6 +1,7 @@
 import { IsString, Length } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
+import { Patients } from 'src/patients/entity/patients.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
@@ -11,6 +12,13 @@ export class KM_Complaints extends BaseModel {
     onUpdate: 'CASCADE',
   })
   chart: KM_Charts;
+
+  @ManyToOne(() => Patients, (patient) => patient.complaints, {
+    nullable: false,
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
+  patient: Patients;
 
   @Column({
     length: 20,
