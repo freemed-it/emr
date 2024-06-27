@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { M_Charts } from './entity/m-charts.entity';
@@ -23,24 +27,35 @@ export class MChartsService {
   ) {}
 
   async createVitalSign(chartId: number, vitalSignDto: CreateVitalSignDto) {
-    const vistalSign = await this.chartsRepository.findOne({
+    const chart = await this.chartsRepository.findOne({
       where: { id: chartId },
     });
 
-    if (!vistalSign) {
+    if (!chart) {
       throw new NotFoundException();
     }
 
-    Object.assign(vistalSign, vitalSignDto);
-    return this.chartsRepository.save(vistalSign);
+    return await this.chartsRepository.save({
+      ...chart,
+      ...vitalSignDto,
+    });
   }
 
   async createComplaint(chartId: number, complaintDto: CreateMComplaintDto) {
-    const complaint = this.complaintsRepository.create({
-      ...complaintDto,
-      chart: { id: chartId } as any,
+    const chart = await this.chartsRepository.findOne({
+      where: { id: chartId },
+      relations: { patient: true },
     });
 
+    if (!chart) {
+      throw new NotFoundException('Chart not found');
+    }
+
+    const complaint = this.complaintsRepository.create({
+      ...complaintDto,
+      chart,
+      patient: { id: chart.patient.id },
+    });
     return this.complaintsRepository.save(complaint);
   }
 
@@ -63,7 +78,7 @@ export class MChartsService {
     });
   }
 
-  async updateStatus(chartId: number) {
+  async updateStatus(chartId: number, status: number) {
     const chart = await this.chartsRepository.findOne({
       where: { id: chartId },
     });
@@ -72,20 +87,40 @@ export class MChartsService {
       throw new NotFoundException();
     }
 
-    chart.status = 2;
+    chart.status = status;
     await this.chartsRepository.save(chart);
 
-    const orders = await this.ordersRepository.find({
+    const order = await this.ordersRepository.findOne({
       where: { mChart: { id: chartId } },
     });
 
-    if (orders.length > 0) {
-      orders.forEach((order) => {
-        order.status = 2;
-      });
-      await this.ordersRepository.save(orders);
-    }
+    order.status = status;
+    await this.ordersRepository.save(order);
 
     return chart;
+  }
+
+  async getPrediagnosis(chartId: number) {
+    const chart = await this.chartsRepository.findOne({
+      where: { id: chartId },
+      relations: {
+        complaints: true,
+        patient: { history: true },
+      },
+    });
+
+    if (chart.status < 2) {
+      throw new BadRequestException('예진이 완료되지 않았습니다');
+    }
+
+    if (chart.status >= 2) {
+      return chart;
+    }
+  }
+
+  async getComplaint(chartId: number) {
+    return this.complaintsRepository.find({
+      where: { chart: { id: chartId } },
+    });
   }
 }

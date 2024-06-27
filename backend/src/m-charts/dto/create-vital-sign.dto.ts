@@ -14,49 +14,49 @@ export class CreateVitalSignDto extends PickType(M_Charts, [
 ]) {
   @ApiProperty({
     description: 'SpO2',
-    example: '0',
+    example: 0,
   })
   @IsNumber()
   spO2: number;
 
   @ApiProperty({
     description: 'Heart Rate',
-    example: '0',
+    example: 0,
   })
   @IsInt()
   heartRate: number;
 
   @ApiProperty({
     description: 'Body Temporature',
-    example: '36.5',
+    example: 36.5,
   })
   @IsNumber()
   bodyTemperature: number;
 
   @ApiProperty({
     description: '수축기',
-    example: '184',
+    example: 184,
   })
   @IsInt()
   systoleBloodPressure: number;
 
   @ApiProperty({
     description: '이완기',
-    example: '80',
+    example: 80,
   })
   @IsInt()
   diastoleBloodPressure: number;
 
   @ApiProperty({
     description: '혈당',
-    example: '90',
+    example: 90,
   })
   @IsInt()
   bloodGlucose: number;
 
   @ApiProperty({
     description: '식후',
-    example: '9',
+    example: 9,
   })
   @IsInt()
   afterMeals: number;
