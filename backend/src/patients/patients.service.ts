@@ -100,4 +100,11 @@ export class PatientsService {
   async getPatientById(id: number): Promise<Patients> {
     return this.patientsRepository.findOne({ where: { id } });
   }
+
+  getPatientHistoryById(patientId: number) {
+    return this.patientsRepository.findOne({
+      where: { id: patientId },
+      relations: { history: true },
+    });
+  }
 }
