@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { CreateMPrescriptionDto } from './dto/create-m-prescription.dto';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
 import { M_Medicines } from 'src/m-medicines/entity/m-medicines.entity';
+import { UpdateMPrescriptionDto } from './dto/update-m-prescription.dto';
 
 @Injectable()
 export class MPrescriptionsService {
@@ -54,6 +55,36 @@ export class MPrescriptionsService {
       medicine: {
         id: medicineId,
       },
+    });
+  }
+
+  async updatePrescription(
+    prescriptionId: number,
+    updateMPrescriptioneDto: UpdateMPrescriptionDto,
+  ) {
+    const prescription = await this.mPrescriptionsRepository.findOne({
+      where: {
+        id: prescriptionId,
+      },
+    });
+
+    if (!prescription) {
+      throw new NotFoundException();
+    }
+
+    const medicine = await this.mMedicinesRepository.findOne({
+      where: {
+        id: updateMPrescriptioneDto.medicineId,
+      },
+    });
+
+    if (!medicine) {
+      throw new BadRequestException('존재하지 않는 약품입니다.');
+    }
+
+    return await this.mPrescriptionsRepository.save({
+      id: prescriptionId,
+      ...updateMPrescriptioneDto,
     });
   }
 }
