@@ -123,4 +123,23 @@ export class MChartsService {
       where: { chart: { id: chartId } },
     });
   }
+
+  async getPastCharts(patientId: number) {
+    const charts = await this.chartsRepository.find({
+      where: {
+        patient: { id: patientId },
+        status: 7,
+      },
+      select: ['id', 'createdAt'],
+    });
+
+    return charts;
+  }
+
+  async getPastPrediagnosis(chartId: number) {
+    return await this.chartsRepository.find({
+      where: { id: chartId },
+      relations: ['complaints', 'prescriptions'], // 필요한 관계 추가
+    });
+  }
 }

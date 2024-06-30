@@ -65,4 +65,28 @@ export class MChartsController {
   getComplaint(@Param('chartId') chartId: number) {
     return this.mChartsService.getComplaint(chartId);
   }
+
+  @Get('past/:patientId')
+  @ApiOperation({
+    summary: '과거 차트 목록',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '과거 차트 목록이 조회되었습니다',
+  })
+  async getPastCharts(@Param('patientId') patientId: number) {
+    return this.mChartsService.getPastCharts(patientId);
+  }
+
+  @Get('/:chartId')
+  @ApiOperation({
+    summary: '과거 차트 상세 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '과거 차트 상세가 조회되었습니다.',
+  })
+  getPastPrediagnosis(@Param('chartId') chartId: number) {
+    return this.mChartsService.getPastPrediagnosis(chartId);
+  }
 }
