@@ -1,12 +1,25 @@
-import { Controller, Post, Body, Param, HttpStatus, Get } from '@nestjs/common';
-import { MChartsService } from './m-charts.service';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  HttpStatus,
+  Get,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { MChartsService } from './m-charts.service';
+import { MPrescriptionsService } from 'src/m-prescriptions/m-prescriptions.service';
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
+import { CreateMPrescriptionDto } from 'src/m-prescriptions/dto/create-m-prescription.dto';
 
 @ApiTags('의과')
 @Controller('m/charts')
 export class MChartsController {
-  constructor(private readonly mChartsService: MChartsService) {}
+  constructor(
+    private readonly mChartsService: MChartsService,
+    private readonly mPrescriptionsService: MPrescriptionsService,
+  ) {}
 
   @Post('/:chartId/prediagnosis')
   @ApiOperation({
@@ -88,5 +101,19 @@ export class MChartsController {
   })
   getPastPrediagnosis(@Param('chartId') chartId: number) {
     return this.mChartsService.getPastPrediagnosis(chartId);
+  }
+
+  @Post(':chartId/prescriptions')
+  @ApiOperation({
+    summary: '처방 생성',
+  })
+  async postMPrescription(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Body() createMPrescriptionDto: CreateMPrescriptionDto,
+  ) {
+    return await this.mPrescriptionsService.createMPrescription(
+      chartId,
+      createMPrescriptionDto,
+    );
   }
 }
