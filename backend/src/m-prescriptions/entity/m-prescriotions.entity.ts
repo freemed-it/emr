@@ -1,4 +1,3 @@
-import { IsBoolean, IsInt, IsNumber, IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
 import { M_Medicines } from 'src/m-medicines/entity/m-medicines.entity';
@@ -19,41 +18,41 @@ export class M_Prescriptions extends BaseModel {
   })
   medicine: M_Medicines;
 
+  /** 1회 투약량 */
   @Column('float')
-  @IsNumber()
   doses: number;
 
+  /** 1일 복용횟수 */
   @Column('char', {
     length: 10,
   })
-  @IsString()
   dosesCountByDay: string;
 
+  /** 복용 일수 */
   @Column()
-  @IsInt()
   dosesDay: number;
 
+  /** 사용량 */
   @Column('float')
-  @IsNumber()
   dosesTotal: number;
 
-  @Column({
-    default: false,
-  })
-  @IsBoolean()
-  isCompleted: boolean;
-
+  /** 묶음 */
   @Column('char', {
     length: 1,
     nullable: true,
   })
-  @IsString()
   bundle: string;
 
+  /** 메모 */
   @Column({
     length: 50,
     nullable: true,
   })
-  @IsString()
   memo: string;
+
+  /** 복약지도 완료 여부 */
+  @Column({
+    default: false,
+  })
+  isCompleted: boolean;
 }

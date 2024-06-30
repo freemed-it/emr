@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { M_Charts } from './entity/m-charts.entity';
 import { CreateVitalSignDto } from './dto/create-vital-sign.dto';
 import { M_Complaints } from 'src/m-complaints/entity/m-complaints.entity';
@@ -140,6 +140,61 @@ export class MChartsService {
     return await this.chartsRepository.find({
       where: { id: chartId },
       relations: ['complaints', 'prescriptions'], // 필요한 관계 추가
+    });
+  }
+
+  async getDiagnosis(chartId: number) {
+    const diagnosis = await this.chartsRepository.findOne({
+      where: {
+        id: chartId,
+      },
+      relations: {
+        prescriptions: true,
+      },
+    });
+
+    if (!diagnosis) {
+      throw new NotFoundException();
+    }
+
+    return diagnosis;
+  }
+
+  async getPastVitalSigns(patientId: number) {
+    return await this.chartsRepository.find({
+      where: {
+        status: 7,
+        patient: { id: patientId },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      select: [
+        'spO2',
+        'heartRate',
+        'bodyTemperature',
+        'systoleBloodPressure',
+        'diastoleBloodPressure',
+        'bloodGlucose',
+        'afterMeals',
+        'createdAt',
+      ],
+    });
+  }
+
+  async getTodayChartByPatientId(patientId: number) {
+    const today = new Date(); // TODO: 확인 필요
+
+    return await this.chartsRepository.findOne({
+      where: {
+        status: 7,
+        patient: { id: patientId },
+        createdAt: Between(today, today),
+      },
+      relations: {
+        complaints: true,
+        prescriptions: true,
+      },
     });
   }
 }
