@@ -105,6 +105,17 @@ export class MChartsController {
     return this.mChartsService.getPastChart(chartId);
   }
 
+  @Get(':chartId/diagnosis')
+  @ApiOperation({
+    summary: '본진 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
+    return this.mChartsService.getDiagnosis(chartId);
+  }
+
   @Get(':chartId/vital-sign')
   @ApiOperation({
     summary: 'V/S 조회',
