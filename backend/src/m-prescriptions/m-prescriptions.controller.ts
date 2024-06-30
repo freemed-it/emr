@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpStatus,
   Param,
   ParseIntPipe,
@@ -35,5 +36,18 @@ export class MPrescriptionsController {
       prescriptionId,
       updateMPrescriptioneDto,
     );
+  }
+
+  @Delete(':prescriptionId')
+  @ApiOperation({
+    summary: '처방 삭제',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async deleteMPrescription(
+    @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
+  ) {
+    return this.mPrescriptionsService.deletePrescription(prescriptionId);
   }
 }

@@ -87,4 +87,20 @@ export class MPrescriptionsService {
       ...updateMPrescriptioneDto,
     });
   }
+
+  async deletePrescription(prescriptionId: number) {
+    const prescription = await this.mPrescriptionsRepository.findOne({
+      where: {
+        id: prescriptionId,
+      },
+    });
+
+    if (!prescription) {
+      throw new NotFoundException();
+    }
+
+    await this.mPrescriptionsRepository.delete(prescriptionId);
+
+    return prescriptionId;
+  }
 }
