@@ -103,6 +103,17 @@ export class MChartsController {
     return this.mChartsService.getPastPrediagnosis(chartId);
   }
 
+  @Get(':chartId/vital-sign')
+  @ApiOperation({
+    summary: 'V/S 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  getVitalSign(@Param('chartId', ParseIntPipe) chartId: number) {
+    return this.mChartsService.getVitalSign(chartId);
+  }
+
   @Post(':chartId/prescriptions')
   @ApiOperation({
     summary: '처방 생성',
