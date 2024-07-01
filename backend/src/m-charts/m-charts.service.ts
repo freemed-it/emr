@@ -159,4 +159,27 @@ export class MChartsService {
       ],
     });
   }
+
+  async getPastVitalSigns(patientId: number) {
+    return await this.chartsRepository.find({
+      where: {
+        status: 7,
+        patient: { id: patientId },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      select: [
+        'spO2',
+        'heartRate',
+        'bodyTemperature',
+        'systoleBloodPressure',
+        'diastoleBloodPressure',
+        'bloodGlucose',
+        'afterMeals',
+        'vsMemo',
+        'createdAt',
+      ],
+    });
+  }
 }

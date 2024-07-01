@@ -114,6 +114,14 @@ export class MChartsController {
     return this.mChartsService.getVitalSign(chartId);
   }
 
+  @Get('vital-sign/:patientId')
+  @ApiOperation({
+    summary: '과거 V/S 전체 조회',
+  })
+  getPastVitalSigns(@Param('patientId', ParseIntPipe) patientId: number) {
+    return this.mChartsService.getPastVitalSigns(patientId);
+  }
+
   @Post(':chartId/prescriptions')
   @ApiOperation({
     summary: '처방 생성',
