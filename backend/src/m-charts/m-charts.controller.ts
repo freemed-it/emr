@@ -132,6 +132,17 @@ export class MChartsController {
     return this.mChartsService.getTodayChartByPatientId(patientId);
   }
 
+  @Get(':chartId/pharmacy')
+  @ApiOperation({
+    summary: '약국 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
+    return this.mChartsService.getPharmacy(chartId);
+  }
+
   @Patch(':chartId/status')
   @ApiOperation({
     summary: '약국 차트 상태 수정',
