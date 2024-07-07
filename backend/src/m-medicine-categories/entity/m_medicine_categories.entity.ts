@@ -17,7 +17,7 @@ export class M_Medicine_Categories extends BaseModel {
   subCategory: string;
 
   /** 소분류 삭제 여부 */
-  @DeleteDateColumn({ select: false })
+  @DeleteDateColumn()
   deletedAt: Date | null;
 
   @OneToMany(() => M_Medicines, (medicine) => medicine.category)
