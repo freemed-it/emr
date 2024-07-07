@@ -61,7 +61,7 @@ import { AccessTokenGuard } from './auth/guard/access-token.guard';
       username: process.env[ENV_DB_USERNAME_KEY],
       password: process.env[ENV_DB_PASSWORD_KEY],
       database: process.env[ENV_DB_DATABASE_KEY],
-      timezone: 'Asia/Seoul',
+      timezone: '+09:00',
       entities: [
         M_Charts,
         M_Complaints,
