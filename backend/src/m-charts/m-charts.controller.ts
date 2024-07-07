@@ -6,12 +6,14 @@ import {
   HttpStatus,
   Get,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MChartsService } from './m-charts.service';
 import { MPrescriptionsService } from 'src/m-prescriptions/m-prescriptions.service';
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
 import { CreateMPrescriptionDto } from 'src/m-prescriptions/dto/create-m-prescription.dto';
+import { UpdatePharmacyStatusDto } from './dto/update-pharmacy-status-dto';
 
 @ApiTags('의과')
 @Controller('m/charts')
@@ -128,6 +130,20 @@ export class MChartsController {
   })
   getTodayChart(@Param('patientId', ParseIntPipe) patientId: number) {
     return this.mChartsService.getTodayChartByPatientId(patientId);
+  }
+
+  @Patch(':chartId/status')
+  @ApiOperation({
+    summary: '약국 차트 상태 수정',
+  })
+  async patchMChartPharmacyStatus(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Body() updateMChartStatusDto: UpdatePharmacyStatusDto,
+  ) {
+    return await this.mChartsService.updateStatus(
+      chartId,
+      updateMChartStatusDto.status,
+    );
   }
 
   @Post(':chartId/prescriptions')
