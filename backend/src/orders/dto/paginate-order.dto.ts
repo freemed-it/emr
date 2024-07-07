@@ -3,20 +3,26 @@ import { BasePaginationDto } from 'src/common/dto/base-pagination.dto';
 import { Department } from '../const/department.const';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Gender } from 'src/patients/const/gender.const';
+import { Type } from 'class-transformer';
 
 export class PaginateOrderDto extends BasePaginationDto {
   @ApiPropertyOptional({ description: '진료과' })
-  @IsEnum(Department)
+  @IsEnum(Department, {
+    each: true,
+  })
   @IsOptional()
-  department: Department;
+  department: Department[];
 
   @ApiPropertyOptional({ description: '차트 상태' })
-  @IsInt()
+  @Type(() => Number)
+  @IsInt({ each: true })
   @IsOptional()
-  status: number;
+  status: number[];
 
   @ApiPropertyOptional({ description: '성별' })
-  @IsEnum(Gender)
+  @IsEnum(Gender, {
+    each: true,
+  })
   @IsOptional()
-  gender: Gender;
+  gender: Gender[];
 }

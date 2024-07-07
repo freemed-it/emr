@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Orders } from './entity/orders.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { CommonService } from 'src/common/common.service';
 import { PaginateOrderDto } from './dto/paginate-order.dto';
+import { endOfDay, endOfToday, startOfDay, startOfToday } from 'date-fns';
+import { PaginateTodayOrderDto } from './dto/paginate-today-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -18,8 +20,8 @@ export class OrdersService {
     endDate: string,
     paginateDto: PaginateOrderDto,
   ) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = startOfDay(startDate);
+    const end = endOfDay(endDate);
 
     if (start.getTime() === end.getTime()) {
       end.setDate(end.getDate() + 1);
@@ -30,9 +32,28 @@ export class OrdersService {
     return this.commonService.paginate(paginateDto, this.ordersRepository, {
       where: {
         createdAt: Between(start, end),
+        ...(paginateDto.department && {
+          department: In([paginateDto.department]),
+        }),
+        ...(paginateDto.status && { status: In([paginateDto.status]) }),
+        ...(paginateDto.gender && {
+          patient: { gender: In([paginateDto.gender]) },
+        }),
+      },
+      relations: {
+        patient: true,
+      },
+    });
+  }
+
+  async paginateTodayOrders(paginateDto: PaginateTodayOrderDto) {
+    const start = startOfToday();
+    const end = endOfToday();
+
+    return this.commonService.paginate(paginateDto, this.ordersRepository, {
+      where: {
+        createdAt: Between(start, end),
         ...(paginateDto.department && { department: paginateDto.department }),
-        ...(paginateDto.status !== undefined && { status: paginateDto.status }),
-        ...(paginateDto.gender && { patient: { gender: paginateDto.gender } }),
       },
       relations: {
         patient: true,

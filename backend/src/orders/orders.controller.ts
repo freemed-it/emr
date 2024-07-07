@@ -2,6 +2,7 @@ import { Controller, Get, HttpStatus, Param, Query } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PaginateOrderDto } from './dto/paginate-order.dto';
+import { PaginateTodayOrderDto } from './dto/paginate-today-order.dto';
 
 @ApiTags('참여자')
 @Controller('orders')
@@ -27,5 +28,18 @@ export class OrdersController {
       endDate,
       paginateOrderDto,
     );
+  }
+
+  @Get('today')
+  @ApiOperation({
+    summary: '금일 대기자 목록 조회',
+    description: 'offset pagination - page 쿼리 파라미터를 이용해야 합니다.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '의과/한의과를 선택하세요',
+  })
+  getTodayOrders(@Query() paginateOrderDto: PaginateTodayOrderDto) {
+    return this.ordersService.paginateTodayOrders(paginateOrderDto);
   }
 }
