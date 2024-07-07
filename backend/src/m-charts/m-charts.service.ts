@@ -138,10 +138,10 @@ export class MChartsService {
     return charts;
   }
 
-  async getPastPrediagnosis(chartId: number) {
-    return await this.chartsRepository.find({
+  async getPastChart(chartId: number) {
+    return await this.chartsRepository.findOne({
+      ...DEFAULT_M_CHART_FIND_OPTIONS,
       where: { id: chartId },
-      relations: ['complaints', 'prescriptions'],
     });
   }
 

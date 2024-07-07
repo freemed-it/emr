@@ -99,8 +99,8 @@ export class MChartsController {
     status: HttpStatus.OK,
     description: '과거 차트 상세가 조회되었습니다.',
   })
-  getPastPrediagnosis(@Param('chartId') chartId: number) {
-    return this.mChartsService.getPastPrediagnosis(chartId);
+  getPastChart(@Param('chartId') chartId: number) {
+    return this.mChartsService.getPastChart(chartId);
   }
 
   @Get(':chartId/vital-sign')
