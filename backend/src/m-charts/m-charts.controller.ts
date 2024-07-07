@@ -99,8 +99,8 @@ export class MChartsController {
     status: HttpStatus.OK,
     description: '과거 차트 상세가 조회되었습니다.',
   })
-  getPastPrediagnosis(@Param('chartId') chartId: number) {
-    return this.mChartsService.getPastPrediagnosis(chartId);
+  getPastChart(@Param('chartId') chartId: number) {
+    return this.mChartsService.getPastChart(chartId);
   }
 
   @Get(':chartId/vital-sign')
@@ -120,6 +120,14 @@ export class MChartsController {
   })
   getPastVitalSigns(@Param('patientId', ParseIntPipe) patientId: number) {
     return this.mChartsService.getPastVitalSigns(patientId);
+  }
+
+  @Get('today/:patientId')
+  @ApiOperation({
+    summary: '금일 의과 차트 조회',
+  })
+  getTodayChart(@Param('patientId', ParseIntPipe) patientId: number) {
+    return this.mChartsService.getTodayChartByPatientId(patientId);
   }
 
   @Post(':chartId/prescriptions')
