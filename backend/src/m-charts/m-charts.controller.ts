@@ -122,6 +122,14 @@ export class MChartsController {
     return this.mChartsService.getPastVitalSigns(patientId);
   }
 
+  @Get('today/:patientId')
+  @ApiOperation({
+    summary: '금일 의과 차트 조회',
+  })
+  getTodayChart(@Param('patientId', ParseIntPipe) patientId: number) {
+    return this.mChartsService.getTodayChartByPatientId(patientId);
+  }
+
   @Post(':chartId/prescriptions')
   @ApiOperation({
     summary: '처방 생성',
