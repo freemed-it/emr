@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsOptional } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { BasePaginationDto } from 'src/common/dto/base-pagination.dto';
 import { Department } from '../const/department.const';
 import { ApiPropertyOptional } from '@nestjs/swagger';
@@ -16,6 +16,8 @@ export class PaginateOrderDto extends BasePaginationDto {
   @ApiPropertyOptional({ description: '차트 상태' })
   @Type(() => Number)
   @IsInt({ each: true })
+  @Min(1, { each: true })
+  @Max(7, { each: true })
   @IsOptional()
   status: number[];
 

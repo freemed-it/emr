@@ -33,11 +33,27 @@ export class OrdersService {
       where: {
         createdAt: Between(start, end),
         ...(paginateDto.department && {
-          department: In([paginateDto.department]),
+          department: In(
+            Array.isArray(paginateDto.department)
+              ? paginateDto.department
+              : [paginateDto.department],
+          ),
         }),
-        ...(paginateDto.status && { status: In([paginateDto.status]) }),
+        ...(paginateDto.status && {
+          status: In(
+            Array.isArray(paginateDto.status)
+              ? paginateDto.status
+              : [paginateDto.status],
+          ),
+        }),
         ...(paginateDto.gender && {
-          patient: { gender: In([paginateDto.gender]) },
+          patient: {
+            gender: In(
+              Array.isArray(paginateDto.gender)
+                ? paginateDto.gender
+                : [paginateDto.gender],
+            ),
+          },
         }),
       },
       relations: {
@@ -54,6 +70,13 @@ export class OrdersService {
       where: {
         createdAt: Between(start, end),
         ...(paginateDto.department && { department: paginateDto.department }),
+        ...(paginateDto.status && {
+          status: In(
+            Array.isArray(paginateDto.status)
+              ? paginateDto.status
+              : [paginateDto.status],
+          ),
+        }),
       },
       relations: {
         patient: true,
