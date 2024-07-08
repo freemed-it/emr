@@ -10,6 +10,8 @@ import { CreateMPrescriptionDto } from './dto/create-m-prescription.dto';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
 import { M_Medicines } from 'src/m-medicines/entity/m-medicines.entity';
 import { UpdateMPrescriptionDto } from './dto/update-m-prescription.dto';
+import { PaginateMPrescriptionHistoryDto } from './dto/paginate-m-prescription-history.dto';
+import { endOfDay, startOfDay } from 'date-fns';
 
 @Injectable()
 export class MPrescriptionsService {
@@ -102,5 +104,83 @@ export class MPrescriptionsService {
     await this.mPrescriptionsRepository.delete(prescriptionId);
 
     return prescriptionId;
+  }
+
+  async getPaginateHistory(
+    startDate: string,
+    endDate: string,
+    paginateDto: PaginateMPrescriptionHistoryDto,
+  ) {
+    const start = startOfDay(startDate);
+    const end = endOfDay(endDate);
+
+    if (start.getTime() > end.getTime()) {
+      throw new BadRequestException('날짜를 올바르게 설정해주세요.');
+    }
+
+    const query = this.mPrescriptionsRepository
+      .createQueryBuilder('prescription')
+      .withDeleted()
+      .innerJoinAndSelect('prescription.medicine', 'medicine')
+      .leftJoinAndSelect(
+        'medicine.category',
+        'category',
+        'medicine.categoryId = category.id',
+      )
+      .where('prescription.isCompleted = :isCompleted', { isCompleted: true })
+      .andWhere('prescription.createdAt >= :start', { start })
+      .andWhere('prescription.createdAt <= :end', { end });
+
+    if (paginateDto.name) {
+      query.andWhere('medicine.name like :name', {
+        name: `%${paginateDto.name}%`,
+      });
+    }
+    if (paginateDto.ingredient) {
+      query.andWhere('medicine.ingredient like :ingredient', {
+        ingredient: `%${paginateDto.ingredient}%`,
+      });
+    }
+    if (paginateDto.cursor) {
+      query.andWhere('medicine.id < :cursor', { cursor: paginateDto.cursor });
+    }
+
+    query
+      .select([
+        'prescription.medicineId',
+        'medicine.id',
+        'medicine.name',
+        'medicine.ingredient',
+        'medicine.totalAmount',
+        'medicine.deletedAt',
+        'category.mainCategory',
+        'category.subCategory',
+        'category.deletedAt',
+      ])
+      .addSelect('SUM(prescription.dosesTotal) as dosesTotalSum')
+      .groupBy('prescription.medicineId')
+      .orderBy({ 'medicine.id': 'DESC' })
+      .limit(paginateDto.take);
+
+    const data = await query.getRawMany();
+    const count = await query.getCount();
+    let hasNext: boolean = true;
+    let cursor: number;
+
+    if (count <= paginateDto.take || data.length <= 0) {
+      hasNext = false;
+      cursor = null;
+    } else {
+      cursor = data[data.length - 1].medicine_id;
+    }
+
+    return {
+      data: data,
+      meta: {
+        count: data.length,
+        cursor,
+        hasNext,
+      },
+    };
   }
 }
