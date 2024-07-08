@@ -2,14 +2,17 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { MPrescriptionsService } from './m-prescriptions.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateMPrescriptionDto } from './dto/update-m-prescription.dto';
+import { PaginateMPrescriptionHistoryDto } from './dto/paginate-m-prescription-history.dto';
 
 @ApiTags('의과')
 @Controller('m/prescriptions')
@@ -49,5 +52,22 @@ export class MPrescriptionsController {
     @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
   ) {
     return this.mPrescriptionsService.deletePrescription(prescriptionId);
+  }
+
+  @Get('history/:startDate/:endDate')
+  @ApiOperation({
+    summary: '히스토리 조회',
+    description: 'cursor pagination - cursor 쿼리 파라미터를 이용해야 합니다.',
+  })
+  async getMPrescriptionHistory(
+    @Param('startDate') startDate: string,
+    @Param('endDate') endDate: string,
+    @Query() paginateMPrescriptionHistoryDto: PaginateMPrescriptionHistoryDto,
+  ) {
+    return this.mPrescriptionsService.getPaginateHistory(
+      startDate,
+      endDate,
+      paginateMPrescriptionHistoryDto,
+    );
   }
 }

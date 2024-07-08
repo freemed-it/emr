@@ -95,7 +95,7 @@ export class M_Medicines extends BaseModel {
   isExcluded: boolean;
 
   /** 삭제 여부 */
-  @DeleteDateColumn({ select: false })
+  @DeleteDateColumn()
   deletedAt: Date | null;
 
   @OneToMany(() => M_Prescriptions, (prescription) => prescription.medicine)
