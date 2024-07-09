@@ -1,3 +1,4 @@
+import { IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { Patients } from 'src/patients/entity/patients.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
@@ -20,5 +21,6 @@ export class Memos extends BaseModel {
   @Column({
     length: 20,
   })
-  account: string;
+  @IsString()
+  writer: string;
 }

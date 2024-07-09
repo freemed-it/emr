@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -13,6 +14,10 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Department } from 'src/orders/const/department.const';
 import { Patients } from './entity/patients.entity';
+import { User } from 'src/users/decorator/user.decorator';
+import { Users } from 'src/users/entity/users.entity';
+import { CreateMemoDto } from './memos/dto/create-memo.dto';
+import { UpdateMemoDto } from './memos/dto/update-memo.dto';
 
 @ApiTags('참여자')
 @Controller('patients')
@@ -87,5 +92,29 @@ export class PatientsController {
   })
   async getPatientHistory(@Param('patientId', ParseIntPipe) patientId: number) {
     return this.patientsService.getPatientHistoryById(patientId);
+  }
+
+  @Post(':patientId/memos')
+  @ApiOperation({
+    summary: '참여자 메모 생성',
+  })
+  async postMemo(
+    @Param('patientId') patientId: number,
+    @Body() createMemoDto: CreateMemoDto,
+    @User() user: Users,
+  ) {
+    return this.patientsService.createMemo(patientId, createMemoDto, user);
+  }
+
+  @Patch(':patientId/memos')
+  @ApiOperation({
+    summary: '참여자 메모 수정',
+  })
+  async pathMemo(
+    @Param('patientId') patientId: number,
+    @Body() updateMemoDto: UpdateMemoDto,
+    @User() user: Users,
+  ) {
+    return this.patientsService.updateMemo(patientId, updateMemoDto, user);
   }
 }
