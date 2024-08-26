@@ -106,6 +106,14 @@ export class MPrescriptionsService {
     return prescriptionId;
   }
 
+  async deletePrescriptionsByChartId(chartId: number) {
+    return await this.mPrescriptionsRepository.delete({
+      chart: {
+        id: chartId,
+      },
+    });
+  }
+
   async getPaginateHistory(
     startDate: string,
     endDate: string,
