@@ -12,6 +12,7 @@ import { M_Medicines } from 'src/m-medicines/entity/m-medicines.entity';
 import { UpdateMPrescriptionDto } from './dto/update-m-prescription.dto';
 import { PaginateMPrescriptionHistoryDto } from './dto/paginate-m-prescription-history.dto';
 import { endOfDay, startOfDay } from 'date-fns';
+import { convertDosesCountByDay } from 'src/common/util/convert.util';
 
 @Injectable()
 export class MPrescriptionsService {
@@ -51,6 +52,10 @@ export class MPrescriptionsService {
 
     return await this.mPrescriptionsRepository.save({
       ...restPrescriptionDto,
+      dosesTotal:
+        restPrescriptionDto.doses *
+        convertDosesCountByDay(restPrescriptionDto.dosesCountByDay) *
+        restPrescriptionDto.dosesDay,
       chart: {
         id: chartId,
       },
@@ -86,6 +91,10 @@ export class MPrescriptionsService {
 
     return await this.mPrescriptionsRepository.save({
       id: prescriptionId,
+      dosesTotal:
+        updateMPrescriptioneDto.doses *
+        convertDosesCountByDay(updateMPrescriptioneDto.dosesCountByDay) *
+        updateMPrescriptioneDto.dosesDay,
       ...updateMPrescriptioneDto,
     });
   }

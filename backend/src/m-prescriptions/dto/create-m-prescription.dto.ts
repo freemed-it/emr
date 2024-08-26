@@ -33,13 +33,6 @@ export class CreateMPrescriptionDto extends PickType(M_Prescriptions, [
   dosesDay: number;
 
   @ApiProperty({
-    description: '사용량',
-    example: 15,
-  })
-  @IsNumber()
-  dosesTotal: number;
-
-  @ApiProperty({
     description: '묶음',
     example: '',
   })
