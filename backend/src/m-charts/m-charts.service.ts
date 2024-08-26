@@ -14,6 +14,7 @@ import { Histories } from 'src/patients/histories/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { endOfToday, startOfToday } from 'date-fns';
 import { DEFAULT_M_CHART_FIND_OPTIONS } from './const/default-m-chart-find-options.const';
+import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
 
 @Injectable()
 export class MChartsService {
@@ -173,6 +174,27 @@ export class MChartsService {
     }
 
     return chart;
+  }
+
+  async postDiagnosis(
+    chartId: number,
+    createDiagnosisDto: CreateMDiagnosisDto,
+  ) {
+    const chart = await this.chartsRepository.findOne({
+      where: { id: chartId },
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    return await this.chartsRepository.save({
+      id: chartId,
+      ...chart,
+      presentIllness: createDiagnosisDto.presentIllness,
+      impression: createDiagnosisDto.impression,
+      treatmentNote: createDiagnosisDto.treatmentNote,
+    });
   }
 
   async getVitalSign(chartId: number) {

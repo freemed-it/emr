@@ -14,6 +14,7 @@ import { MPrescriptionsService } from 'src/m-prescriptions/m-prescriptions.servi
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
 import { CreateMPrescriptionDto } from 'src/m-prescriptions/dto/create-m-prescription.dto';
 import { UpdatePharmacyStatusDto } from './dto/update-pharmacy-status-dto';
+import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
 
 @ApiTags('의과')
 @Controller('m/charts')
@@ -114,6 +115,44 @@ export class MChartsController {
   })
   getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
     return this.mChartsService.getDiagnosis(chartId);
+  }
+
+  @Post(':chartId/diagnosis')
+  @ApiOperation({
+    summary: '본진 완료',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async postDiagnosis(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Body() createMDiagnosisDto: CreateMDiagnosisDto,
+  ) {
+    const chart = await this.mChartsService.postDiagnosis(
+      chartId,
+      createMDiagnosisDto,
+    );
+
+    // status 3이상이면 기존 처방 삭제
+    if (chart.status > 2) {
+      this.mPrescriptionsService.deletePrescriptionsByChartId(chartId);
+    }
+
+    const prescriptions = await Promise.all(
+      createMDiagnosisDto.prescriptions.map(async (prescription) => {
+        return this.mPrescriptionsService.createMPrescription(
+          chartId,
+          prescription,
+        );
+      }),
+    );
+
+    await this.mChartsService.updateStatus(chartId, 3);
+
+    return {
+      ...chart,
+      prescriptions,
+    };
   }
 
   @Get(':chartId/vital-sign')
