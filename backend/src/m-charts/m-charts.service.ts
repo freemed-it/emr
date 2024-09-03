@@ -29,6 +29,18 @@ export class MChartsService {
     private readonly ordersRepository: Repository<Orders>,
   ) {}
 
+  getChart(chartId: number) {
+    const chart = this.chartsRepository.findOne({
+      where: { id: chartId },
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    return chart;
+  }
+
   async createVitalSign(chartId: number, vitalSignDto: CreateVitalSignDto) {
     const chart = await this.chartsRepository.findOne({
       where: { id: chartId },

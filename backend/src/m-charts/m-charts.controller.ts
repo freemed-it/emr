@@ -7,6 +7,7 @@ import {
   Get,
   ParseIntPipe,
   Patch,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MChartsService } from './m-charts.service';
@@ -15,6 +16,7 @@ import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
 import { CreateMPrescriptionDto } from 'src/m-prescriptions/dto/create-m-prescription.dto';
 import { UpdatePharmacyStatusDto } from './dto/update-pharmacy-status-dto';
 import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
+import { MMedicinesService } from 'src/m-medicines/m-medicines.service';
 
 @ApiTags('의과')
 @Controller('m/charts')
@@ -22,6 +24,7 @@ export class MChartsController {
   constructor(
     private readonly mChartsService: MChartsService,
     private readonly mPrescriptionsService: MPrescriptionsService,
+    private readonly mMedicineService: MMedicinesService,
   ) {}
 
   @Post('/:chartId/prediagnosis')
@@ -128,24 +131,31 @@ export class MChartsController {
     @Param('chartId', ParseIntPipe) chartId: number,
     @Body() createMDiagnosisDto: CreateMDiagnosisDto,
   ) {
+    const currentChart = await this.mChartsService.getChart(chartId);
+    if (Number(currentChart.status) < 2 || Number(currentChart.status) > 3) {
+      throw new BadRequestException(
+        `예진 완료(2) 혹은 조제 대기(3) 중인 차트가 아닙니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
+      );
+    }
+
     const chart = await this.mChartsService.postDiagnosis(
       chartId,
       createMDiagnosisDto,
     );
 
-    // status 3이상이면 기존 처방 삭제
-    if (chart.status > 2) {
-      this.mPrescriptionsService.deletePrescriptionsByChartId(chartId);
+    // 조제 대기 차트(이미 본진 완료)이면 기존 처방 삭제
+    if (chart.status === 3) {
+      await this.mPrescriptionsService.deletePrescriptionsByChartId(chartId);
     }
 
-    const prescriptions = await Promise.all(
-      createMDiagnosisDto.prescriptions.map(async (prescription) => {
+    const prescriptions = await Promise.all([
+      ...createMDiagnosisDto.prescriptions.map((prescription) => {
         return this.mPrescriptionsService.createMPrescription(
           chartId,
           prescription,
         );
       }),
-    );
+    ]);
 
     await this.mChartsService.updateStatus(chartId, 3);
 
@@ -201,6 +211,34 @@ export class MChartsController {
     @Param('chartId', ParseIntPipe) chartId: number,
     @Body() updateMChartStatusDto: UpdatePharmacyStatusDto,
   ) {
+    const currentChart = await this.mChartsService.getChart(chartId);
+    if (currentChart.status < 3 || currentChart.status >= 6) {
+      throw new BadRequestException(
+        `조제 전 혹은 복약지도 완료된 차트입니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
+      );
+    }
+
+    if (updateMChartStatusDto.status < 3 || updateMChartStatusDto.status > 6) {
+      throw new BadRequestException(
+        '수정할 차트 상태가 올바르지 않습니다. 조제 대기(3) ~ 복약지도 완료(6)까지 가능합니다.',
+      );
+    }
+
+    // 복약지도 완료 시 약품 총량 줄이기 & 완료된 처방으로 수정
+    if (updateMChartStatusDto.status === 6) {
+      const prescriptions =
+        await this.mPrescriptionsService.getPrescriptions(chartId);
+      prescriptions.map(async (prescription) => {
+        await this.mMedicineService.updateMedicineTotalAmount(
+          prescription.medicine.id,
+          prescription,
+        );
+        return await this.mPrescriptionsService.updatePrescriptionIsCompleted(
+          prescription.id,
+        );
+      });
+    }
+
     return await this.mChartsService.updateStatus(
       chartId,
       updateMChartStatusDto.status,
