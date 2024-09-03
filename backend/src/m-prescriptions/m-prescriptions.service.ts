@@ -45,9 +45,7 @@ export class MPrescriptionsService {
     prescriptionDto: CreateMPrescriptionDto,
   ) {
     const chart = await this.mChartsRepository.findOne({
-      where: {
-        id: chartId,
-      },
+      where: { id: chartId },
     });
 
     if (!chart) {
@@ -56,9 +54,7 @@ export class MPrescriptionsService {
 
     const { medicineId, ...restPrescriptionDto } = prescriptionDto;
     const medicine = await this.mMedicinesRepository.findOne({
-      where: {
-        id: medicineId,
-      },
+      where: { id: medicineId },
     });
 
     if (!medicine) {
@@ -85,9 +81,7 @@ export class MPrescriptionsService {
     updateMPrescriptioneDto: UpdateMPrescriptionDto,
   ) {
     const prescription = await this.mPrescriptionsRepository.findOne({
-      where: {
-        id: prescriptionId,
-      },
+      where: { id: prescriptionId },
     });
 
     if (!prescription) {
@@ -95,9 +89,7 @@ export class MPrescriptionsService {
     }
 
     const medicine = await this.mMedicinesRepository.findOne({
-      where: {
-        id: updateMPrescriptioneDto.medicineId,
-      },
+      where: { id: updateMPrescriptioneDto.medicineId },
     });
 
     if (!medicine) {
@@ -131,9 +123,7 @@ export class MPrescriptionsService {
 
   async deletePrescription(prescriptionId: number) {
     const prescription = await this.mPrescriptionsRepository.findOne({
-      where: {
-        id: prescriptionId,
-      },
+      where: { id: prescriptionId },
     });
 
     if (!prescription) {
@@ -147,9 +137,7 @@ export class MPrescriptionsService {
 
   async deletePrescriptionsByChartId(chartId: number) {
     return await this.mPrescriptionsRepository.delete({
-      chart: {
-        id: chartId,
-      },
+      chart: { id: chartId },
     });
   }
 

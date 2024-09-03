@@ -214,13 +214,7 @@ export class MChartsController {
     const currentChart = await this.mChartsService.getChart(chartId);
     if (currentChart.status < 3 || currentChart.status >= 6) {
       throw new BadRequestException(
-        `조제 전 혹은 복약지도 완료된 차트입니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
-      );
-    }
-
-    if (updateMChartStatusDto.status < 3 || updateMChartStatusDto.status > 6) {
-      throw new BadRequestException(
-        '수정할 차트 상태가 올바르지 않습니다. 조제 대기(3) ~ 복약지도 완료(6)까지 가능합니다.',
+        `조제 전(< 3) 혹은 복약지도 완료(6)된 차트입니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
       );
     }
 

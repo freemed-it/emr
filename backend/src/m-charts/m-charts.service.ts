@@ -252,14 +252,8 @@ export class MChartsService {
   async getPharmacy(chartId: number) {
     return await this.chartsRepository.findOne({
       ...DEFAULT_M_CHART_FIND_OPTIONS,
-      where: {
-        id: chartId,
-      },
-      relations: {
-        prescriptions: {
-          medicine: true,
-        },
-      },
+      where: { id: chartId },
+      relations: { prescriptions: { medicine: true } },
     });
   }
 }
