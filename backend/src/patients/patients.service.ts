@@ -104,7 +104,12 @@ export class PatientsService {
     todayDate: string,
     departmentCode: string,
   ): Promise<string | null> {
-    const latestChart = await this.mChartsRepository
+    const repository =
+      departmentCode === '01'
+        ? this.mChartsRepository
+        : this.kmChartsRepository;
+
+    const latestChart = await repository
       .createQueryBuilder('chart')
       .where('chart.chartNumber LIKE :chartNumber', {
         chartNumber: `${todayDate}${departmentCode}%`,
