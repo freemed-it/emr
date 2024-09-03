@@ -25,6 +25,21 @@ export class MPrescriptionsService {
     private readonly mMedicinesRepository: Repository<M_Medicines>,
   ) {}
 
+  async getPrescriptions(chartId: number) {
+    const chart = await this.mChartsRepository.findOne({
+      where: { id: chartId },
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    return this.mPrescriptionsRepository.find({
+      where: { chart: { id: chartId } },
+      relations: ['medicine'],
+    });
+  }
+
   async createMPrescription(
     chartId: number,
     prescriptionDto: CreateMPrescriptionDto,
@@ -96,6 +111,21 @@ export class MPrescriptionsService {
         convertDosesCountByDay(updateMPrescriptioneDto.dosesCountByDay) *
         updateMPrescriptioneDto.dosesDay,
       ...updateMPrescriptioneDto,
+    });
+  }
+
+  async updatePrescriptionIsCompleted(prescriptionId: number) {
+    const prescription = await this.mPrescriptionsRepository.findOne({
+      where: { id: prescriptionId },
+    });
+
+    if (!prescription) {
+      throw new NotFoundException();
+    }
+
+    return await this.mPrescriptionsRepository.save({
+      id: prescriptionId,
+      isCompleted: true,
     });
   }
 
