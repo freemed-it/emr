@@ -11,6 +11,7 @@ import { Memos } from './memos/entity/memos.entity';
 import { UpdateMemoDto } from './memos/dto/update-memo.dto';
 import { CreateMemoDto } from './memos/dto/create-memo.dto';
 import { Users } from 'src/users/entity/users.entity';
+import { format } from 'date-fns';
 
 @Injectable()
 export class PatientsService {
@@ -33,6 +34,7 @@ export class PatientsService {
     patientId?: number,
   ): Promise<Patients> {
     let patient: Patients;
+    const chartNumber = await this.generateChartNumber(department);
     if (patientId) {
       // 재진: 기존 참여자 업데이트
       patient = await this.patientsRepository.findOne({
@@ -53,7 +55,7 @@ export class PatientsService {
     if (department === Department.M) {
       const mChart = this.mChartsRepository.create({
         patient,
-        chartNumber: this.generateChartNumber(),
+        chartNumber,
       });
       await this.mChartsRepository.save(mChart);
       const order = this.ordersRepository.create({
@@ -66,7 +68,7 @@ export class PatientsService {
     } else if (department === Department.KM) {
       const kmChart = this.kmChartsRepository.create({
         patient,
-        chartNumber: this.generateChartNumber(),
+        chartNumber,
       });
       await this.kmChartsRepository.save(kmChart);
       const order = this.ordersRepository.create({
@@ -80,12 +82,37 @@ export class PatientsService {
     return patient;
   }
 
-  private generateChartNumber(): string {
-    let str = '';
-    for (let i = 0; i < 10; i++) {
-      str += Math.floor(Math.random() * 10);
+  private async generateChartNumber(department: Department): Promise<string> {
+    const todayDate = format(new Date(), 'yyMMdd'); // 오늘 날짜 YYMMDD 형식으로
+    const departmentCode = department === Department.M ? '01' : '02'; // 진료과 코드 설정
+    const baseChartNumber = `${todayDate}${departmentCode}`; // 기본 차트 번호
+
+    // 오늘 생성된 차트 중 가장 최신의 차트 번호 가져오기
+    const lastChart = await this.getLastChartNumber(todayDate, departmentCode);
+
+    let newNum = '01'; // 기본 값 01
+    if (lastChart) {
+      // 가장 최신의 차트 번호 마지막 두 자리를 가져와 +1
+      const lastNum = parseInt(lastChart.slice(-2));
+      newNum = (lastNum + 1).toString().padStart(2, '0');
     }
-    return str;
+
+    return `${baseChartNumber}${newNum}`;
+  }
+
+  private async getLastChartNumber(
+    todayDate: string,
+    departmentCode: string,
+  ): Promise<string | null> {
+    const latestChart = await this.mChartsRepository
+      .createQueryBuilder('chart')
+      .where('chart.chartNumber LIKE :chartNumber', {
+        chartNumber: `${todayDate}${departmentCode}%`,
+      })
+      .orderBy('chart.chartNumber', 'DESC')
+      .getOne();
+
+    return latestChart ? latestChart.chartNumber : null;
   }
 
   async searchByName(name: string): Promise<any> {
