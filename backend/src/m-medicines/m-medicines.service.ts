@@ -66,20 +66,10 @@ export class MMedicinesService {
     return medicine;
   }
 
-  async createMMedicine(
+  async createMedicine(
     medicineDto: CreateMMedicineDto,
     image: Express.Multer.File,
   ) {
-    const category = await this.mMedicineCategoriesRepository.findOne({
-      where: {
-        id: medicineDto.categoryId,
-      },
-    });
-
-    if (!category) {
-      throw new BadRequestException('존재하지 않는 분류입니다.');
-    }
-
     const { categoryId, ...restMedicineDto } = medicineDto;
     const imagePath = await this.uploadImage(image, medicineDto.name);
 
