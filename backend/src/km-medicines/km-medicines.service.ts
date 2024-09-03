@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KM_Medicines } from './entity/km-medicines.entity';
 import { Repository } from 'typeorm';
@@ -14,9 +18,21 @@ import {
 export class KmMedicinesService {
   constructor(
     @InjectRepository(KM_Medicines)
-    private readonly kmMedicinesRepository: Repository<KM_Medicines>,
+    private readonly medicinesRepository: Repository<KM_Medicines>,
     private readonly configService: ConfigService,
   ) {}
+
+  async getMedicine(medicineId: number) {
+    const medicine = await this.medicinesRepository.findOne({
+      where: { id: medicineId },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    return medicine;
+  }
 
   async createMedicine(
     medicineDto: CreateKMMedicineDto,
@@ -24,7 +40,7 @@ export class KmMedicinesService {
   ) {
     const imagePath = await this.uploadImage(image, medicineDto.name);
 
-    return await this.kmMedicinesRepository.save({
+    return await this.medicinesRepository.save({
       ...medicineDto,
       image: imagePath,
     });
