@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KM_Charts } from './entity/km-charts.entity';
 import { KM_Complaints } from 'src/km-complaints/entity/km-complaints.entity';
@@ -93,5 +97,23 @@ export class KmChartsService {
     await this.ordersRepository.save(order);
 
     return chart;
+  }
+
+  async getPrediagnosis(chartId: number) {
+    const chart = await this.chartsRepository.findOne({
+      where: { id: chartId },
+      relations: {
+        complaints: true,
+        patient: { history: true },
+      },
+    });
+
+    if (chart.status < 2) {
+      throw new BadRequestException('예진이 완료되지 않았습니다');
+    }
+
+    if (chart.status >= 2) {
+      return chart;
+    }
   }
 }
