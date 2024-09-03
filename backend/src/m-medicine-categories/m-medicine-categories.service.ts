@@ -199,4 +199,10 @@ export class MMedicineCategoriesService {
 
     return deletedMedicineCount === medicineCount;
   }
+
+  async checkCategoryExistsById(id: number) {
+    return this.mMedicineCategoriesRepository.exists({
+      where: { id },
+    });
+  }
 }
