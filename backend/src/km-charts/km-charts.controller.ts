@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { KmChartsService } from './km-charts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
@@ -40,5 +40,17 @@ export class KmChartsController {
       history,
       complaint,
     };
+  }
+
+  @Get('/:chartId/prediagnosis')
+  @ApiOperation({
+    summary: '예진 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '예진이 조회되었습니다',
+  })
+  getPrediagnosis(@Param('chartId') chartId: number) {
+    return this.kmChartsService.getPrediagnosis(chartId);
   }
 }
