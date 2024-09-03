@@ -5,7 +5,7 @@ import { M_Charts } from '../entity/m-charts.entity';
 export class UpdatePharmacyStatusDto extends PickType(M_Charts, ['status']) {
   @ApiProperty({ description: '차트 상태' })
   @IsInt()
-  @Min(4)
-  @Max(7)
+  @Min(3)
+  @Max(6)
   status: number;
 }

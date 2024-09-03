@@ -12,6 +12,7 @@ import { M_Medicines } from 'src/m-medicines/entity/m-medicines.entity';
 import { UpdateMPrescriptionDto } from './dto/update-m-prescription.dto';
 import { PaginateMPrescriptionHistoryDto } from './dto/paginate-m-prescription-history.dto';
 import { endOfDay, startOfDay } from 'date-fns';
+import { convertDosesCountByDay } from 'src/common/util/convert.util';
 
 @Injectable()
 export class MPrescriptionsService {
@@ -24,14 +25,27 @@ export class MPrescriptionsService {
     private readonly mMedicinesRepository: Repository<M_Medicines>,
   ) {}
 
+  async getPrescriptions(chartId: number) {
+    const chart = await this.mChartsRepository.findOne({
+      where: { id: chartId },
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    return this.mPrescriptionsRepository.find({
+      where: { chart: { id: chartId } },
+      relations: ['medicine'],
+    });
+  }
+
   async createMPrescription(
     chartId: number,
     prescriptionDto: CreateMPrescriptionDto,
   ) {
     const chart = await this.mChartsRepository.findOne({
-      where: {
-        id: chartId,
-      },
+      where: { id: chartId },
     });
 
     if (!chart) {
@@ -40,9 +54,7 @@ export class MPrescriptionsService {
 
     const { medicineId, ...restPrescriptionDto } = prescriptionDto;
     const medicine = await this.mMedicinesRepository.findOne({
-      where: {
-        id: medicineId,
-      },
+      where: { id: medicineId },
     });
 
     if (!medicine) {
@@ -51,6 +63,10 @@ export class MPrescriptionsService {
 
     return await this.mPrescriptionsRepository.save({
       ...restPrescriptionDto,
+      dosesTotal:
+        restPrescriptionDto.doses *
+        convertDosesCountByDay(restPrescriptionDto.dosesCountByDay) *
+        restPrescriptionDto.dosesDay,
       chart: {
         id: chartId,
       },
@@ -65,9 +81,7 @@ export class MPrescriptionsService {
     updateMPrescriptioneDto: UpdateMPrescriptionDto,
   ) {
     const prescription = await this.mPrescriptionsRepository.findOne({
-      where: {
-        id: prescriptionId,
-      },
+      where: { id: prescriptionId },
     });
 
     if (!prescription) {
@@ -75,9 +89,7 @@ export class MPrescriptionsService {
     }
 
     const medicine = await this.mMedicinesRepository.findOne({
-      where: {
-        id: updateMPrescriptioneDto.medicineId,
-      },
+      where: { id: updateMPrescriptioneDto.medicineId },
     });
 
     if (!medicine) {
@@ -86,15 +98,32 @@ export class MPrescriptionsService {
 
     return await this.mPrescriptionsRepository.save({
       id: prescriptionId,
+      dosesTotal:
+        updateMPrescriptioneDto.doses *
+        convertDosesCountByDay(updateMPrescriptioneDto.dosesCountByDay) *
+        updateMPrescriptioneDto.dosesDay,
       ...updateMPrescriptioneDto,
+    });
+  }
+
+  async updatePrescriptionIsCompleted(prescriptionId: number) {
+    const prescription = await this.mPrescriptionsRepository.findOne({
+      where: { id: prescriptionId },
+    });
+
+    if (!prescription) {
+      throw new NotFoundException();
+    }
+
+    return await this.mPrescriptionsRepository.save({
+      id: prescriptionId,
+      isCompleted: true,
     });
   }
 
   async deletePrescription(prescriptionId: number) {
     const prescription = await this.mPrescriptionsRepository.findOne({
-      where: {
-        id: prescriptionId,
-      },
+      where: { id: prescriptionId },
     });
 
     if (!prescription) {
@@ -104,6 +133,12 @@ export class MPrescriptionsService {
     await this.mPrescriptionsRepository.delete(prescriptionId);
 
     return prescriptionId;
+  }
+
+  async deletePrescriptionsByChartId(chartId: number) {
+    return await this.mPrescriptionsRepository.delete({
+      chart: { id: chartId },
+    });
   }
 
   async getPaginateHistory(

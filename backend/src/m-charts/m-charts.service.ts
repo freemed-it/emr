@@ -14,6 +14,7 @@ import { Histories } from 'src/patients/histories/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { endOfToday, startOfToday } from 'date-fns';
 import { DEFAULT_M_CHART_FIND_OPTIONS } from './const/default-m-chart-find-options.const';
+import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
 
 @Injectable()
 export class MChartsService {
@@ -27,6 +28,18 @@ export class MChartsService {
     @InjectRepository(Orders)
     private readonly ordersRepository: Repository<Orders>,
   ) {}
+
+  getChart(chartId: number) {
+    const chart = this.chartsRepository.findOne({
+      where: { id: chartId },
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    return chart;
+  }
 
   async createVitalSign(chartId: number, vitalSignDto: CreateVitalSignDto) {
     const chart = await this.chartsRepository.findOne({
@@ -156,6 +169,46 @@ export class MChartsService {
     });
   }
 
+  async getDiagnosis(chartId: number) {
+    const chart = await this.chartsRepository.findOne({
+      where: { id: chartId },
+      relations: ['prescriptions'],
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    if (chart.status < 2) {
+      throw new BadRequestException(
+        '해당 참여자의 예진이 완료되지 않았습니다.',
+      );
+    }
+
+    return chart;
+  }
+
+  async postDiagnosis(
+    chartId: number,
+    createDiagnosisDto: CreateMDiagnosisDto,
+  ) {
+    const chart = await this.chartsRepository.findOne({
+      where: { id: chartId },
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    return await this.chartsRepository.save({
+      id: chartId,
+      ...chart,
+      presentIllness: createDiagnosisDto.presentIllness,
+      impression: createDiagnosisDto.impression,
+      treatmentNote: createDiagnosisDto.treatmentNote,
+    });
+  }
+
   async getVitalSign(chartId: number) {
     return await this.chartsRepository.findOne({
       where: { id: chartId },
@@ -199,14 +252,8 @@ export class MChartsService {
   async getPharmacy(chartId: number) {
     return await this.chartsRepository.findOne({
       ...DEFAULT_M_CHART_FIND_OPTIONS,
-      where: {
-        id: chartId,
-      },
-      relations: {
-        prescriptions: {
-          medicine: true,
-        },
-      },
+      where: { id: chartId },
+      relations: { prescriptions: { medicine: true } },
     });
   }
 }

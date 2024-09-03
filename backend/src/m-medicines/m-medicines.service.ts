@@ -18,6 +18,8 @@ import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medici
 import { UpdateMMedicineDto } from './dto/update-m-medicine.dto';
 import { PaginateMMedicineDto } from './dto/paginate-m-medicine.dto';
 import { CommonService } from 'src/common/common.service';
+import { convertDosesCountByDay } from 'src/common/util/convert.util';
+import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriotions.entity';
 
 @Injectable()
 export class MMedicinesService {
@@ -165,6 +167,29 @@ export class MMedicinesService {
     }
 
     return medicineId;
+  }
+
+  async updateMedicineTotalAmount(
+    medicineId: number,
+    prescriptionDto: M_Prescriptions,
+  ) {
+    const medicine = await this.mMedicinesRepository.findOne({
+      where: { id: medicineId },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    const dosesTotal =
+      prescriptionDto.doses *
+      convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
+      prescriptionDto.dosesDay;
+
+    return await this.mMedicinesRepository.save({
+      id: medicineId,
+      totalAmount: medicine.totalAmount - dosesTotal,
+    });
   }
 
   async uploadImage(image: Express.Multer.File, name: string) {

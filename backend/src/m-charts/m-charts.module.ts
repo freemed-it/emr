@@ -8,11 +8,13 @@ import { MComplaintsService } from 'src/m-complaints/m-complaints.service';
 import { Histories } from 'src/patients/histories/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { MPrescriptionsModule } from 'src/m-prescriptions/m-prescriptions.module';
+import { MMedicinesModule } from 'src/m-medicines/m-medicines.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([M_Charts, Histories, M_Complaints, Orders]),
     MPrescriptionsModule,
+    MMedicinesModule,
   ],
   controllers: [MChartsController],
   providers: [MChartsService, MComplaintsService],
