@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KM_Medicines } from './entity/km-medicines.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreateKMMedicineDto } from './dto/create-km-medicine.dto';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -13,14 +13,28 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { PaginateKMMedicineDto } from './dto/paginate-km-medicine.dto';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class KmMedicinesService {
   constructor(
     @InjectRepository(KM_Medicines)
     private readonly medicinesRepository: Repository<KM_Medicines>,
+    private readonly commonService: CommonService,
     private readonly configService: ConfigService,
   ) {}
+
+  async paginateMedicines(paginateDto: PaginateKMMedicineDto) {
+    return this.commonService.paginate(paginateDto, this.medicinesRepository, {
+      where: {
+        ...(paginateDto.name && { name: ILike(`%${paginateDto.name}%`) }),
+        ...(paginateDto.indication && {
+          indication: ILike(`%${paginateDto.indication}%`),
+        }),
+      },
+    });
+  }
 
   async getMedicine(medicineId: number) {
     const medicine = await this.medicinesRepository.findOne({

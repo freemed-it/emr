@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,11 +19,21 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateKMMedicineDto } from './dto/create-km-medicine.dto';
+import { PaginateKMMedicineDto } from './dto/paginate-km-medicine.dto';
 
 @ApiTags('한의과')
 @Controller('km/medicines')
 export class KmMedicinesController {
   constructor(private readonly medicinesService: KmMedicinesService) {}
+
+  @Get()
+  @ApiOperation({
+    summary: '약품 목록 조회',
+    description: 'cursor pagination - cursor 쿼리 파라미터를 이용해야 합니다.',
+  })
+  async getMedicines(@Query() paginateMedicineDto: PaginateKMMedicineDto) {
+    return this.medicinesService.paginateMedicines(paginateMedicineDto);
+  }
 
   @Get(':medicineId')
   @ApiOperation({
@@ -41,7 +52,7 @@ export class KmMedicinesController {
   @ApiOperation({
     summary: '약품 생성',
   })
-  async postKMMedicine(
+  async postMedicine(
     @Body() createMedicineDto: CreateKMMedicineDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
