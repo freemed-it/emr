@@ -142,4 +142,10 @@ export class KmChartsService {
       where: { id: chartId },
     });
   }
+
+  async checkChartExistsById(id: number) {
+    return this.chartsRepository.exists({
+      where: { id },
+    });
+  }
 }
