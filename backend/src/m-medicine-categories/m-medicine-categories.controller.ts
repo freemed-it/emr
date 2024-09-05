@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -15,20 +16,22 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateMMedicineCategoryDto } from './dto/create-m-medicine-category.dto';
 import { UpdateMMedicineSubCategoryDto } from './dto/update-m-medicine-sub-category.dto';
 import { UpdateMMedicineMainCategoryDto } from './dto/update-m-medicine-main-category.dto';
+import { MMedicinesService } from 'src/m-medicines/m-medicines.service';
 
 @ApiTags('의과')
 @Controller('m/medicine-categories')
 export class MMedicineCategoriesController {
   constructor(
-    private readonly mMedicineCategoriesService: MMedicineCategoriesService,
+    private readonly medicineCategoriesService: MMedicineCategoriesService,
+    private readonly medicinesService: MMedicinesService,
   ) {}
 
   @Get()
   @ApiOperation({
     summary: '약품 분류 조회',
   })
-  async getMMedicineCategories() {
-    return this.mMedicineCategoriesService.getCategories();
+  async getMedicineCategories() {
+    return this.medicineCategoriesService.getCategories();
   }
 
   @Post()
@@ -39,11 +42,11 @@ export class MMedicineCategoriesController {
     status: HttpStatus.BAD_REQUEST,
     description: '이미 존재하는 분류입니다.',
   })
-  async postMMedicineCategory(
-    @Body() createMMedicineCategoryDto: CreateMMedicineCategoryDto,
+  async postMedicineCategory(
+    @Body() createMedicineCategoryDto: CreateMMedicineCategoryDto,
   ) {
-    return this.mMedicineCategoriesService.createCategory(
-      createMMedicineCategoryDto,
+    return this.medicineCategoriesService.createCategory(
+      createMedicineCategoryDto,
     );
   }
 
@@ -58,13 +61,13 @@ export class MMedicineCategoriesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async patchMMedicineMainCategory(
+  async patchMedicineMainCategory(
     @Query('category') category: string,
-    @Body() updateMMedicineMainCategoryDto: UpdateMMedicineMainCategoryDto,
+    @Body() updateMedicineMainCategoryDto: UpdateMMedicineMainCategoryDto,
   ) {
-    return this.mMedicineCategoriesService.updateMainCategory(
+    return this.medicineCategoriesService.updateMainCategory(
       category,
-      updateMMedicineMainCategoryDto,
+      updateMedicineMainCategoryDto,
     );
   }
 
@@ -79,8 +82,8 @@ export class MMedicineCategoriesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async deleteMMedicineMainCategory(@Query('category') category: string) {
-    return this.mMedicineCategoriesService.deleteMainCategory(category);
+  async deleteMedicineMainCategory(@Query('category') category: string) {
+    return this.medicineCategoriesService.deleteMainCategory(category);
   }
 
   @Patch('sub-category/:categoryId')
@@ -90,13 +93,13 @@ export class MMedicineCategoriesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async patchMMedicineSubCategory(
+  async patchMedicineSubCategory(
     @Param('categoryId', ParseIntPipe) categoryId: number,
-    @Body() updateMMedicineSubCategoryDto: UpdateMMedicineSubCategoryDto,
+    @Body() updateMedicineSubCategoryDto: UpdateMMedicineSubCategoryDto,
   ) {
-    return this.mMedicineCategoriesService.updateSubCategory(
+    return this.medicineCategoriesService.updateSubCategory(
       categoryId,
-      updateMMedicineSubCategoryDto,
+      updateMedicineSubCategoryDto,
     );
   }
 
@@ -111,9 +114,16 @@ export class MMedicineCategoriesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async deleteMMedicineSubCategory(
+  async deleteMedicineSubCategory(
     @Param('categoryId', ParseIntPipe) categoryId: number,
   ) {
-    return this.mMedicineCategoriesService.deleteSubCategory(categoryId);
+    const idDeleted =
+      await this.medicinesService.checkDeletedMedicineByCategoryId(categoryId);
+
+    if (!idDeleted) {
+      throw new BadRequestException('삭제되지 않은 약품이 존재합니다.');
+    }
+
+    return this.medicineCategoriesService.deleteSubCategory(categoryId);
   }
 }

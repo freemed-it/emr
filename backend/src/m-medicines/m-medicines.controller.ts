@@ -95,14 +95,23 @@ export class MMedicinesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async patchMMedicine(
+  async patchMedicine(
     @Param('medicineId', ParseIntPipe) medicineId: number,
-    @Body() updateMMedicineDto: UpdateMMedicineDto,
+    @Body() updateMedicineDto: UpdateMMedicineDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
+    const categoryExists =
+      await this.medicineCategoriesService.checkCategoryExistsById(
+        updateMedicineDto.categoryId,
+      );
+
+    if (!categoryExists) {
+      throw new NotFoundException('존재하지 않는 분류입니다.');
+    }
+
     return this.medicinesService.updateMedicine(
       medicineId,
-      updateMMedicineDto,
+      updateMedicineDto,
       image,
     );
   }

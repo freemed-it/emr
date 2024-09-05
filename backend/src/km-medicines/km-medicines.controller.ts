@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -21,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateKMMedicineDto } from './dto/create-km-medicine.dto';
 import { PaginateKMMedicineDto } from './dto/paginate-km-medicine.dto';
+import { UpdateKMMedicineDto } from './dto/update-km-medicine.dto';
 
 @ApiTags('한의과')
 @Controller('km/medicines')
@@ -58,6 +60,27 @@ export class KmMedicinesController {
     @UploadedFile() image: Express.Multer.File,
   ) {
     return await this.medicinesService.createMedicine(createMedicineDto, image);
+  }
+
+  @Patch(':medicineId')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: '약품 수정',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async patchMedicine(
+    @Param('medicineId', ParseIntPipe) medicineId: number,
+    @Body() updateMedicineDto: UpdateKMMedicineDto,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    return this.medicinesService.updateMedicine(
+      medicineId,
+      updateMedicineDto,
+      image,
+    );
   }
 
   @Delete(':medicineId')

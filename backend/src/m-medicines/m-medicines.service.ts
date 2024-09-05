@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ILike, Repository } from 'typeorm';
+import { ILike, IsNull, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { M_Medicines } from './entity/m-medicines.entity';
 import { CreateMMedicineDto } from './dto/create-m-medicine.dto';
@@ -14,7 +14,6 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
-import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medicine_categories.entity';
 import { UpdateMMedicineDto } from './dto/update-m-medicine.dto';
 import { PaginateMMedicineDto } from './dto/paginate-m-medicine.dto';
 import { CommonService } from 'src/common/common.service';
@@ -26,8 +25,6 @@ export class MMedicinesService {
   constructor(
     @InjectRepository(M_Medicines)
     private readonly medicinesRepository: Repository<M_Medicines>,
-    @InjectRepository(M_Medicine_Categories)
-    private readonly medicineCategoriesRepository: Repository<M_Medicine_Categories>,
     private readonly commonService: CommonService,
     private readonly configService: ConfigService,
   ) {}
@@ -80,23 +77,11 @@ export class MMedicinesService {
     image: Express.Multer.File,
   ) {
     const medicine = await this.medicinesRepository.findOne({
-      where: {
-        id: medicineId,
-      },
+      where: { id: medicineId },
     });
 
     if (!medicine) {
       throw new NotFoundException();
-    }
-
-    const category = await this.medicineCategoriesRepository.findOne({
-      where: {
-        id: medicineDto.categoryId,
-      },
-    });
-
-    if (!category) {
-      throw new BadRequestException('존재하지 않는 분류입니다.');
     }
 
     const { categoryId, ...restMedicineDto } = medicineDto;
@@ -224,5 +209,23 @@ export class MMedicinesService {
     } catch (error) {
       throw new BadRequestException(error);
     }
+  }
+
+  async checkDeletedMedicineByCategoryId(categoryId: number) {
+    const [, deletedMedicineCount] =
+      await this.medicinesRepository.findAndCount({
+        where: {
+          category: { id: categoryId },
+          deletedAt: Not(IsNull()),
+        },
+        withDeleted: true,
+      });
+
+    const [, medicineCount] = await this.medicinesRepository.findAndCount({
+      where: { category: { id: categoryId } },
+      withDeleted: true,
+    });
+
+    return deletedMedicineCount === medicineCount;
   }
 }
