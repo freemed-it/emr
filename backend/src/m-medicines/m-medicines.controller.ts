@@ -114,7 +114,7 @@ export class MMedicinesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async deleteMMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
+  async deleteMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
     return this.medicinesService.deleteMedicine(medicineId);
   }
 }

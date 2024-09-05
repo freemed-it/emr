@@ -129,9 +129,7 @@ export class MMedicinesService {
 
   async deleteMedicine(medicineId: number) {
     const medicine = await this.medicinesRepository.findOne({
-      where: {
-        id: medicineId,
-      },
+      where: { id: medicineId },
     });
 
     if (!medicine) {
