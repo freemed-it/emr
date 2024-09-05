@@ -116,4 +116,16 @@ export class KmChartsService {
       return chart;
     }
   }
+
+  async getPastCharts(patientId: number) {
+    const charts = await this.chartsRepository.find({
+      where: {
+        patient: { id: patientId },
+        status: 6,
+      },
+      select: ['id', 'createdAt'],
+    });
+
+    return charts;
+  }
 }
