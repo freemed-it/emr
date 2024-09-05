@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { M_Medicines } from './entity/m-medicines.entity';
 import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medicine_categories.entity';
 import { CommonModule } from 'src/common/common.module';
+import { MMedicineCategoriesService } from 'src/m-medicine-categories/m-medicine-categories.service';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { CommonModule } from 'src/common/common.module';
     CommonModule,
   ],
   controllers: [MMedicinesController],
-  providers: [MMedicinesService],
+  providers: [MMedicinesService, MMedicineCategoriesService],
   exports: [MMedicinesService],
 })
 export class MMedicinesModule {}

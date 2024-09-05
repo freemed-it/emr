@@ -25,15 +25,15 @@ import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriotions.enti
 export class MMedicinesService {
   constructor(
     @InjectRepository(M_Medicines)
-    private readonly mMedicinesRepository: Repository<M_Medicines>,
+    private readonly medicinesRepository: Repository<M_Medicines>,
     @InjectRepository(M_Medicine_Categories)
-    private readonly mMedicineCategoriesRepository: Repository<M_Medicine_Categories>,
+    private readonly medicineCategoriesRepository: Repository<M_Medicine_Categories>,
     private readonly commonService: CommonService,
     private readonly configService: ConfigService,
   ) {}
 
   async paginateMedicines(paginateDto: PaginateMMedicineDto) {
-    return this.commonService.paginate(paginateDto, this.mMedicinesRepository, {
+    return this.commonService.paginate(paginateDto, this.medicinesRepository, {
       where: {
         ...(paginateDto.name && { name: ILike(`%${paginateDto.name}%`) }),
         ...(paginateDto.ingredient && {
@@ -43,20 +43,14 @@ export class MMedicinesService {
           category: { id: paginateDto.categoryId },
         }),
       },
-      relations: {
-        category: true,
-      },
+      relations: { category: true },
     });
   }
 
   async getMedicine(medicineId: number) {
-    const medicine = await this.mMedicinesRepository.findOne({
-      where: {
-        id: medicineId,
-      },
-      relations: {
-        category: true,
-      },
+    const medicine = await this.medicinesRepository.findOne({
+      where: { id: medicineId },
+      relations: { category: true },
     });
 
     if (!medicine) {
@@ -73,12 +67,10 @@ export class MMedicinesService {
     const { categoryId, ...restMedicineDto } = medicineDto;
     const imagePath = await this.uploadImage(image, medicineDto.name);
 
-    return await this.mMedicinesRepository.save({
+    return await this.medicinesRepository.save({
       ...restMedicineDto,
       image: imagePath,
-      category: {
-        id: categoryId,
-      },
+      category: { id: categoryId },
     });
   }
 
@@ -87,7 +79,7 @@ export class MMedicinesService {
     medicineDto: UpdateMMedicineDto,
     image: Express.Multer.File,
   ) {
-    const medicine = await this.mMedicinesRepository.findOne({
+    const medicine = await this.medicinesRepository.findOne({
       where: {
         id: medicineId,
       },
@@ -97,7 +89,7 @@ export class MMedicinesService {
       throw new NotFoundException();
     }
 
-    const category = await this.mMedicineCategoriesRepository.findOne({
+    const category = await this.medicineCategoriesRepository.findOne({
       where: {
         id: medicineDto.categoryId,
       },
@@ -124,7 +116,7 @@ export class MMedicinesService {
       restMedicineDto.image = null;
     }
 
-    const newMedicine = await this.mMedicinesRepository.preload({
+    const newMedicine = await this.medicinesRepository.preload({
       id: medicineId,
       ...restMedicineDto,
       category: {
@@ -132,11 +124,11 @@ export class MMedicinesService {
       },
     });
 
-    return await this.mMedicinesRepository.save(newMedicine);
+    return await this.medicinesRepository.save(newMedicine);
   }
 
   async deleteMedicine(medicineId: number) {
-    const medicine = await this.mMedicinesRepository.findOne({
+    const medicine = await this.medicinesRepository.findOne({
       where: {
         id: medicineId,
       },
@@ -146,11 +138,11 @@ export class MMedicinesService {
       throw new NotFoundException();
     }
 
-    await this.mMedicinesRepository.softDelete(medicineId);
+    await this.medicinesRepository.softDelete(medicineId);
 
     if (medicine.image) {
       await this.deleteUploadedImage(medicine.image);
-      await this.mMedicinesRepository.save({
+      await this.medicinesRepository.save({
         ...medicine,
         image: null,
       });
@@ -163,7 +155,7 @@ export class MMedicinesService {
     medicineId: number,
     prescriptionDto: M_Prescriptions,
   ) {
-    const medicine = await this.mMedicinesRepository.findOne({
+    const medicine = await this.medicinesRepository.findOne({
       where: { id: medicineId },
     });
 
@@ -176,7 +168,7 @@ export class MMedicinesService {
       convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
       prescriptionDto.dosesDay;
 
-    return await this.mMedicinesRepository.save({
+    return await this.medicinesRepository.save({
       id: medicineId,
       totalAmount: medicine.totalAmount - dosesTotal,
     });

@@ -30,17 +30,17 @@ import { MMedicineCategoriesService } from 'src/m-medicine-categories/m-medicine
 @Controller('m/medicines')
 export class MMedicinesController {
   constructor(
-    private readonly mMedicinesService: MMedicinesService,
-    private readonly mMedicineCategoriesService: MMedicineCategoriesService,
+    private readonly medicinesService: MMedicinesService,
+    private readonly medicineCategoriesService: MMedicineCategoriesService,
   ) {}
 
   @Get()
   @ApiOperation({
     summary: '약품 목록 조회',
-    description: 'offset pagination - page 쿼리 파라미터를 이용해야 합니다.',
+    description: 'cursor pagination - cursor 쿼리 파라미터를 이용해야 합니다.',
   })
-  async getMMedicines(@Query() paginateMMedicineDto: PaginateMMedicineDto) {
-    return this.mMedicinesService.paginateMedicines(paginateMMedicineDto);
+  async getMedicines(@Query() paginateMedicineDto: PaginateMMedicineDto) {
+    return this.medicinesService.paginateMedicines(paginateMedicineDto);
   }
 
   @Get(':medicineId')
@@ -50,8 +50,8 @@ export class MMedicinesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async getMMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
-    return this.mMedicinesService.getMedicine(medicineId);
+  async getMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
+    return this.medicinesService.getMedicine(medicineId);
   }
 
   @Post()
@@ -65,12 +65,12 @@ export class MMedicinesController {
     description:
       '존재하지 않는 분류입니다. <small>categoryId에 해당하는 분류가 없는 경우</small>',
   })
-  async postMMedicine(
+  async postMedicine(
     @Body() createMedicineDto: CreateMMedicineDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
     const categoryExists =
-      await this.mMedicineCategoriesService.checkCategoryExistsById(
+      await this.medicineCategoriesService.checkCategoryExistsById(
         createMedicineDto.categoryId,
       );
 
@@ -78,10 +78,7 @@ export class MMedicinesController {
       throw new NotFoundException('존재하지 않는 분류입니다.');
     }
 
-    return await this.mMedicinesService.createMedicine(
-      createMedicineDto,
-      image,
-    );
+    return await this.medicinesService.createMedicine(createMedicineDto, image);
   }
 
   @Patch(':medicineId')
@@ -103,7 +100,7 @@ export class MMedicinesController {
     @Body() updateMMedicineDto: UpdateMMedicineDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    return this.mMedicinesService.updateMedicine(
+    return this.medicinesService.updateMedicine(
       medicineId,
       updateMMedicineDto,
       image,
@@ -118,6 +115,6 @@ export class MMedicinesController {
     status: HttpStatus.NOT_FOUND,
   })
   async deleteMMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
-    return this.mMedicinesService.deleteMedicine(medicineId);
+    return this.medicinesService.deleteMedicine(medicineId);
   }
 }
