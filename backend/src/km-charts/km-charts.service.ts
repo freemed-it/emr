@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { CreateVitalSignDto } from './dto/create-vital-sign.dto';
 import { CreateKMComplaintDto } from '../km-complaints/dto/create-km-complaint.dto';
 import { CreateHistoryDto } from '../patients/histories/dto/create-history.dto';
+import { DEFAULT_KM_CHART_FIND_OPTIONS } from './const/default-km-chart-find-options.const';
 
 @Injectable()
 export class KmChartsService {
@@ -127,5 +128,18 @@ export class KmChartsService {
     });
 
     return charts;
+  }
+
+  async getComplaint(chartId: number) {
+    return this.complaintsRepository.find({
+      where: { chart: { id: chartId } },
+    });
+  }
+
+  async getPastChart(chartId: number) {
+    return await this.chartsRepository.findOne({
+      ...DEFAULT_KM_CHART_FIND_OPTIONS,
+      where: { id: chartId },
+    });
   }
 }

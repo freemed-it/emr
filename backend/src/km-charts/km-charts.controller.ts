@@ -65,4 +65,28 @@ export class KmChartsController {
   async getPastCharts(@Param('patientId') patientId: number) {
     return this.chartsService.getPastCharts(patientId);
   }
+
+  @Get('/:chartId/complaints')
+  @ApiOperation({
+    summary: '예진 C.C 상세 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'C.C가 조회되었습니다.',
+  })
+  getComplaint(@Param('chartId') chartId: number) {
+    return this.chartsService.getComplaint(chartId);
+  }
+
+  @Get('/:chartId')
+  @ApiOperation({
+    summary: '과거 차트 상세 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '과거 차트 상세가 조회되었습니다.',
+  })
+  getPastChart(@Param('chartId') chartId: number) {
+    return this.chartsService.getPastChart(chartId);
+  }
 }
