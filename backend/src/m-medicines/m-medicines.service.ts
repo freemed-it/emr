@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ILike, Repository } from 'typeorm';
+import { ILike, IsNull, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { M_Medicines } from './entity/m-medicines.entity';
 import { CreateMMedicineDto } from './dto/create-m-medicine.dto';
@@ -209,5 +209,23 @@ export class MMedicinesService {
     } catch (error) {
       throw new BadRequestException(error);
     }
+  }
+
+  async checkDeletedMedicineByCategoryId(categoryId: number) {
+    const [, deletedMedicineCount] =
+      await this.medicinesRepository.findAndCount({
+        where: {
+          category: { id: categoryId },
+          deletedAt: Not(IsNull()),
+        },
+        withDeleted: true,
+      });
+
+    const [, medicineCount] = await this.medicinesRepository.findAndCount({
+      where: { category: { id: categoryId } },
+      withDeleted: true,
+    });
+
+    return deletedMedicineCount === medicineCount;
   }
 }

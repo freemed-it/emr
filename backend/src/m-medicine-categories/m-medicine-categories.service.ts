@@ -5,23 +5,20 @@ import {
 } from '@nestjs/common';
 import { M_Medicine_Categories } from './entity/m_medicine_categories.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateMMedicineCategoryDto } from './dto/create-m-medicine-category.dto';
 import { UpdateMMedicineSubCategoryDto } from './dto/update-m-medicine-sub-category.dto';
 import { UpdateMMedicineMainCategoryDto } from './dto/update-m-medicine-main-category.dto';
-import { M_Medicines } from 'src/m-medicines/entity/m-medicines.entity';
 
 @Injectable()
 export class MMedicineCategoriesService {
   constructor(
     @InjectRepository(M_Medicine_Categories)
-    private readonly mMedicineCategoriesRepository: Repository<M_Medicine_Categories>,
-    @InjectRepository(M_Medicines)
-    private readonly mMedicinesRepository: Repository<M_Medicines>,
+    private readonly medicineCategoriesRepository: Repository<M_Medicine_Categories>,
   ) {}
 
   async getCategories() {
-    const categories = await this.mMedicineCategoriesRepository.find();
+    const categories = await this.medicineCategoriesRepository.find();
 
     return categories.reduce(
       (acc, cur) =>
@@ -53,15 +50,15 @@ export class MMedicineCategoriesService {
       throw new BadRequestException('이미 존재하는 분류입니다.');
     }
 
-    const category = this.mMedicineCategoriesRepository.create({
+    const category = this.medicineCategoriesRepository.create({
       ...categoryDto,
     });
 
-    return await this.mMedicineCategoriesRepository.save(category);
+    return await this.medicineCategoriesRepository.save(category);
   }
 
   async getCategoryByName(mainCategory: string, subCategory: string) {
-    return await this.mMedicineCategoriesRepository.findOne({
+    return await this.medicineCategoriesRepository.findOne({
       where: {
         mainCategory,
         subCategory,
@@ -73,20 +70,16 @@ export class MMedicineCategoriesService {
     category: string,
     mainCategoryDto: UpdateMMedicineMainCategoryDto,
   ) {
-    const categories = await this.mMedicineCategoriesRepository.find({
-      where: {
-        mainCategory: category,
-      },
+    const categories = await this.medicineCategoriesRepository.find({
+      where: { mainCategory: category },
     });
 
     if (categories.length === 0) {
       throw new NotFoundException();
     }
 
-    const existingCategories = await this.mMedicineCategoriesRepository.find({
-      where: {
-        mainCategory: mainCategoryDto.mainCategory,
-      },
+    const existingCategories = await this.medicineCategoriesRepository.find({
+      where: { mainCategory: mainCategoryDto.mainCategory },
     });
 
     if (existingCategories.length > 0) {
@@ -94,7 +87,7 @@ export class MMedicineCategoriesService {
     }
 
     for (const category of categories) {
-      await this.mMedicineCategoriesRepository.save({
+      await this.medicineCategoriesRepository.save({
         ...category,
         mainCategory: mainCategoryDto.mainCategory,
       });
@@ -104,10 +97,8 @@ export class MMedicineCategoriesService {
   }
 
   async deleteMainCategory(category: string) {
-    const categories = await this.mMedicineCategoriesRepository.find({
-      where: {
-        mainCategory: category,
-      },
+    const categories = await this.medicineCategoriesRepository.find({
+      where: { mainCategory: category },
       withDeleted: true,
     });
 
@@ -115,17 +106,15 @@ export class MMedicineCategoriesService {
       throw new NotFoundException();
     }
 
-    const existingCategories = await this.mMedicineCategoriesRepository.find({
-      where: {
-        mainCategory: category,
-      },
+    const existingCategories = await this.medicineCategoriesRepository.find({
+      where: { mainCategory: category },
     });
 
     if (existingCategories.length > 0) {
       throw new BadRequestException('삭제되지 않은 소분류가 존재합니다.');
     }
 
-    await this.mMedicineCategoriesRepository.delete({
+    await this.medicineCategoriesRepository.delete({
       mainCategory: category,
     });
 
@@ -136,72 +125,38 @@ export class MMedicineCategoriesService {
     categoryId: number,
     subCategoryDto: UpdateMMedicineSubCategoryDto,
   ) {
-    const category = await this.mMedicineCategoriesRepository.findOne({
-      where: {
-        id: categoryId,
-      },
+    const category = await this.medicineCategoriesRepository.findOne({
+      where: { id: categoryId },
     });
 
     if (!category) {
       throw new NotFoundException();
     }
 
-    const newCategory = await this.mMedicineCategoriesRepository.preload({
+    const newCategory = await this.medicineCategoriesRepository.preload({
       id: categoryId,
       ...subCategoryDto,
     });
 
-    return await this.mMedicineCategoriesRepository.save(newCategory);
+    return await this.medicineCategoriesRepository.save(newCategory);
   }
 
   async deleteSubCategory(categoryId: number) {
-    const category = await this.mMedicineCategoriesRepository.findOne({
-      where: {
-        id: categoryId,
-      },
+    const category = await this.medicineCategoriesRepository.findOne({
+      where: { id: categoryId },
     });
 
     if (!category) {
       throw new NotFoundException();
     }
 
-    const isDeleted = await this.checkDeletedMMedicinesByCategoryId(categoryId);
-
-    if (!isDeleted) {
-      throw new BadRequestException('삭제되지 않은 약품이 존재합니다.');
-    }
-
-    await this.mMedicineCategoriesRepository.softDelete(categoryId);
+    await this.medicineCategoriesRepository.softDelete(categoryId);
 
     return categoryId;
   }
 
-  async checkDeletedMMedicinesByCategoryId(categoryId: number) {
-    const [, deletedMedicineCount] =
-      await this.mMedicinesRepository.findAndCount({
-        where: {
-          category: {
-            id: categoryId,
-          },
-          deletedAt: Not(IsNull()),
-        },
-        withDeleted: true,
-      });
-
-    const [, medicineCount] = await this.mMedicinesRepository.findAndCount({
-      where: {
-        category: {
-          id: categoryId,
-        },
-      },
-      withDeleted: true,
-    });
-
-    return deletedMedicineCount === medicineCount;
-  }
-
   async checkCategoryExistsById(id: number) {
-    return this.mMedicineCategoriesRepository.exists({
+    return this.medicineCategoriesRepository.exists({
       where: { id },
     });
   }
