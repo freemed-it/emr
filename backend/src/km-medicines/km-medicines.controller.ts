@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -57,5 +58,16 @@ export class KmMedicinesController {
     @UploadedFile() image: Express.Multer.File,
   ) {
     return await this.medicinesService.createMedicine(createMedicineDto, image);
+  }
+
+  @Delete(':medicineId')
+  @ApiOperation({
+    summary: '약품 삭제',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async deleteMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
+    return this.medicinesService.deleteMedicine(medicineId);
   }
 }
