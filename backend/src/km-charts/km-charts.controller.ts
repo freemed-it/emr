@@ -6,7 +6,7 @@ import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
 @ApiTags('한의과')
 @Controller('km/charts')
 export class KmChartsController {
-  constructor(private readonly kmChartsService: KmChartsService) {}
+  constructor(private readonly chartsService: KmChartsService) {}
 
   @Post('/:chartId/prediagnosis')
   @ApiOperation({
@@ -14,26 +14,26 @@ export class KmChartsController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: '예진 완료되었습니다.',
+    description: '예진이 완료되었습니다.',
   })
   async createPrediagnosis(
     @Param('chartId') chartId: number,
     @Body() createPrediagnosisDto: CreatePrediagnosisDto,
   ) {
-    const vitalSign = await this.kmChartsService.createVitalSign(
+    const vitalSign = await this.chartsService.createVitalSign(
       chartId,
       createPrediagnosisDto.vistalSign,
     );
-    const complaint = await this.kmChartsService.createComplaint(
+    const complaint = await this.chartsService.createComplaint(
       chartId,
       createPrediagnosisDto.complaint,
     );
-    const history = await this.kmChartsService.createHistory(
+    const history = await this.chartsService.createHistory(
       chartId,
       createPrediagnosisDto.history,
     );
 
-    await this.kmChartsService.updateStatus(chartId, 2);
+    await this.chartsService.updateStatus(chartId, 2);
 
     return {
       vitalSign,
@@ -47,10 +47,22 @@ export class KmChartsController {
     summary: '예진 조회',
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+    status: HttpStatus.OK,
     description: '예진이 조회되었습니다',
   })
   getPrediagnosis(@Param('chartId') chartId: number) {
-    return this.kmChartsService.getPrediagnosis(chartId);
+    return this.chartsService.getPrediagnosis(chartId);
+  }
+
+  @Get('past/:patientId')
+  @ApiOperation({
+    summary: '과거 차트 목록',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '과거 차트 목록이 조회되었습니다',
+  })
+  async getPastCharts(@Param('patientId') patientId: number) {
+    return this.chartsService.getPastCharts(patientId);
   }
 }

@@ -133,22 +133,22 @@ export class MChartsService {
     }
   }
 
-  async getComplaint(chartId: number) {
-    return this.complaintsRepository.find({
-      where: { chart: { id: chartId } },
-    });
-  }
-
   async getPastCharts(patientId: number) {
     const charts = await this.chartsRepository.find({
       where: {
         patient: { id: patientId },
-        status: 7,
+        status: 6,
       },
       select: ['id', 'createdAt'],
     });
 
     return charts;
+  }
+
+  async getComplaint(chartId: number) {
+    return this.complaintsRepository.find({
+      where: { chart: { id: chartId } },
+    });
   }
 
   async getPastChart(chartId: number) {

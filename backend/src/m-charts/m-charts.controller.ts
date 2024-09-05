@@ -22,9 +22,9 @@ import { MMedicinesService } from 'src/m-medicines/m-medicines.service';
 @Controller('m/charts')
 export class MChartsController {
   constructor(
-    private readonly mChartsService: MChartsService,
-    private readonly mPrescriptionsService: MPrescriptionsService,
-    private readonly mMedicineService: MMedicinesService,
+    private readonly chartsService: MChartsService,
+    private readonly prescriptionsService: MPrescriptionsService,
+    private readonly medicineService: MMedicinesService,
   ) {}
 
   @Post('/:chartId/prediagnosis')
@@ -39,20 +39,20 @@ export class MChartsController {
     @Param('chartId') chartId: number,
     @Body() createPrediagnosisDto: CreatePrediagnosisDto,
   ) {
-    const vitalSign = await this.mChartsService.createVitalSign(
+    const vitalSign = await this.chartsService.createVitalSign(
       chartId,
       createPrediagnosisDto.vistalSign,
     );
-    const complaint = await this.mChartsService.createComplaint(
+    const complaint = await this.chartsService.createComplaint(
       chartId,
       createPrediagnosisDto.complaint,
     );
-    const history = await this.mChartsService.createHistory(
+    const history = await this.chartsService.createHistory(
       chartId,
       createPrediagnosisDto.history,
     );
 
-    await this.mChartsService.updateStatus(chartId, 2);
+    await this.chartsService.updateStatus(chartId, 2);
 
     return {
       vitalSign,
@@ -70,19 +70,7 @@ export class MChartsController {
     description: '예진이 조회되었습니다',
   })
   getPrediagnosis(@Param('chartId') chartId: number) {
-    return this.mChartsService.getPrediagnosis(chartId);
-  }
-
-  @Get('/:chartId/complaints')
-  @ApiOperation({
-    summary: '예진 C.C 상세 조회',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'C.C가 조회되었습니다.',
-  })
-  getComplaint(@Param('chartId') chartId: number) {
-    return this.mChartsService.getComplaint(chartId);
+    return this.chartsService.getPrediagnosis(chartId);
   }
 
   @Get('past/:patientId')
@@ -94,7 +82,19 @@ export class MChartsController {
     description: '과거 차트 목록이 조회되었습니다',
   })
   async getPastCharts(@Param('patientId') patientId: number) {
-    return this.mChartsService.getPastCharts(patientId);
+    return this.chartsService.getPastCharts(patientId);
+  }
+
+  @Get('/:chartId/complaints')
+  @ApiOperation({
+    summary: '예진 C.C 상세 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'C.C가 조회되었습니다.',
+  })
+  getComplaint(@Param('chartId') chartId: number) {
+    return this.chartsService.getComplaint(chartId);
   }
 
   @Get('/:chartId')
@@ -106,7 +106,7 @@ export class MChartsController {
     description: '과거 차트 상세가 조회되었습니다.',
   })
   getPastChart(@Param('chartId') chartId: number) {
-    return this.mChartsService.getPastChart(chartId);
+    return this.chartsService.getPastChart(chartId);
   }
 
   @Get(':chartId/diagnosis')
@@ -117,7 +117,7 @@ export class MChartsController {
     status: HttpStatus.NOT_FOUND,
   })
   getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.mChartsService.getDiagnosis(chartId);
+    return this.chartsService.getDiagnosis(chartId);
   }
 
   @Post(':chartId/diagnosis')
@@ -131,33 +131,33 @@ export class MChartsController {
     @Param('chartId', ParseIntPipe) chartId: number,
     @Body() createMDiagnosisDto: CreateMDiagnosisDto,
   ) {
-    const currentChart = await this.mChartsService.getChart(chartId);
+    const currentChart = await this.chartsService.getChart(chartId);
     if (Number(currentChart.status) < 2 || Number(currentChart.status) > 3) {
       throw new BadRequestException(
         `예진 완료(2) 혹은 조제 대기(3) 중인 차트가 아닙니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
       );
     }
 
-    const chart = await this.mChartsService.postDiagnosis(
+    const chart = await this.chartsService.postDiagnosis(
       chartId,
       createMDiagnosisDto,
     );
 
     // 조제 대기 차트(이미 본진 완료)이면 기존 처방 삭제
     if (chart.status === 3) {
-      await this.mPrescriptionsService.deletePrescriptionsByChartId(chartId);
+      await this.prescriptionsService.deletePrescriptionsByChartId(chartId);
     }
 
     const prescriptions = await Promise.all([
       ...createMDiagnosisDto.prescriptions.map((prescription) => {
-        return this.mPrescriptionsService.createMPrescription(
+        return this.prescriptionsService.createMPrescription(
           chartId,
           prescription,
         );
       }),
     ]);
 
-    await this.mChartsService.updateStatus(chartId, 3);
+    await this.chartsService.updateStatus(chartId, 3);
 
     return {
       ...chart,
@@ -173,7 +173,7 @@ export class MChartsController {
     status: HttpStatus.NOT_FOUND,
   })
   getVitalSign(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.mChartsService.getVitalSign(chartId);
+    return this.chartsService.getVitalSign(chartId);
   }
 
   @Get('vital-sign/:patientId')
@@ -181,7 +181,7 @@ export class MChartsController {
     summary: '과거 V/S 전체 조회',
   })
   getPastVitalSigns(@Param('patientId', ParseIntPipe) patientId: number) {
-    return this.mChartsService.getPastVitalSigns(patientId);
+    return this.chartsService.getPastVitalSigns(patientId);
   }
 
   @Get('today/:patientId')
@@ -189,7 +189,7 @@ export class MChartsController {
     summary: '금일 의과 차트 조회',
   })
   getTodayChart(@Param('patientId', ParseIntPipe) patientId: number) {
-    return this.mChartsService.getTodayChartByPatientId(patientId);
+    return this.chartsService.getTodayChartByPatientId(patientId);
   }
 
   @Get(':chartId/pharmacy')
@@ -200,7 +200,7 @@ export class MChartsController {
     status: HttpStatus.NOT_FOUND,
   })
   getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.mChartsService.getPharmacy(chartId);
+    return this.chartsService.getPharmacy(chartId);
   }
 
   @Patch(':chartId/status')
@@ -211,7 +211,7 @@ export class MChartsController {
     @Param('chartId', ParseIntPipe) chartId: number,
     @Body() updateMChartStatusDto: UpdatePharmacyStatusDto,
   ) {
-    const currentChart = await this.mChartsService.getChart(chartId);
+    const currentChart = await this.chartsService.getChart(chartId);
     if (currentChart.status < 3 || currentChart.status >= 6) {
       throw new BadRequestException(
         `조제 전(< 3) 혹은 복약지도 완료(6)된 차트입니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
@@ -221,19 +221,19 @@ export class MChartsController {
     // 복약지도 완료 시 약품 총량 줄이기 & 완료된 처방으로 수정
     if (updateMChartStatusDto.status === 6) {
       const prescriptions =
-        await this.mPrescriptionsService.getPrescriptions(chartId);
+        await this.prescriptionsService.getPrescriptions(chartId);
       prescriptions.map(async (prescription) => {
-        await this.mMedicineService.updateMedicineTotalAmount(
+        await this.medicineService.updateMedicineTotalAmount(
           prescription.medicine.id,
           prescription,
         );
-        return await this.mPrescriptionsService.updatePrescriptionIsCompleted(
+        return await this.prescriptionsService.updatePrescriptionIsCompleted(
           prescription.id,
         );
       });
     }
 
-    return await this.mChartsService.updateStatus(
+    return await this.chartsService.updateStatus(
       chartId,
       updateMChartStatusDto.status,
     );
@@ -255,7 +255,7 @@ export class MChartsController {
     @Param('chartId', ParseIntPipe) chartId: number,
     @Body() createMPrescriptionDto: CreateMPrescriptionDto,
   ) {
-    return await this.mPrescriptionsService.createMPrescription(
+    return await this.prescriptionsService.createMPrescription(
       chartId,
       createMPrescriptionDto,
     );
