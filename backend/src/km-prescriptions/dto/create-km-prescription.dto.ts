@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/mapped-types';
-import { KM_Prescriptions } from '../entity/km-prescriotions.entity';
+import { KM_Prescriptions } from '../entity/km-prescriptions.entity';
 import { IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 

@@ -9,7 +9,7 @@ import { Orders } from 'src/orders/entity/orders.entity';
 import { MComplaintsService } from 'src/m-complaints/m-complaints.service';
 import { KmPrescriptionsService } from 'src/km-prescriptions/km-prescriptions.service';
 import { KmMedicinesService } from 'src/km-medicines/km-medicines.service';
-import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriotions.entity';
+import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriptions.entity';
 import { KM_Medicines } from 'src/km-medicines/entity/km-medicines.entity';
 import { CommonService } from 'src/common/common.service';
 

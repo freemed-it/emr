@@ -13,7 +13,7 @@ import { M_Charts } from './m-charts/entity/m-charts.entity';
 import { MComplaintsModule } from './m-complaints/m-complaints.module';
 import { M_Complaints } from './m-complaints/entity/m-complaints.entity';
 import { MPrescriptionsModule } from './m-prescriptions/m-prescriptions.module';
-import { M_Prescriptions } from './m-prescriptions/entity/m-prescriotions.entity';
+import { M_Prescriptions } from './m-prescriptions/entity/m-prescriptions.entity';
 import { HistoriesModule } from './patients/histories/histories.module';
 import { Histories } from './patients/histories/entity/histories.entity';
 import { Users } from './users/entity/users.entity';
@@ -30,7 +30,7 @@ import { KmComplaintsModule } from './km-complaints/km-complaints.module';
 import { KmPrescriptionsModule } from './km-prescriptions/km-prescriptions.module';
 import { KmMedicinesModule } from './km-medicines/km-medicines.module';
 import { KM_Complaints } from './km-complaints/entity/km-complaints.entity';
-import { KM_Prescriptions } from './km-prescriptions/entity/km-prescriotions.entity';
+import { KM_Prescriptions } from './km-prescriptions/entity/km-prescriptions.entity';
 import { KM_Medicines } from './km-medicines/entity/km-medicines.entity';
 import {
   ENV_DB_DATABASE_KEY,

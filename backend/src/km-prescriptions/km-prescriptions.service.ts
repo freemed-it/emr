@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { KM_Prescriptions } from './entity/km-prescriotions.entity';
+import { KM_Prescriptions } from './entity/km-prescriptions.entity';
 import { Repository } from 'typeorm';
 import { CreateKMPrescriptionDto } from './dto/create-km-prescription.dto';
 import { convertDosesCountByDay } from 'src/common/util/convert.util';

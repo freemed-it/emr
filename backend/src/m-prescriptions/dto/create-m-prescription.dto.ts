@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/mapped-types';
-import { M_Prescriptions } from '../entity/m-prescriotions.entity';
+import { M_Prescriptions } from '../entity/m-prescriptions.entity';
 import { IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -7,7 +7,6 @@ export class CreateMPrescriptionDto extends PickType(M_Prescriptions, [
   'doses',
   'dosesCountByDay',
   'dosesDay',
-  'dosesTotal',
   'bundle',
   'memo',
 ]) {

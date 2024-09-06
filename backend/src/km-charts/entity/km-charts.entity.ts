@@ -1,6 +1,6 @@
 import { BaseModel } from 'src/common/entity/base.entity';
 import { KM_Complaints } from 'src/km-complaints/entity/km-complaints.entity';
-import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriotions.entity';
+import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriptions.entity';
 import { Patients } from 'src/patients/entity/patients.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
