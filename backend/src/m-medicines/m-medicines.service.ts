@@ -211,6 +211,12 @@ export class MMedicinesService {
     }
   }
 
+  async checkMedicineExistsById(id: number) {
+    return this.medicinesRepository.exists({
+      where: { id },
+    });
+  }
+
   async checkDeletedMedicineByCategoryId(categoryId: number) {
     const [, deletedMedicineCount] =
       await this.medicinesRepository.findAndCount({

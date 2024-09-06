@@ -256,4 +256,10 @@ export class MChartsService {
       relations: { prescriptions: { medicine: true } },
     });
   }
+
+  async checkChartExistsById(id: number) {
+    return this.chartsRepository.exists({
+      where: { id },
+    });
+  }
 }

@@ -40,7 +40,7 @@ export class MPrescriptionsService {
     });
   }
 
-  async createMPrescription(
+  async createPrescription(
     chartId: number,
     prescriptionDto: CreateMPrescriptionDto,
   ) {
