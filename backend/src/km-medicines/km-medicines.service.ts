@@ -173,4 +173,10 @@ export class KmMedicinesService {
       throw new BadRequestException(error);
     }
   }
+
+  async checkMedicineExistsById(id: number) {
+    return this.medicinesRepository.exists({
+      where: { id },
+    });
+  }
 }

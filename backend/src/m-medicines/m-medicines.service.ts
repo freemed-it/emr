@@ -18,7 +18,7 @@ import { UpdateMMedicineDto } from './dto/update-m-medicine.dto';
 import { PaginateMMedicineDto } from './dto/paginate-m-medicine.dto';
 import { CommonService } from 'src/common/common.service';
 import { convertDosesCountByDay } from 'src/common/util/convert.util';
-import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriotions.entity';
+import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriptions.entity';
 
 @Injectable()
 export class MMedicinesService {
@@ -209,6 +209,12 @@ export class MMedicinesService {
     } catch (error) {
       throw new BadRequestException(error);
     }
+  }
+
+  async checkMedicineExistsById(id: number) {
+    return this.medicinesRepository.exists({
+      where: { id },
+    });
   }
 
   async checkDeletedMedicineByCategoryId(categoryId: number) {

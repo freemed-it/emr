@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { KmPrescriptionsService } from './km-prescriptions.service';
 import { KmPrescriptionsController } from './km-prescriptions.controller';
-import { KM_Prescriptions } from './entity/km-prescriotions.entity';
+import { KM_Prescriptions } from './entity/km-prescriptions.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({

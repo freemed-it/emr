@@ -1,12 +1,28 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { KmChartsService } from './km-charts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
+import { KmPrescriptionsService } from 'src/km-prescriptions/km-prescriptions.service';
+import { CreateKMPrescriptionDto } from 'src/km-prescriptions/dto/create-km-prescription.dto';
+import { KmMedicinesService } from 'src/km-medicines/km-medicines.service';
 
 @ApiTags('한의과')
 @Controller('km/charts')
 export class KmChartsController {
-  constructor(private readonly chartsService: KmChartsService) {}
+  constructor(
+    private readonly chartsService: KmChartsService,
+    private readonly prescriptionsService: KmPrescriptionsService,
+    private readonly medicinesService: KmMedicinesService,
+  ) {}
 
   @Post('/:chartId/prediagnosis')
   @ApiOperation({
@@ -88,5 +104,39 @@ export class KmChartsController {
   })
   getPastChart(@Param('chartId') chartId: number) {
     return this.chartsService.getPastChart(chartId);
+  }
+
+  @Post(':chartId/prescriptions')
+  @ApiOperation({
+    summary: '처방 생성',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      '존재하지 않는 약품입니다. <small>medicineId에 해당하는 약품이 없는 경우</small>',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async postPrescription(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Body() createPrescriptionDto: CreateKMPrescriptionDto,
+  ) {
+    const chartExists = await this.chartsService.checkChartExistsById(chartId);
+    if (!chartExists) {
+      throw new NotFoundException();
+    }
+
+    const medicineExists = await this.medicinesService.checkMedicineExistsById(
+      createPrescriptionDto.medicineId,
+    );
+    if (!medicineExists) {
+      throw new NotFoundException('존재하지 않는 약품입니다.');
+    }
+
+    return await this.prescriptionsService.createPrescription(
+      chartId,
+      createPrescriptionDto,
+    );
   }
 }

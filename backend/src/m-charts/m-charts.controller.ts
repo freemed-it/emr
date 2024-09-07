@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MChartsService } from './m-charts.service';
@@ -24,7 +25,7 @@ export class MChartsController {
   constructor(
     private readonly chartsService: MChartsService,
     private readonly prescriptionsService: MPrescriptionsService,
-    private readonly medicineService: MMedicinesService,
+    private readonly medicinesService: MMedicinesService,
   ) {}
 
   @Post('/:chartId/prediagnosis')
@@ -150,7 +151,7 @@ export class MChartsController {
 
     const prescriptions = await Promise.all([
       ...createMDiagnosisDto.prescriptions.map((prescription) => {
-        return this.prescriptionsService.createMPrescription(
+        return this.prescriptionsService.createPrescription(
           chartId,
           prescription,
         );
@@ -223,7 +224,7 @@ export class MChartsController {
       const prescriptions =
         await this.prescriptionsService.getPrescriptions(chartId);
       prescriptions.map(async (prescription) => {
-        await this.medicineService.updateMedicineTotalAmount(
+        await this.medicinesService.updateMedicineTotalAmount(
           prescription.medicine.id,
           prescription,
         );
@@ -251,13 +252,25 @@ export class MChartsController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async postMPrescription(
+  async postPrescription(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() createMPrescriptionDto: CreateMPrescriptionDto,
+    @Body() createPrescriptionDto: CreateMPrescriptionDto,
   ) {
-    return await this.prescriptionsService.createMPrescription(
+    const chartExists = await this.chartsService.checkChartExistsById(chartId);
+    if (!chartExists) {
+      throw new NotFoundException();
+    }
+
+    const medicineExists = await this.medicinesService.checkMedicineExistsById(
+      createPrescriptionDto.medicineId,
+    );
+    if (!medicineExists) {
+      throw new NotFoundException('존재하지 않는 약품입니다.');
+    }
+
+    return await this.prescriptionsService.createPrescription(
       chartId,
-      createMPrescriptionDto,
+      createPrescriptionDto,
     );
   }
 }

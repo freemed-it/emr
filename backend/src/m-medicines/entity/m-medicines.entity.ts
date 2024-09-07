@@ -1,6 +1,6 @@
 import { BaseModel } from 'src/common/entity/base.entity';
 import { M_Medicine_Categories } from 'src/m-medicine-categories/entity/m_medicine_categories.entity';
-import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriotions.entity';
+import { M_Prescriptions } from 'src/m-prescriptions/entity/m-prescriptions.entity';
 import {
   Column,
   DeleteDateColumn,

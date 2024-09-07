@@ -1,13 +1,13 @@
 import { PickType } from '@nestjs/mapped-types';
-import { M_Prescriptions } from '../entity/m-prescriptions.entity';
+import { KM_Prescriptions } from '../entity/km-prescriptions.entity';
 import { IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateMPrescriptionDto extends PickType(M_Prescriptions, [
+export class CreateKMPrescriptionDto extends PickType(KM_Prescriptions, [
   'doses',
   'dosesCountByDay',
   'dosesDay',
-  'bundle',
+  'dosesTime',
   'memo',
 ]) {
   @ApiProperty({
@@ -32,12 +32,11 @@ export class CreateMPrescriptionDto extends PickType(M_Prescriptions, [
   dosesDay: number;
 
   @ApiProperty({
-    description: '묶음',
-    example: '',
+    description: '복용 시간',
+    example: '식전',
   })
   @IsString()
-  @IsOptional()
-  bundle: string;
+  dosesTime: string;
 
   @ApiProperty({
     description: '메모',

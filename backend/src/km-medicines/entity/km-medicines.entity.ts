@@ -1,5 +1,5 @@
 import { BaseModel } from 'src/common/entity/base.entity';
-import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriotions.entity';
+import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriptions.entity';
 import { Column, DeleteDateColumn, Entity, OneToMany } from 'typeorm';
 
 @Entity()
