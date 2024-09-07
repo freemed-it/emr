@@ -16,6 +16,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { PaginateKMMedicineDto } from './dto/paginate-km-medicine.dto';
 import { CommonService } from 'src/common/common.service';
+import { UpdateKMMedicineDto } from './dto/update-km-medicine.dto';
 
 @Injectable()
 export class KmMedicinesService {
@@ -59,6 +60,42 @@ export class KmMedicinesService {
       ...medicineDto,
       image: imagePath,
     });
+  }
+
+  async updateMedicine(
+    medicineId: number,
+    medicineDto: UpdateKMMedicineDto,
+    image: Express.Multer.File,
+  ) {
+    const medicine = await this.medicinesRepository.findOne({
+      where: { id: medicineId },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    // 사진 변경 (이미 있으면 삭제 후 업로드)
+    if (!medicineDto.hasOwnProperty('image') && image) {
+      if (medicine.image) {
+        await this.deleteUploadedImage(medicine.image);
+      }
+      const imagePath = await this.uploadImage(image, medicineDto.name);
+      medicineDto.image = imagePath;
+    }
+
+    // 사진 삭제
+    if (medicineDto.hasOwnProperty('image') && !image && medicine.image) {
+      await this.deleteUploadedImage(medicine.image);
+      medicineDto.image = null;
+    }
+
+    const newMedicine = await this.medicinesRepository.preload({
+      id: medicineId,
+      ...medicineDto,
+    });
+
+    return await this.medicinesRepository.save(newMedicine);
   }
 
   async deleteMedicine(medicineId: number) {
@@ -135,5 +172,11 @@ export class KmMedicinesService {
     } catch (error) {
       throw new BadRequestException(error);
     }
+  }
+
+  async checkMedicineExistsById(id: number) {
+    return this.medicinesRepository.exists({
+      where: { id },
+    });
   }
 }

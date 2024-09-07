@@ -33,9 +33,11 @@ export class KM_Prescriptions extends BaseModel {
   @IsInt()
   dosesDay: number;
 
-  @Column()
-  @IsInt()
-  dosesTime: number;
+  @Column('char', {
+    length: 10,
+  })
+  @IsString()
+  dosesTime: string;
 
   @Column('float')
   @IsNumber()

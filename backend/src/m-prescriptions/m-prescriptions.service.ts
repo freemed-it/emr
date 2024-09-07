@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { M_Prescriptions } from './entity/m-prescriotions.entity';
+import { M_Prescriptions } from './entity/m-prescriptions.entity';
 import { Repository } from 'typeorm';
 import { CreateMPrescriptionDto } from './dto/create-m-prescription.dto';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
@@ -40,7 +40,7 @@ export class MPrescriptionsService {
     });
   }
 
-  async createMPrescription(
+  async createPrescription(
     chartId: number,
     prescriptionDto: CreateMPrescriptionDto,
   ) {
