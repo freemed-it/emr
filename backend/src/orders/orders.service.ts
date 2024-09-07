@@ -6,6 +6,7 @@ import { CommonService } from 'src/common/common.service';
 import { PaginateOrderDto } from './dto/paginate-order.dto';
 import { endOfDay, endOfToday, startOfDay, startOfToday } from 'date-fns';
 import { PaginateTodayOrderDto } from './dto/paginate-today-order.dto';
+import { Department } from './const/department.const';
 
 @Injectable()
 export class OrdersService {
@@ -82,5 +83,20 @@ export class OrdersService {
         patient: true,
       },
     });
+  }
+
+  async checkTodayChart(patientId: number, department: Department) {
+    const start = startOfToday();
+    const end = endOfToday();
+
+    const order = await this.ordersRepository.findOne({
+      where: {
+        patient: { id: patientId },
+        status: 6,
+        createdAt: Between(start, end),
+        department: department,
+      },
+    });
+    return order?.chartNumber;
   }
 }
