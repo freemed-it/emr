@@ -9,14 +9,23 @@ import { Histories } from 'src/patients/histories/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { MPrescriptionsModule } from 'src/m-prescriptions/m-prescriptions.module';
 import { MMedicinesModule } from 'src/m-medicines/m-medicines.module';
+import { OrdersService } from 'src/orders/orders.service';
+import { CommonService } from 'src/common/common.service';
+import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([M_Charts, Histories, M_Complaints, Orders]),
+    TypeOrmModule.forFeature([
+      M_Charts,
+      Histories,
+      M_Complaints,
+      Orders,
+      KM_Charts,
+    ]),
     MPrescriptionsModule,
     MMedicinesModule,
   ],
   controllers: [MChartsController],
-  providers: [MChartsService, MComplaintsService],
+  providers: [MChartsService, MComplaintsService, OrdersService, CommonService],
 })
 export class MChartsModule {}
