@@ -4,6 +4,7 @@ import { KM_Prescriptions } from './entity/km-prescriptions.entity';
 import { Repository } from 'typeorm';
 import { CreateKMPrescriptionDto } from './dto/create-km-prescription.dto';
 import { convertDosesCountByDay } from 'src/common/util/convert.util';
+import { UpdateKMPrescriptionDto } from './dto/update-km-prescription.dto';
 
 @Injectable()
 export class KmPrescriptionsService {
@@ -26,6 +27,26 @@ export class KmPrescriptionsService {
         restPrescriptionDto.dosesDay,
       chart: { id: chartId },
       medicine: { id: medicineId },
+    });
+  }
+
+  async updatePrescription(
+    prescriptionId: number,
+    prescriptionDto: UpdateKMPrescriptionDto,
+  ) {
+    return await this.prescriptionsRepository.save({
+      id: prescriptionId,
+      dosesTotal:
+        prescriptionDto.doses *
+        convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
+        prescriptionDto.dosesDay,
+      ...prescriptionDto,
+    });
+  }
+
+  async checkPrescriptionExistsById(id: number) {
+    return this.prescriptionsRepository.exists({
+      where: { id },
     });
   }
 }
