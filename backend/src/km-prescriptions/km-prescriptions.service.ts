@@ -44,6 +44,11 @@ export class KmPrescriptionsService {
     });
   }
 
+  async deletePrescription(prescriptionId: number) {
+    await this.prescriptionsRepository.delete(prescriptionId);
+    return prescriptionId;
+  }
+
   async checkPrescriptionExistsById(id: number) {
     return this.prescriptionsRepository.exists({
       where: { id },

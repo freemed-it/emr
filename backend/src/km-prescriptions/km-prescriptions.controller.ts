@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpStatus,
   NotFoundException,
   Param,
@@ -48,5 +49,26 @@ export class KmPrescriptionsController {
       prescriptionId,
       updatePrescriptioneDto,
     );
+  }
+
+  @Delete(':prescriptionId')
+  @ApiOperation({
+    summary: '처방 삭제',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async deletePrescription(
+    @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
+  ) {
+    const prescriptionExists =
+      await this.prescriptionsService.checkPrescriptionExistsById(
+        prescriptionId,
+      );
+    if (!prescriptionExists) {
+      throw new NotFoundException();
+    }
+
+    return this.prescriptionsService.deletePrescription(prescriptionId);
   }
 }
