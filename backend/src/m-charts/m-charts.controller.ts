@@ -188,12 +188,22 @@ export class MChartsController {
     };
   }
 
-  @Get('vital-sign/:patientId')
+  @Get(':chartId/vital-sign/:patientId')
   @ApiOperation({
-    summary: '과거 V/S 전체 조회',
+    summary: 'V/S 전체 조회',
   })
-  getPastVitalSigns(@Param('patientId', ParseIntPipe) patientId: number) {
-    return this.chartsService.getPastVitalSigns(patientId);
+  async getVitalSigns(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Param('patientId', ParseIntPipe) patientId: number,
+  ) {
+    const chartVitalSign = await this.chartsService.getVitalSign(chartId);
+    const pastVitalSigns =
+      await this.chartsService.getPastVitalSigns(patientId);
+
+    return {
+      now: chartVitalSign,
+      past: pastVitalSigns,
+    };
   }
 
   @Get('today/:patientId')
