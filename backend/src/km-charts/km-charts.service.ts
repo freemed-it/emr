@@ -169,17 +169,20 @@ export class KmChartsService {
   async getVitalSign(chartId: number) {
     return await this.kmChartsRepository.findOne({
       where: { id: chartId },
-      select: [
-        'spO2',
-        'heartRate',
-        'bodyTemperature',
-        'systoleBloodPressure',
-        'diastoleBloodPressure',
-        'bloodGlucose',
-        'afterMeals',
-        'vsMemo',
-        'createdAt',
-      ],
+      relations: { patient: true },
+      select: {
+        id: true,
+        spO2: true,
+        heartRate: true,
+        bodyTemperature: true,
+        systoleBloodPressure: true,
+        diastoleBloodPressure: true,
+        bloodGlucose: true,
+        afterMeals: true,
+        vsMemo: true,
+        createdAt: true,
+        patient: { id: true },
+      },
     });
   }
 

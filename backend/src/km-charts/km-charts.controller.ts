@@ -129,17 +129,15 @@ export class KmChartsController {
     return this.chartsService.getPastChart(chartId);
   }
 
-  @Get(':chartId/vital-sign/:patientId')
+  @Get(':chartId/vital-sign')
   @ApiOperation({
     summary: 'V/S 전체 조회',
   })
-  async getVitalSigns(
-    @Param('chartId', ParseIntPipe) chartId: number,
-    @Param('patientId', ParseIntPipe) patientId: number,
-  ) {
+  async getVitalSigns(@Param('chartId', ParseIntPipe) chartId: number) {
     const chartVitalSign = await this.chartsService.getVitalSign(chartId);
-    const pastVitalSigns =
-      await this.chartsService.getPastVitalSigns(patientId);
+    const pastVitalSigns = await this.chartsService.getPastVitalSigns(
+      chartVitalSign.patient.id,
+    );
 
     return {
       now: chartVitalSign,
@@ -154,7 +152,7 @@ export class KmChartsController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
+  getChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
     return this.chartsService.getPharmacy(chartId);
   }
 

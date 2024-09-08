@@ -192,13 +192,11 @@ export class MChartsController {
   @ApiOperation({
     summary: 'V/S 전체 조회',
   })
-  async getVitalSigns(
-    @Param('chartId', ParseIntPipe) chartId: number,
-    @Param('patientId', ParseIntPipe) patientId: number,
-  ) {
+  async getVitalSigns(@Param('chartId', ParseIntPipe) chartId: number) {
     const chartVitalSign = await this.chartsService.getVitalSign(chartId);
-    const pastVitalSigns =
-      await this.chartsService.getPastVitalSigns(patientId);
+    const pastVitalSigns = await this.chartsService.getPastVitalSigns(
+      chartVitalSign.patient.id,
+    );
 
     return {
       now: chartVitalSign,
