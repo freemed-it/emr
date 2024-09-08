@@ -165,4 +165,12 @@ export class KmChartsService {
       where: { id },
     });
   }
+
+  async getPharmacy(chartId: number) {
+    return await this.kmChartsRepository.findOne({
+      ...DEFAULT_KM_CHART_FIND_OPTIONS,
+      where: { id: chartId },
+      relations: { prescriptions: { medicine: true } },
+    });
+  }
 }

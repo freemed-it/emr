@@ -162,4 +162,15 @@ export class KmChartsController {
       createPrescriptionDto,
     );
   }
+
+  @Get(':chartId/pharmacy')
+  @ApiOperation({
+    summary: '약국 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
+    return this.chartsService.getPharmacy(chartId);
+  }
 }
