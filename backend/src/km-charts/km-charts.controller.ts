@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -11,9 +12,11 @@ import {
 import { KmChartsService } from './km-charts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
-import { KmPrescriptionsService } from 'src/km-prescriptions/km-prescriptions.service';
-import { CreateKMPrescriptionDto } from 'src/km-prescriptions/dto/create-km-prescription.dto';
-import { KmMedicinesService } from 'src/km-medicines/km-medicines.service';
+import { KmPrescriptionsService } from '../km-prescriptions/km-prescriptions.service';
+import { CreateKMPrescriptionDto } from '../km-prescriptions/dto/create-km-prescription.dto';
+import { KmMedicinesService } from '../km-medicines/km-medicines.service';
+import { OrdersService } from '../orders/orders.service';
+import { Department } from '../orders/const/department.const';
 
 @ApiTags('한의과')
 @Controller('km/charts')
@@ -21,6 +24,7 @@ export class KmChartsController {
   constructor(
     private readonly chartsService: KmChartsService,
     private readonly prescriptionsService: KmPrescriptionsService,
+    private readonly ordersService: OrdersService,
     private readonly medicinesService: KmMedicinesService,
   ) {}
 
@@ -66,8 +70,27 @@ export class KmChartsController {
     status: HttpStatus.OK,
     description: '예진이 조회되었습니다',
   })
-  getPrediagnosis(@Param('chartId') chartId: number) {
-    return this.chartsService.getPrediagnosis(chartId);
+  async getPrediagnosis(@Param('chartId') chartId: number) {
+    const chart = await this.chartsService.getPrediagnosis(chartId);
+
+    if (chart.status === 1) {
+      const chartNumber = await this.ordersService.checkTodayChart(
+        chart.patient.id,
+        Department.M,
+      );
+      const vitalSign =
+        await this.chartsService.getVitalSignByChartNumber(chartNumber);
+      const history = await this.chartsService.getHistory(chartId);
+      if (chartNumber) {
+        return { vitalSign, history };
+      } else {
+        return history;
+      }
+    } else if (chart.status === 2) {
+      return chart;
+    }
+
+    throw new BadRequestException();
   }
 
   @Get('past/:patientId')

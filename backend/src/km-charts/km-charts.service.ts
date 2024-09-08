@@ -1,24 +1,23 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KM_Charts } from './entity/km-charts.entity';
-import { KM_Complaints } from 'src/km-complaints/entity/km-complaints.entity';
-import { Histories } from 'src/patients/histories/entity/histories.entity';
-import { Orders } from 'src/orders/entity/orders.entity';
+import { KM_Complaints } from '../km-complaints/entity/km-complaints.entity';
+import { Histories } from '../patients/histories/entity/histories.entity';
+import { Orders } from '../orders/entity/orders.entity';
 import { Repository } from 'typeorm';
 import { CreateVitalSignDto } from './dto/create-vital-sign.dto';
 import { CreateKMComplaintDto } from '../km-complaints/dto/create-km-complaint.dto';
 import { CreateHistoryDto } from '../patients/histories/dto/create-history.dto';
 import { DEFAULT_KM_CHART_FIND_OPTIONS } from './const/default-km-chart-find-options.const';
+import { M_Charts } from '../m-charts/entity/m-charts.entity';
 
 @Injectable()
 export class KmChartsService {
   constructor(
     @InjectRepository(KM_Charts)
-    private readonly chartsRepository: Repository<KM_Charts>,
+    private readonly kmChartsRepository: Repository<KM_Charts>,
+    @InjectRepository(M_Charts)
+    private readonly mChartsRepository: Repository<M_Charts>,
     @InjectRepository(KM_Complaints)
     private readonly complaintsRepository: Repository<KM_Complaints>,
     @InjectRepository(Histories)
@@ -27,7 +26,7 @@ export class KmChartsService {
     private readonly ordersRepository: Repository<Orders>,
   ) {}
   async createVitalSign(chartId: number, vitalSignDto: CreateVitalSignDto) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.kmChartsRepository.findOne({
       where: { id: chartId },
     });
 
@@ -35,14 +34,14 @@ export class KmChartsService {
       throw new NotFoundException();
     }
 
-    return await this.chartsRepository.save({
+    return await this.kmChartsRepository.save({
       ...chart,
       ...vitalSignDto,
     });
   }
 
   async createComplaint(chartId: number, complaintDto: CreateKMComplaintDto) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.kmChartsRepository.findOne({
       where: { id: chartId },
       relations: { patient: true },
     });
@@ -60,7 +59,7 @@ export class KmChartsService {
   }
 
   async createHistory(chartId: number, historyDto: CreateHistoryDto) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.kmChartsRepository.findOne({
       where: { id: chartId },
       relations: { patient: { history: true } },
     });
@@ -79,7 +78,7 @@ export class KmChartsService {
   }
 
   async updateStatus(chartId: number, status: number) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.kmChartsRepository.findOne({
       where: { id: chartId },
     });
 
@@ -88,7 +87,7 @@ export class KmChartsService {
     }
 
     chart.status = status;
-    await this.chartsRepository.save(chart);
+    await this.kmChartsRepository.save(chart);
 
     const order = await this.ordersRepository.findOne({
       where: { kmChart: { id: chartId } },
@@ -101,25 +100,17 @@ export class KmChartsService {
   }
 
   async getPrediagnosis(chartId: number) {
-    const chart = await this.chartsRepository.findOne({
+    return await this.kmChartsRepository.findOne({
       where: { id: chartId },
       relations: {
         complaints: true,
         patient: { history: true },
       },
     });
-
-    if (chart.status < 2) {
-      throw new BadRequestException('예진이 완료되지 않았습니다');
-    }
-
-    if (chart.status >= 2) {
-      return chart;
-    }
   }
 
   async getPastCharts(patientId: number) {
-    const charts = await this.chartsRepository.find({
+    const charts = await this.kmChartsRepository.find({
       where: {
         patient: { id: patientId },
         status: 6,
@@ -130,21 +121,47 @@ export class KmChartsService {
     return charts;
   }
 
+  async getVitalSignByChartNumber(chartNumber: string) {
+    return await this.mChartsRepository.findOne({
+      where: { chartNumber },
+      select: [
+        'spO2',
+        'heartRate',
+        'bodyTemperature',
+        'systoleBloodPressure',
+        'diastoleBloodPressure',
+        'bloodGlucose',
+        'afterMeals',
+        'vsMemo',
+        'createdAt',
+      ],
+    });
+  }
+
   async getComplaint(chartId: number) {
     return this.complaintsRepository.find({
       where: { chart: { id: chartId } },
     });
   }
 
+  async getHistory(chartId: number) {
+    const chart = await this.kmChartsRepository.findOne({
+      where: { id: chartId },
+      relations: { patient: { history: true } },
+    });
+
+    return chart?.patient?.history;
+  }
+
   async getPastChart(chartId: number) {
-    return await this.chartsRepository.findOne({
+    return await this.kmChartsRepository.findOne({
       ...DEFAULT_KM_CHART_FIND_OPTIONS,
       where: { id: chartId },
     });
   }
 
   async checkChartExistsById(id: number) {
-    return this.chartsRepository.exists({
+    return this.kmChartsRepository.exists({
       where: { id },
     });
   }
