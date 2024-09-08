@@ -2,15 +2,18 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { KmPrescriptionsService } from './km-prescriptions.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateKMPrescriptionDto } from './dto/update-km-prescription.dto';
+import { PaginateKMPrescriptionHistoryDto } from './dto/paginate-km-prescription-history.dto';
 
 @ApiTags('한의과')
 @Controller('km/prescriptions')
@@ -61,5 +64,22 @@ export class KmPrescriptionsController {
     }
 
     return this.prescriptionsService.deletePrescription(prescriptionId);
+  }
+
+  @Get('history/:startDate/:endDate')
+  @ApiOperation({
+    summary: '히스토리 조회',
+    description: 'cursor pagination - cursor 쿼리 파라미터를 이용해야 합니다.',
+  })
+  async getPrescriptionHistory(
+    @Param('startDate') startDate: string,
+    @Param('endDate') endDate: string,
+    @Query() paginatePrescriptionHistoryDto: PaginateKMPrescriptionHistoryDto,
+  ) {
+    return this.prescriptionsService.getPaginateHistory(
+      startDate,
+      endDate,
+      paginatePrescriptionHistoryDto,
+    );
   }
 }

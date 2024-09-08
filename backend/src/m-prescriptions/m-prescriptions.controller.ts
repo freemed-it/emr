@@ -71,15 +71,15 @@ export class MPrescriptionsController {
     summary: '히스토리 조회',
     description: 'cursor pagination - cursor 쿼리 파라미터를 이용해야 합니다.',
   })
-  async getMPrescriptionHistory(
+  async getPrescriptionHistory(
     @Param('startDate') startDate: string,
     @Param('endDate') endDate: string,
-    @Query() paginateMPrescriptionHistoryDto: PaginateMPrescriptionHistoryDto,
+    @Query() paginatePrescriptionHistoryDto: PaginateMPrescriptionHistoryDto,
   ) {
     return this.prescriptionsService.getPaginateHistory(
       startDate,
       endDate,
-      paginateMPrescriptionHistoryDto,
+      paginatePrescriptionHistoryDto,
     );
   }
 }
