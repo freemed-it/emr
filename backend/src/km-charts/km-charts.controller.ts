@@ -129,6 +129,35 @@ export class KmChartsController {
     return this.chartsService.getPastChart(chartId);
   }
 
+  @Get(':chartId/vital-sign/:patientId')
+  @ApiOperation({
+    summary: 'V/S 전체 조회',
+  })
+  async getVitalSigns(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Param('patientId', ParseIntPipe) patientId: number,
+  ) {
+    const chartVitalSign = await this.chartsService.getVitalSign(chartId);
+    const pastVitalSigns =
+      await this.chartsService.getPastVitalSigns(patientId);
+
+    return {
+      now: chartVitalSign,
+      past: pastVitalSigns,
+    };
+  }
+
+  @Get(':chartId/pharmacy')
+  @ApiOperation({
+    summary: '약국 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
+    return this.chartsService.getPharmacy(chartId);
+  }
+
   @Post(':chartId/prescriptions')
   @ApiOperation({
     summary: '처방 생성',
@@ -161,16 +190,5 @@ export class KmChartsController {
       chartId,
       createPrescriptionDto,
     );
-  }
-
-  @Get(':chartId/pharmacy')
-  @ApiOperation({
-    summary: '약국 조회',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-  })
-  getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.chartsService.getPharmacy(chartId);
   }
 }

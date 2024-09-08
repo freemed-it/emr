@@ -166,6 +166,46 @@ export class KmChartsService {
     });
   }
 
+  async getVitalSign(chartId: number) {
+    return await this.kmChartsRepository.findOne({
+      where: { id: chartId },
+      select: [
+        'spO2',
+        'heartRate',
+        'bodyTemperature',
+        'systoleBloodPressure',
+        'diastoleBloodPressure',
+        'bloodGlucose',
+        'afterMeals',
+        'vsMemo',
+        'createdAt',
+      ],
+    });
+  }
+
+  async getPastVitalSigns(patientId: number) {
+    return await this.kmChartsRepository.find({
+      where: {
+        status: 7,
+        patient: { id: patientId },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      select: [
+        'spO2',
+        'heartRate',
+        'bodyTemperature',
+        'systoleBloodPressure',
+        'diastoleBloodPressure',
+        'bloodGlucose',
+        'afterMeals',
+        'vsMemo',
+        'createdAt',
+      ],
+    });
+  }
+
   async getPharmacy(chartId: number) {
     return await this.kmChartsRepository.findOne({
       ...DEFAULT_KM_CHART_FIND_OPTIONS,
