@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -17,27 +18,30 @@ import { PaginateMPrescriptionHistoryDto } from './dto/paginate-m-prescription-h
 @ApiTags('의과')
 @Controller('m/prescriptions')
 export class MPrescriptionsController {
-  constructor(private readonly mPrescriptionsService: MPrescriptionsService) {}
+  constructor(private readonly prescriptionsService: MPrescriptionsService) {}
 
   @Patch(':prescriptionId')
   @ApiOperation({
     summary: '처방 수정',
   })
   @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description:
-      '존재하지 않는 약품입니다. <small>medicineId에 해당하는 약품이 없는 경우</small>',
-  })
-  @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async patchMPrescription(
+  async patchPrescription(
     @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
-    @Body() updateMPrescriptioneDto: UpdateMPrescriptionDto,
+    @Body() updatePrescriptionDto: UpdateMPrescriptionDto,
   ) {
-    return this.mPrescriptionsService.updatePrescription(
+    const prescriptionExists =
+      await this.prescriptionsService.checkPrescriptionExistsById(
+        prescriptionId,
+      );
+    if (!prescriptionExists) {
+      throw new NotFoundException();
+    }
+
+    return this.prescriptionsService.updatePrescription(
       prescriptionId,
-      updateMPrescriptioneDto,
+      updatePrescriptionDto,
     );
   }
 
@@ -48,10 +52,18 @@ export class MPrescriptionsController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async deleteMPrescription(
+  async deletePrescription(
     @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
   ) {
-    return this.mPrescriptionsService.deletePrescription(prescriptionId);
+    const prescriptionExists =
+      await this.prescriptionsService.checkPrescriptionExistsById(
+        prescriptionId,
+      );
+    if (!prescriptionExists) {
+      throw new NotFoundException();
+    }
+
+    return this.prescriptionsService.deletePrescription(prescriptionId);
   }
 
   @Get('history/:startDate/:endDate')
@@ -64,7 +76,7 @@ export class MPrescriptionsController {
     @Param('endDate') endDate: string,
     @Query() paginateMPrescriptionHistoryDto: PaginateMPrescriptionHistoryDto,
   ) {
-    return this.mPrescriptionsService.getPaginateHistory(
+    return this.prescriptionsService.getPaginateHistory(
       startDate,
       endDate,
       paginateMPrescriptionHistoryDto,
