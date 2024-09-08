@@ -188,17 +188,6 @@ export class MChartsController {
     };
   }
 
-  @Get(':chartId/vital-sign')
-  @ApiOperation({
-    summary: 'V/S 조회',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-  })
-  getVitalSign(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.chartsService.getVitalSign(chartId);
-  }
-
   @Get('vital-sign/:patientId')
   @ApiOperation({
     summary: '과거 V/S 전체 조회',
