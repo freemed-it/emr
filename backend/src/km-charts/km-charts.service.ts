@@ -186,7 +186,7 @@ export class KmChartsService {
   async getPastVitalSigns(patientId: number) {
     return await this.kmChartsRepository.find({
       where: {
-        status: 7,
+        status: 6,
         patient: { id: patientId },
       },
       order: {
