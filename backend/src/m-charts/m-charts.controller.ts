@@ -18,6 +18,8 @@ import { CreateMPrescriptionDto } from 'src/m-prescriptions/dto/create-m-prescri
 import { UpdatePharmacyStatusDto } from './dto/update-pharmacy-status-dto';
 import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
 import { MMedicinesService } from 'src/m-medicines/m-medicines.service';
+import { OrdersService } from 'src/orders/orders.service';
+import { Department } from 'src/orders/const/department.const';
 
 @ApiTags('의과')
 @Controller('m/charts')
@@ -25,6 +27,7 @@ export class MChartsController {
   constructor(
     private readonly chartsService: MChartsService,
     private readonly prescriptionsService: MPrescriptionsService,
+    private readonly ordersService: OrdersService,
     private readonly medicinesService: MMedicinesService,
   ) {}
 
@@ -70,8 +73,27 @@ export class MChartsController {
     status: HttpStatus.BAD_REQUEST,
     description: '예진이 조회되었습니다',
   })
-  getPrediagnosis(@Param('chartId') chartId: number) {
-    return this.chartsService.getPrediagnosis(chartId);
+  async getPrediagnosis(@Param('chartId') chartId: number) {
+    const chart = await this.chartsService.getPrediagnosis(chartId);
+
+    if (chart.status === 1) {
+      const chartNumber = await this.ordersService.checkTodayChart(
+        chart.patient.id,
+        Department.KM,
+      );
+      const vitalSign =
+        await this.chartsService.getVitalSignByChartNumber(chartNumber);
+      const history = await this.chartsService.getHistory(chartId);
+      if (chartNumber) {
+        return { vitalSign, history };
+      } else {
+        return history;
+      }
+    } else if (chart.status === 2) {
+      return chart;
+    }
+
+    throw new BadRequestException();
   }
 
   @Get('past/:patientId')

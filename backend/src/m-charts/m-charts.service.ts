@@ -15,12 +15,15 @@ import { Orders } from 'src/orders/entity/orders.entity';
 import { endOfToday, startOfToday } from 'date-fns';
 import { DEFAULT_M_CHART_FIND_OPTIONS } from './const/default-m-chart-find-options.const';
 import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
+import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
 
 @Injectable()
 export class MChartsService {
   constructor(
     @InjectRepository(M_Charts)
     private readonly chartsRepository: Repository<M_Charts>,
+    @InjectRepository(KM_Charts)
+    private readonly kmChartsRepository: Repository<KM_Charts>,
     @InjectRepository(M_Complaints)
     private readonly complaintsRepository: Repository<M_Complaints>,
     @InjectRepository(Histories)
@@ -116,21 +119,13 @@ export class MChartsService {
   }
 
   async getPrediagnosis(chartId: number) {
-    const chart = await this.chartsRepository.findOne({
+    return await this.chartsRepository.findOne({
       where: { id: chartId },
       relations: {
         complaints: true,
         patient: { history: true },
       },
     });
-
-    if (chart.status < 2) {
-      throw new BadRequestException('예진이 완료되지 않았습니다');
-    }
-
-    if (chart.status >= 2) {
-      return chart;
-    }
   }
 
   async getPastCharts(patientId: number) {
@@ -145,10 +140,36 @@ export class MChartsService {
     return charts;
   }
 
+  async getVitalSignByChartNumber(chartNumber: string) {
+    return await this.kmChartsRepository.findOne({
+      where: { chartNumber },
+      select: [
+        'spO2',
+        'heartRate',
+        'bodyTemperature',
+        'systoleBloodPressure',
+        'diastoleBloodPressure',
+        'bloodGlucose',
+        'afterMeals',
+        'vsMemo',
+        'createdAt',
+      ],
+    });
+  }
+
   async getComplaint(chartId: number) {
     return this.complaintsRepository.find({
       where: { chart: { id: chartId } },
     });
+  }
+
+  async getHistory(chartId: number) {
+    const chart = await this.chartsRepository.findOne({
+      where: { id: chartId },
+      relations: { patient: { history: true } },
+    });
+
+    return chart?.patient?.history;
   }
 
   async getPastChart(chartId: number) {
