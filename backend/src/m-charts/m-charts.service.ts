@@ -233,24 +233,27 @@ export class MChartsService {
   async getVitalSign(chartId: number) {
     return await this.chartsRepository.findOne({
       where: { id: chartId },
-      select: [
-        'spO2',
-        'heartRate',
-        'bodyTemperature',
-        'systoleBloodPressure',
-        'diastoleBloodPressure',
-        'bloodGlucose',
-        'afterMeals',
-        'vsMemo',
-        'createdAt',
-      ],
+      relations: { patient: true },
+      select: {
+        id: true,
+        spO2: true,
+        heartRate: true,
+        bodyTemperature: true,
+        systoleBloodPressure: true,
+        diastoleBloodPressure: true,
+        bloodGlucose: true,
+        afterMeals: true,
+        vsMemo: true,
+        createdAt: true,
+        patient: { id: true },
+      },
     });
   }
 
   async getPastVitalSigns(patientId: number) {
     return await this.chartsRepository.find({
       where: {
-        status: 7,
+        status: 6,
         patient: { id: patientId },
       },
       order: {
