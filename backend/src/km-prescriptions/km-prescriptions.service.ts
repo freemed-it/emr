@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KM_Prescriptions } from './entity/km-prescriptions.entity';
 import { Repository } from 'typeorm';
 import { CreateKMPrescriptionDto } from './dto/create-km-prescription.dto';
 import { convertDosesCountByDay } from 'src/common/util/convert.util';
 import { UpdateKMPrescriptionDto } from './dto/update-km-prescription.dto';
+import { PaginateKMPrescriptionHistoryDto } from './dto/paginate-km-prescription-history.dto';
+import { endOfDay, startOfDay } from 'date-fns';
 
 @Injectable()
 export class KmPrescriptionsService {
@@ -53,5 +55,75 @@ export class KmPrescriptionsService {
     return this.prescriptionsRepository.exists({
       where: { id },
     });
+  }
+
+  async getPaginateHistory(
+    startDate: string,
+    endDate: string,
+    paginateDto: PaginateKMPrescriptionHistoryDto,
+  ) {
+    const start = startOfDay(startDate);
+    const end = endOfDay(endDate);
+
+    if (start.getTime() > end.getTime()) {
+      throw new BadRequestException('날짜를 올바르게 설정해주세요.');
+    }
+
+    const query = this.prescriptionsRepository
+      .createQueryBuilder('prescription')
+      .withDeleted()
+      .innerJoinAndSelect('prescription.medicine', 'medicine')
+      .where('prescription.isCompleted = :isCompleted', { isCompleted: true })
+      .andWhere('prescription.createdAt >= :start', { start })
+      .andWhere('prescription.createdAt <= :end', { end });
+
+    if (paginateDto.name) {
+      query.andWhere('medicine.name like :name', {
+        name: `%${paginateDto.name}%`,
+      });
+    }
+    if (paginateDto.indication) {
+      query.andWhere('medicine.indication like :indication', {
+        indication: `%${paginateDto.indication}%`,
+      });
+    }
+    if (paginateDto.cursor) {
+      query.andWhere('medicine.id < :cursor', { cursor: paginateDto.cursor });
+    }
+
+    query
+      .select([
+        'prescription.medicineId',
+        'medicine.id',
+        'medicine.name',
+        'medicine.indication',
+        'medicine.totalAmount',
+        'medicine.deletedAt',
+      ])
+      .addSelect('SUM(prescription.dosesTotal) as dosesTotalSum')
+      .groupBy('prescription.medicineId')
+      .orderBy({ 'medicine.id': 'DESC' })
+      .limit(paginateDto.take);
+
+    const data = await query.getRawMany();
+    const count = await query.getCount();
+    let hasNext: boolean = true;
+    let cursor: number;
+
+    if (count <= paginateDto.take || data.length <= 0) {
+      hasNext = false;
+      cursor = null;
+    } else {
+      cursor = data[data.length - 1].medicine_id;
+    }
+
+    return {
+      data: data,
+      meta: {
+        count: data.length,
+        cursor,
+        hasNext,
+      },
+    };
   }
 }
