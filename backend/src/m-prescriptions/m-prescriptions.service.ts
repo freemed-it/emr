@@ -8,7 +8,6 @@ import { M_Prescriptions } from './entity/m-prescriptions.entity';
 import { Repository } from 'typeorm';
 import { CreateMPrescriptionDto } from './dto/create-m-prescription.dto';
 import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
-import { M_Medicines } from 'src/m-medicines/entity/m-medicines.entity';
 import { UpdateMPrescriptionDto } from './dto/update-m-prescription.dto';
 import { PaginateMPrescriptionHistoryDto } from './dto/paginate-m-prescription-history.dto';
 import { endOfDay, startOfDay } from 'date-fns';
@@ -20,9 +19,7 @@ export class MPrescriptionsService {
     @InjectRepository(M_Charts)
     private readonly mChartsRepository: Repository<M_Charts>,
     @InjectRepository(M_Prescriptions)
-    private readonly mPrescriptionsRepository: Repository<M_Prescriptions>,
-    @InjectRepository(M_Medicines)
-    private readonly mMedicinesRepository: Repository<M_Medicines>,
+    private readonly prescriptionsRepository: Repository<M_Prescriptions>,
   ) {}
 
   async getPrescriptions(chartId: number) {
@@ -34,7 +31,7 @@ export class MPrescriptionsService {
       throw new NotFoundException();
     }
 
-    return this.mPrescriptionsRepository.find({
+    return this.prescriptionsRepository.find({
       where: { chart: { id: chartId } },
       relations: ['medicine'],
     });
@@ -44,70 +41,35 @@ export class MPrescriptionsService {
     chartId: number,
     prescriptionDto: CreateMPrescriptionDto,
   ) {
-    const chart = await this.mChartsRepository.findOne({
-      where: { id: chartId },
-    });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
     const { medicineId, ...restPrescriptionDto } = prescriptionDto;
-    const medicine = await this.mMedicinesRepository.findOne({
-      where: { id: medicineId },
-    });
 
-    if (!medicine) {
-      throw new BadRequestException('존재하지 않는 약품입니다.');
-    }
-
-    return await this.mPrescriptionsRepository.save({
+    return await this.prescriptionsRepository.save({
       ...restPrescriptionDto,
       dosesTotal:
         restPrescriptionDto.doses *
         convertDosesCountByDay(restPrescriptionDto.dosesCountByDay) *
         restPrescriptionDto.dosesDay,
-      chart: {
-        id: chartId,
-      },
-      medicine: {
-        id: medicineId,
-      },
+      chart: { id: chartId },
+      medicine: { id: medicineId },
     });
   }
 
   async updatePrescription(
     prescriptionId: number,
-    updateMPrescriptioneDto: UpdateMPrescriptionDto,
+    prescriptionDto: UpdateMPrescriptionDto,
   ) {
-    const prescription = await this.mPrescriptionsRepository.findOne({
-      where: { id: prescriptionId },
-    });
-
-    if (!prescription) {
-      throw new NotFoundException();
-    }
-
-    const medicine = await this.mMedicinesRepository.findOne({
-      where: { id: updateMPrescriptioneDto.medicineId },
-    });
-
-    if (!medicine) {
-      throw new BadRequestException('존재하지 않는 약품입니다.');
-    }
-
-    return await this.mPrescriptionsRepository.save({
+    return await this.prescriptionsRepository.save({
       id: prescriptionId,
       dosesTotal:
-        updateMPrescriptioneDto.doses *
-        convertDosesCountByDay(updateMPrescriptioneDto.dosesCountByDay) *
-        updateMPrescriptioneDto.dosesDay,
-      ...updateMPrescriptioneDto,
+        prescriptionDto.doses *
+        convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
+        prescriptionDto.dosesDay,
+      ...prescriptionDto,
     });
   }
 
   async updatePrescriptionIsCompleted(prescriptionId: number) {
-    const prescription = await this.mPrescriptionsRepository.findOne({
+    const prescription = await this.prescriptionsRepository.findOne({
       where: { id: prescriptionId },
     });
 
@@ -115,29 +77,26 @@ export class MPrescriptionsService {
       throw new NotFoundException();
     }
 
-    return await this.mPrescriptionsRepository.save({
+    return await this.prescriptionsRepository.save({
       id: prescriptionId,
       isCompleted: true,
     });
   }
 
   async deletePrescription(prescriptionId: number) {
-    const prescription = await this.mPrescriptionsRepository.findOne({
-      where: { id: prescriptionId },
-    });
-
-    if (!prescription) {
-      throw new NotFoundException();
-    }
-
-    await this.mPrescriptionsRepository.delete(prescriptionId);
-
+    await this.prescriptionsRepository.delete(prescriptionId);
     return prescriptionId;
   }
 
   async deletePrescriptionsByChartId(chartId: number) {
-    return await this.mPrescriptionsRepository.delete({
+    return await this.prescriptionsRepository.delete({
       chart: { id: chartId },
+    });
+  }
+
+  async checkPrescriptionExistsById(id: number) {
+    return this.prescriptionsRepository.exists({
+      where: { id },
     });
   }
 
@@ -153,7 +112,7 @@ export class MPrescriptionsService {
       throw new BadRequestException('날짜를 올바르게 설정해주세요.');
     }
 
-    const query = this.mPrescriptionsRepository
+    const query = this.prescriptionsRepository
       .createQueryBuilder('prescription')
       .withDeleted()
       .innerJoinAndSelect('prescription.medicine', 'medicine')
