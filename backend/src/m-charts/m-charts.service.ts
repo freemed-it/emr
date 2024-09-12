@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { M_Charts } from './entity/m-charts.entity';
 import { CreateVitalSignDto } from './dto/create-vital-sign.dto';
 import { M_Complaints } from 'src/m-complaints/entity/m-complaints.entity';
@@ -8,7 +8,6 @@ import { CreateMComplaintDto } from '../m-complaints/dto/create-m-complaint.dto'
 import { CreateHistoryDto } from 'src/patients/histories/dto/create-history.dto';
 import { Histories } from 'src/patients/histories/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
-import { endOfToday, startOfToday } from 'date-fns';
 import { DEFAULT_M_CHART_FIND_OPTIONS } from './const/default-m-chart-find-options.const';
 import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
 import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
@@ -172,17 +171,6 @@ export class MChartsService {
     return await this.chartsRepository.findOne({
       ...DEFAULT_M_CHART_FIND_OPTIONS,
       where: { id: chartId },
-    });
-  }
-
-  async getTodayChartByPatientId(patientId: number) {
-    return await this.chartsRepository.findOne({
-      ...DEFAULT_M_CHART_FIND_OPTIONS,
-      where: {
-        status: 7,
-        patient: { id: patientId },
-        createdAt: Between(startOfToday(), endOfToday()),
-      },
     });
   }
 

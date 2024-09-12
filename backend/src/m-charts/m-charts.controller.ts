@@ -208,14 +208,6 @@ export class MChartsController {
     };
   }
 
-  @Get('today/:patientId')
-  @ApiOperation({
-    summary: '금일 의과 차트 조회',
-  })
-  getTodayChart(@Param('patientId', ParseIntPipe) patientId: number) {
-    return this.chartsService.getTodayChartByPatientId(patientId);
-  }
-
   @Get(':chartId/pharmacy')
   @ApiOperation({
     summary: '약국 조회',
