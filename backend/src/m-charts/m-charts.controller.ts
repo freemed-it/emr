@@ -39,21 +39,21 @@ export class MChartsController {
     status: HttpStatus.OK,
     description: '예진 완료되었습니다.',
   })
-  async createPrediagnosis(
+  async postPrediagnosis(
     @Param('chartId') chartId: number,
-    @Body() createPrediagnosisDto: CreatePrediagnosisDto,
+    @Body() prediagnosisDto: CreatePrediagnosisDto,
   ) {
     const vitalSign = await this.chartsService.createVitalSign(
       chartId,
-      createPrediagnosisDto.vistalSign,
+      prediagnosisDto.vistalSign,
     );
     const complaint = await this.chartsService.createComplaint(
       chartId,
-      createPrediagnosisDto.complaint,
+      prediagnosisDto.complaint,
     );
     const history = await this.chartsService.createHistory(
       chartId,
-      createPrediagnosisDto.history,
+      prediagnosisDto.history,
     );
 
     await this.chartsService.updateStatus(chartId, 2);
@@ -71,29 +71,33 @@ export class MChartsController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: '예진이 조회되었습니다',
+    description: '예진이 조회되었습니다.',
   })
-  async getPrediagnosis(@Param('chartId') chartId: number) {
+  async getPrediagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
     const chart = await this.chartsService.getPrediagnosis(chartId);
 
-    if (chart.status === 1) {
-      const chartNumber = await this.ordersService.checkTodayChart(
-        chart.patient.id,
-        Department.KM,
-      );
-      const vitalSign =
-        await this.chartsService.getVitalSignByChartNumber(chartNumber);
-      const history = await this.chartsService.getHistory(chartId);
-      if (chartNumber) {
-        return { vitalSign, history };
-      } else {
-        return history;
-      }
-    } else if (chart.status === 2) {
-      return chart;
-    }
+    // 차트 상태에 따른 예진 데이터 처리
+    switch (chart.status) {
+      case 1:
+        const chartNumber = await this.ordersService.checkTodayChart(
+          chart.patient.id,
+          Department.KM,
+        );
 
-    throw new BadRequestException();
+        const vitalSign = chartNumber
+          ? await this.chartsService.getVitalSignByChartNumber(chartNumber)
+          : null;
+
+        const history = await this.chartsService.getHistory(chartId);
+
+        return vitalSign ? { vitalSign, history } : { history };
+
+      case 2:
+        return chart;
+
+      default:
+        throw new BadRequestException('유효하지 않은 차트 상태입니다.');
+    }
   }
 
   @Get('past/:patientId')
@@ -152,7 +156,7 @@ export class MChartsController {
   })
   async postDiagnosis(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() createDiagnosisDto: CreateMDiagnosisDto,
+    @Body() diagnosisDto: CreateMDiagnosisDto,
   ) {
     const currentChart = await this.chartsService.getChart(chartId);
     if (Number(currentChart.status) < 2 || Number(currentChart.status) > 3) {
@@ -161,7 +165,7 @@ export class MChartsController {
       );
     }
 
-    await this.chartsService.postDiagnosis(chartId, createDiagnosisDto);
+    await this.chartsService.postDiagnosis(chartId, diagnosisDto);
 
     // 조제 대기 중인 차트 -> 기존 처방 삭제
     if (currentChart.status === 3) {
@@ -169,7 +173,7 @@ export class MChartsController {
     }
 
     const prescriptions = await Promise.all(
-      createDiagnosisDto.prescriptions.map(async (prescription) => {
+      diagnosisDto.prescriptions.map(async (prescription) => {
         const medicineExists =
           await this.medicinesService.checkMedicineExistsById(
             prescription.medicineId,
@@ -225,7 +229,7 @@ export class MChartsController {
   })
   async patchMChartPharmacyStatus(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() updateMChartStatusDto: UpdatePharmacyStatusDto,
+    @Body() chartStatusDto: UpdatePharmacyStatusDto,
   ) {
     const currentChart = await this.chartsService.getChart(chartId);
     if (currentChart.status < 3 || currentChart.status >= 6) {
@@ -235,7 +239,7 @@ export class MChartsController {
     }
 
     // 복약지도 완료 시 약품 총량 줄이기 & 완료된 처방으로 수정
-    if (updateMChartStatusDto.status === 6) {
+    if (chartStatusDto.status === 6) {
       const prescriptions =
         await this.prescriptionsService.getPrescriptions(chartId);
       prescriptions.map(async (prescription) => {
@@ -251,7 +255,7 @@ export class MChartsController {
 
     return await this.chartsService.updateStatus(
       chartId,
-      updateMChartStatusDto.status,
+      chartStatusDto.status,
     );
   }
 
@@ -269,7 +273,7 @@ export class MChartsController {
   })
   async postPrescription(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() createPrescriptionDto: CreateMPrescriptionDto,
+    @Body() prescriptionDto: CreateMPrescriptionDto,
   ) {
     const chartExists = await this.chartsService.checkChartExistsById(chartId);
     if (!chartExists) {
@@ -277,7 +281,7 @@ export class MChartsController {
     }
 
     const medicineExists = await this.medicinesService.checkMedicineExistsById(
-      createPrescriptionDto.medicineId,
+      prescriptionDto.medicineId,
     );
     if (!medicineExists) {
       throw new NotFoundException('존재하지 않는 약품입니다.');
@@ -285,7 +289,7 @@ export class MChartsController {
 
     return await this.prescriptionsService.createPrescription(
       chartId,
-      createPrescriptionDto,
+      prescriptionDto,
     );
   }
 }

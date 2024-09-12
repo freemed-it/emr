@@ -37,21 +37,21 @@ export class KmChartsController {
     status: HttpStatus.OK,
     description: '예진이 완료되었습니다.',
   })
-  async createPrediagnosis(
+  async postPrediagnosis(
     @Param('chartId') chartId: number,
-    @Body() createPrediagnosisDto: CreatePrediagnosisDto,
+    @Body() prediagnosisDto: CreatePrediagnosisDto,
   ) {
     const vitalSign = await this.chartsService.createVitalSign(
       chartId,
-      createPrediagnosisDto.vistalSign,
+      prediagnosisDto.vistalSign,
     );
     const complaint = await this.chartsService.createComplaint(
       chartId,
-      createPrediagnosisDto.complaint,
+      prediagnosisDto.complaint,
     );
     const history = await this.chartsService.createHistory(
       chartId,
-      createPrediagnosisDto.history,
+      prediagnosisDto.history,
     );
 
     await this.chartsService.updateStatus(chartId, 2);
@@ -68,30 +68,33 @@ export class KmChartsController {
     summary: '예진 조회',
   })
   @ApiResponse({
-    status: HttpStatus.OK,
-    description: '예진이 조회되었습니다',
+    status: HttpStatus.BAD_REQUEST,
+    description: '예진이 조회되었습니다.',
   })
-  async getPrediagnosis(@Param('chartId') chartId: number) {
+  async getPrediagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
     const chart = await this.chartsService.getPrediagnosis(chartId);
 
-    if (chart.status === 1) {
-      const chartNumber = await this.ordersService.checkTodayChart(
-        chart.patient.id,
-        Department.M,
-      );
-      const vitalSign =
-        await this.chartsService.getVitalSignByChartNumber(chartNumber);
-      const history = await this.chartsService.getHistory(chartId);
-      if (chartNumber) {
-        return { vitalSign, history };
-      } else {
-        return history;
-      }
-    } else if (chart.status === 2) {
-      return chart;
-    }
+    switch (chart.status) {
+      case 1:
+        const chartNumber = await this.ordersService.checkTodayChart(
+          chart.patient.id,
+          Department.M,
+        );
 
-    throw new BadRequestException();
+        const vitalSign = chartNumber
+          ? await this.chartsService.getVitalSignByChartNumber(chartNumber)
+          : null;
+
+        const history = await this.chartsService.getHistory(chartId);
+
+        return vitalSign ? { vitalSign, history } : { history };
+
+      case 2:
+        return chart;
+
+      default:
+        throw new BadRequestException('유효하지 않은 차트 상태입니다.');
+    }
   }
 
   @Get('past/:patientId')
@@ -241,7 +244,7 @@ export class KmChartsController {
   })
   async postPrescription(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() createPrescriptionDto: CreateKMPrescriptionDto,
+    @Body() prescriptionDto: CreateKMPrescriptionDto,
   ) {
     const chartExists = await this.chartsService.checkChartExistsById(chartId);
     if (!chartExists) {
@@ -249,7 +252,7 @@ export class KmChartsController {
     }
 
     const medicineExists = await this.medicinesService.checkMedicineExistsById(
-      createPrescriptionDto.medicineId,
+      prescriptionDto.medicineId,
     );
     if (!medicineExists) {
       throw new NotFoundException('존재하지 않는 약품입니다.');
@@ -257,7 +260,18 @@ export class KmChartsController {
 
     return await this.prescriptionsService.createPrescription(
       chartId,
-      createPrescriptionDto,
+      prescriptionDto,
     );
+  }
+
+  @Get(':chartId/pharmacy')
+  @ApiOperation({
+    summary: '약국 조회',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
+    return this.chartsService.getPharmacy(chartId);
   }
 }

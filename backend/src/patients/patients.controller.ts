@@ -11,9 +11,8 @@ import {
 } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Department } from 'src/orders/const/department.const';
-import { Patients } from './entity/patients.entity';
 import { User } from 'src/users/decorator/user.decorator';
 import { Users } from 'src/users/entity/users.entity';
 import { CreateMemoDto } from './memos/dto/create-memo.dto';
@@ -32,12 +31,13 @@ export class PatientsController {
     status: HttpStatus.BAD_REQUEST,
     description: '이름/생년월일을 입력해주세요.',
   })
+  @ApiQuery({ name: 'patientId', required: false, type: Number })
   async createMPatient(
-    @Body() createPatientDto: CreatePatientDto,
+    @Body() patientDto: CreatePatientDto,
     @Query('patientId') patientId?: number,
   ) {
     return this.patientsService.createPatient(
-      createPatientDto,
+      patientDto,
       Department.M,
       patientId,
     );
@@ -51,12 +51,13 @@ export class PatientsController {
     status: HttpStatus.BAD_REQUEST,
     description: '이름/생년월일을 입력해주세요.',
   })
+  @ApiQuery({ name: 'patientId', required: false, type: Number })
   async createKMPatient(
-    @Body() createPatientDto: CreatePatientDto,
+    @Body() patientDto: CreatePatientDto,
     @Query('patientId') patientId?: number,
   ) {
     return this.patientsService.createPatient(
-      createPatientDto,
+      patientDto,
       Department.KM,
       patientId,
     );
@@ -70,7 +71,7 @@ export class PatientsController {
     status: HttpStatus.OK,
     description: '참여자 검색 결과',
   })
-  async searchPatients(@Query('name') name: string): Promise<Patients> {
+  async searchPatients(@Query('name') name: string) {
     return this.patientsService.searchByName(name);
   }
 
@@ -100,10 +101,10 @@ export class PatientsController {
   })
   async postMemo(
     @Param('patientId') patientId: number,
-    @Body() createMemoDto: CreateMemoDto,
+    @Body() memoDto: CreateMemoDto,
     @User() user: Users,
   ) {
-    return this.patientsService.createMemo(patientId, createMemoDto, user);
+    return this.patientsService.createMemo(patientId, memoDto, user);
   }
 
   @Patch(':patientId/memos')
@@ -112,9 +113,9 @@ export class PatientsController {
   })
   async pathMemo(
     @Param('patientId') patientId: number,
-    @Body() updateMemoDto: UpdateMemoDto,
+    @Body() memoDto: UpdateMemoDto,
     @User() user: Users,
   ) {
-    return this.patientsService.updateMemo(patientId, updateMemoDto, user);
+    return this.patientsService.updateMemo(patientId, memoDto, user);
   }
 }
