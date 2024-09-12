@@ -143,8 +143,24 @@ export class MChartsController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.chartsService.getDiagnosis(chartId);
+  async getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
+    const chart = await this.chartsService.getDiagnosis(chartId);
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    if (chart.status < 2) {
+      throw new BadRequestException(
+        '해당 참여자의 예진이 완료되지 않았습니다.',
+      );
+    } else {
+      const chartNumber = await this.ordersService.checkTodayChart(
+        chart.patient.id,
+        Department.M,
+      );
+
+      return { ...chart, mChartNumber: chartNumber };
+    }
   }
 
   @Post(':chartId/diagnosis')
