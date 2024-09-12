@@ -152,7 +152,7 @@ export class MChartsController {
   })
   async postDiagnosis(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() createMDiagnosisDto: CreateMDiagnosisDto,
+    @Body() createDiagnosisDto: CreateMDiagnosisDto,
   ) {
     const currentChart = await this.chartsService.getChart(chartId);
     if (Number(currentChart.status) < 2 || Number(currentChart.status) > 3) {
@@ -161,26 +161,30 @@ export class MChartsController {
       );
     }
 
-    const chart = await this.chartsService.postDiagnosis(
-      chartId,
-      createMDiagnosisDto,
-    );
+    await this.chartsService.postDiagnosis(chartId, createDiagnosisDto);
 
-    // 조제 대기 차트(이미 본진 완료)이면 기존 처방 삭제
-    if (chart.status === 3) {
+    // 조제 대기 중인 차트 -> 기존 처방 삭제
+    if (currentChart.status === 3) {
       await this.prescriptionsService.deletePrescriptionsByChartId(chartId);
     }
 
-    const prescriptions = await Promise.all([
-      ...createMDiagnosisDto.prescriptions.map((prescription) => {
+    const prescriptions = await Promise.all(
+      createDiagnosisDto.prescriptions.map(async (prescription) => {
+        const medicineExists =
+          await this.medicinesService.checkMedicineExistsById(
+            prescription.medicineId,
+          );
+        if (!medicineExists) {
+          throw new NotFoundException('존재하지 않는 약품입니다.');
+        }
         return this.prescriptionsService.createPrescription(
           chartId,
           prescription,
         );
       }),
-    ]);
+    );
 
-    await this.chartsService.updateStatus(chartId, 3);
+    const chart = await this.chartsService.updateStatus(chartId, 3);
 
     return {
       ...chart,

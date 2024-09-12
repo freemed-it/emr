@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { M_Charts } from './entity/m-charts.entity';
@@ -191,42 +187,21 @@ export class MChartsService {
   }
 
   async getDiagnosis(chartId: number) {
-    const chart = await this.chartsRepository.findOne({
+    return await this.chartsRepository.findOne({
       where: { id: chartId },
-      relations: ['prescriptions'],
+      relations: {
+        patient: true,
+        prescriptions: { medicine: true },
+      },
     });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
-    if (chart.status < 2) {
-      throw new BadRequestException(
-        '해당 참여자의 예진이 완료되지 않았습니다.',
-      );
-    }
-
-    return chart;
   }
 
-  async postDiagnosis(
-    chartId: number,
-    createDiagnosisDto: CreateMDiagnosisDto,
-  ) {
-    const chart = await this.chartsRepository.findOne({
-      where: { id: chartId },
-    });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
+  async postDiagnosis(chartId: number, diagnosisDto: CreateMDiagnosisDto) {
     return await this.chartsRepository.save({
       id: chartId,
-      ...chart,
-      presentIllness: createDiagnosisDto.presentIllness,
-      impression: createDiagnosisDto.impression,
-      treatmentNote: createDiagnosisDto.treatmentNote,
+      presentIllness: diagnosisDto.presentIllness,
+      impression: diagnosisDto.impression,
+      treatmentNote: diagnosisDto.treatmentNote,
     });
   }
 
