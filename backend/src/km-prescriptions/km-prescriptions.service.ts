@@ -51,6 +51,12 @@ export class KmPrescriptionsService {
     return prescriptionId;
   }
 
+  async deletePrescriptionsByChartId(chartId: number) {
+    return await this.prescriptionsRepository.delete({
+      chart: { id: chartId },
+    });
+  }
+
   async checkPrescriptionExistsById(id: number) {
     return this.prescriptionsRepository.exists({
       where: { id },

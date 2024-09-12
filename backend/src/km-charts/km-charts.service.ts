@@ -10,6 +10,7 @@ import { CreateKMComplaintDto } from '../km-complaints/dto/create-km-complaint.d
 import { CreateHistoryDto } from '../patients/histories/dto/create-history.dto';
 import { DEFAULT_KM_CHART_FIND_OPTIONS } from './const/default-km-chart-find-options.const';
 import { M_Charts } from '../m-charts/entity/m-charts.entity';
+import { CreateKMDiagnosisDto } from './dto/create-km-diagnosis.dto';
 
 @Injectable()
 export class KmChartsService {
@@ -25,6 +26,19 @@ export class KmChartsService {
     @InjectRepository(Orders)
     private readonly ordersRepository: Repository<Orders>,
   ) {}
+
+  async getChart(chartId: number) {
+    const chart = await this.kmChartsRepository.findOne({
+      where: { id: chartId },
+    });
+
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    return chart;
+  }
+
   async createVitalSign(chartId: number, vitalSignDto: CreateVitalSignDto) {
     const chart = await this.kmChartsRepository.findOne({
       where: { id: chartId },
@@ -173,6 +187,15 @@ export class KmChartsService {
         patient: true,
         prescriptions: { medicine: true },
       },
+    });
+  }
+
+  async postDiagnosis(chartId: number, diagnosisDto: CreateKMDiagnosisDto) {
+    return await this.kmChartsRepository.save({
+      id: chartId,
+      presentIllness: diagnosisDto.presentIllness,
+      impression: diagnosisDto.impression,
+      treatmentNote: diagnosisDto.treatmentNote,
     });
   }
 
