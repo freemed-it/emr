@@ -17,6 +17,8 @@ import {
 import { PaginateKMMedicineDto } from './dto/paginate-km-medicine.dto';
 import { CommonService } from 'src/common/common.service';
 import { UpdateKMMedicineDto } from './dto/update-km-medicine.dto';
+import { convertDosesCountByDay } from 'src/common/util/convert.util';
+import { KM_Prescriptions } from 'src/km-prescriptions/entity/km-prescriptions.entity';
 
 @Injectable()
 export class KmMedicinesService {
@@ -118,6 +120,29 @@ export class KmMedicinesService {
     }
 
     return medicineId;
+  }
+
+  async updateMedicineTotalAmount(
+    medicineId: number,
+    prescriptionDto: KM_Prescriptions,
+  ) {
+    const medicine = await this.medicinesRepository.findOne({
+      where: { id: medicineId },
+    });
+
+    if (!medicine) {
+      throw new NotFoundException();
+    }
+
+    const dosesTotal =
+      prescriptionDto.doses *
+      convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
+      prescriptionDto.dosesDay;
+
+    return await this.medicinesRepository.save({
+      id: medicineId,
+      totalAmount: medicine.totalAmount - dosesTotal,
+    });
   }
 
   async uploadImage(image: Express.Multer.File, name: string) {

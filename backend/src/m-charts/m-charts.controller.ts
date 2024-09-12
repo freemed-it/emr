@@ -15,7 +15,7 @@ import { MChartsService } from './m-charts.service';
 import { MPrescriptionsService } from 'src/m-prescriptions/m-prescriptions.service';
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
 import { CreateMPrescriptionDto } from 'src/m-prescriptions/dto/create-m-prescription.dto';
-import { UpdatePharmacyStatusDto } from './dto/update-pharmacy-status-dto';
+import { UpdateMPharmacyDto } from './dto/update-m-pharmacy.dto';
 import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
 import { MMedicinesService } from 'src/m-medicines/m-medicines.service';
 import { OrdersService } from 'src/orders/orders.service';
@@ -143,8 +143,24 @@ export class MChartsController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.chartsService.getDiagnosis(chartId);
+  async getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
+    const chart = await this.chartsService.getDiagnosis(chartId);
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    if (chart.status < 2) {
+      throw new BadRequestException(
+        '해당 참여자의 예진이 완료되지 않았습니다.',
+      );
+    } else {
+      const chartNumber = await this.ordersService.checkTodayChart(
+        chart.patient.id,
+        Department.M,
+      );
+
+      return { ...chart, mChartNumber: chartNumber };
+    }
   }
 
   @Post(':chartId/diagnosis')
@@ -219,7 +235,7 @@ export class MChartsController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  getMChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
+  getChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
     return this.chartsService.getPharmacy(chartId);
   }
 
@@ -227,9 +243,9 @@ export class MChartsController {
   @ApiOperation({
     summary: '약국 차트 상태 수정',
   })
-  async patchMChartPharmacyStatus(
+  async patchChartPharmacyStatus(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() chartStatusDto: UpdatePharmacyStatusDto,
+    @Body() pharmacyDto: UpdateMPharmacyDto,
   ) {
     const currentChart = await this.chartsService.getChart(chartId);
     if (currentChart.status < 3 || currentChart.status >= 6) {
@@ -239,10 +255,10 @@ export class MChartsController {
     }
 
     // 복약지도 완료 시 약품 총량 줄이기 & 완료된 처방으로 수정
-    if (chartStatusDto.status === 6) {
+    if (pharmacyDto.status === 6) {
       const prescriptions =
         await this.prescriptionsService.getPrescriptions(chartId);
-      prescriptions.map(async (prescription) => {
+      prescriptions.forEach(async (prescription) => {
         await this.medicinesService.updateMedicineTotalAmount(
           prescription.medicine.id,
           prescription,
@@ -253,10 +269,7 @@ export class MChartsController {
       });
     }
 
-    return await this.chartsService.updateStatus(
-      chartId,
-      chartStatusDto.status,
-    );
+    return await this.chartsService.updateStatus(chartId, pharmacyDto.status);
   }
 
   @Post(':chartId/prescriptions')

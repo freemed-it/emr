@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { KmChartsService } from './km-charts.service';
@@ -18,6 +19,7 @@ import { KmMedicinesService } from '../km-medicines/km-medicines.service';
 import { OrdersService } from '../orders/orders.service';
 import { Department } from '../orders/const/department.const';
 import { CreateKMDiagnosisDto } from './dto/create-km-diagnosis.dto';
+import { UpdateKMPharmacyDto } from './dto/update-km-pharmacy.dto';
 
 @ApiTags('한의과')
 @Controller('km/charts')
@@ -228,6 +230,39 @@ export class KmChartsController {
   })
   getChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
     return this.chartsService.getPharmacy(chartId);
+  }
+
+  @Patch(':chartId/status')
+  @ApiOperation({
+    summary: '약국 차트 상태 수정',
+  })
+  async patchChartPharmacyStatus(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Body() pharmacyDto: UpdateKMPharmacyDto,
+  ) {
+    const currentChart = await this.chartsService.getChart(chartId);
+    if (currentChart.status < 3 || currentChart.status >= 6) {
+      throw new BadRequestException(
+        `조제 전(< 3) 혹은 복약지도 완료(6)된 차트입니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
+      );
+    }
+
+    // 복약지도 완료 시 약품 총량 줄이기 & 완료된 처방으로 수정
+    if (pharmacyDto.status === 6) {
+      const prescriptions =
+        await this.prescriptionsService.getPrescriptions(chartId);
+      prescriptions.forEach(async (prescription) => {
+        await this.medicinesService.updateMedicineTotalAmount(
+          prescription.medicine.id,
+          prescription,
+        );
+        await this.prescriptionsService.updatePrescriptionIsCompleted(
+          prescription.id,
+        );
+      });
+    }
+
+    return await this.chartsService.updateStatus(chartId, pharmacyDto.status);
   }
 
   @Post(':chartId/prescriptions')
