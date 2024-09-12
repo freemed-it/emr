@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { M_Prescriptions } from './entity/m-prescriptions.entity';
 import { Repository } from 'typeorm';
 import { CreateMPrescriptionDto } from './dto/create-m-prescription.dto';
-import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
 import { UpdateMPrescriptionDto } from './dto/update-m-prescription.dto';
 import { PaginateMPrescriptionHistoryDto } from './dto/paginate-m-prescription-history.dto';
 import { endOfDay, startOfDay } from 'date-fns';
@@ -16,24 +15,14 @@ import { convertDosesCountByDay } from 'src/common/util/convert.util';
 @Injectable()
 export class MPrescriptionsService {
   constructor(
-    @InjectRepository(M_Charts)
-    private readonly mChartsRepository: Repository<M_Charts>,
     @InjectRepository(M_Prescriptions)
     private readonly prescriptionsRepository: Repository<M_Prescriptions>,
   ) {}
 
   async getPrescriptions(chartId: number) {
-    const chart = await this.mChartsRepository.findOne({
-      where: { id: chartId },
-    });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
-    return this.prescriptionsRepository.find({
+    return await this.prescriptionsRepository.find({
       where: { chart: { id: chartId } },
-      relations: ['medicine'],
+      relations: { medicine: true },
     });
   }
 
