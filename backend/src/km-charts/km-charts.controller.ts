@@ -19,7 +19,7 @@ import { KmMedicinesService } from '../km-medicines/km-medicines.service';
 import { OrdersService } from '../orders/orders.service';
 import { Department } from '../orders/const/department.const';
 import { CreateKMDiagnosisDto } from './dto/create-km-diagnosis.dto';
-import { UpdatePharmacyDto } from './dto/update-km-pharmacy.dto';
+import { UpdateKMPharmacyDto } from './dto/update-km-pharmacy.dto';
 
 @ApiTags('한의과')
 @Controller('km/charts')
@@ -238,7 +238,7 @@ export class KmChartsController {
   })
   async patchChartPharmacyStatus(
     @Param('chartId', ParseIntPipe) chartId: number,
-    @Body() pharmacyDto: UpdatePharmacyDto,
+    @Body() pharmacyDto: UpdateKMPharmacyDto,
   ) {
     const currentChart = await this.chartsService.getChart(chartId);
     if (currentChart.status < 3 || currentChart.status >= 6) {
