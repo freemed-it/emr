@@ -129,6 +129,30 @@ export class KmChartsController {
     return this.chartsService.getPastChart(chartId);
   }
 
+  @Get(':chartId/diagnosis')
+  @ApiOperation({
+    summary: '본진 조회',
+  })
+  async getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
+    const chart = await this.chartsService.getDiagnosis(chartId);
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    if (chart.status < 2) {
+      throw new BadRequestException(
+        '해당 참여자의 예진이 완료되지 않았습니다.',
+      );
+    } else {
+      const chartNumber = await this.ordersService.checkTodayChart(
+        chart.patient.id,
+        Department.M,
+      );
+
+      return { ...chart, mChartNumber: chartNumber };
+    }
+  }
+
   @Get(':chartId/vital-sign')
   @ApiOperation({
     summary: 'V/S 전체 조회',

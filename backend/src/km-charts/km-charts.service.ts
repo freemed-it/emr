@@ -166,6 +166,16 @@ export class KmChartsService {
     });
   }
 
+  async getDiagnosis(chartId: number) {
+    return await this.kmChartsRepository.findOne({
+      where: { id: chartId },
+      relations: {
+        patient: true,
+        prescriptions: { medicine: true },
+      },
+    });
+  }
+
   async getVitalSign(chartId: number) {
     return await this.kmChartsRepository.findOne({
       where: { id: chartId },
