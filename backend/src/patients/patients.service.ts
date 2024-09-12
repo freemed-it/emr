@@ -32,57 +32,44 @@ export class PatientsService {
     patientDto: CreatePatientDto,
     department: Department,
     patientId?: number,
-  ): Promise<Patients> {
-    let patient: Patients;
-    const chartNumber = await this.generateChartNumber(department);
-    if (patientId) {
-      // 재진: 기존 참여자 업데이트
-      patient = await this.patientsRepository.findOne({
-        where: { id: patientId },
-      });
-      if (!patient) {
-        // 초진: 새로운 참여자 생성
-        patient = this.patientsRepository.create(patientDto);
-      }
-      this.patientsRepository.merge(patient, patientDto);
-    }
-    await this.patientsRepository.save(patient);
+  ) {
+    const patient = await this.patientsRepository.findOne({
+      where: { id: patientId },
+    });
 
+    await this.patientsRepository.save(
+      patient ? { ...patient, ...patientDto } : patientDto,
+    );
+
+    const chartNumber = await this.generateChartNumber(department);
     if (!patient.name || !patient.birth) {
       throw new BadRequestException('이름과 생년월일은 필수 입력 사항입니다.');
     }
+    await this.createChartAndOrder(patient, department, chartNumber);
 
-    if (department === Department.M) {
-      const mChart = this.mChartsRepository.create({
-        patient,
-        chartNumber,
-      });
-      await this.mChartsRepository.save(mChart);
-      const order = this.ordersRepository.create({
-        patient,
-        mChart,
-        department,
-        chartNumber: mChart.chartNumber,
-      });
-      await this.ordersRepository.save(order);
-    } else if (department === Department.KM) {
-      const kmChart = this.kmChartsRepository.create({
-        patient,
-        chartNumber,
-      });
-      await this.kmChartsRepository.save(kmChart);
-      const order = this.ordersRepository.create({
-        patient,
-        kmChart,
-        department,
-        chartNumber: kmChart.chartNumber,
-      });
-      await this.ordersRepository.save(order);
-    }
     return patient;
   }
+  private async createChartAndOrder(
+    patient: Patients,
+    department: Department,
+    chartNumber: string,
+  ) {
+    const chartRepository: Repository<M_Charts | KM_Charts> =
+      department === Department.M
+        ? this.mChartsRepository
+        : this.kmChartsRepository;
 
-  private async generateChartNumber(department: Department): Promise<string> {
+    const chart = await chartRepository.save({ patient, chartNumber });
+
+    await this.ordersRepository.save({
+      patient,
+      department,
+      chartNumber,
+      ...(department === Department.M ? { mChart: chart } : { kmChart: chart }),
+    });
+  }
+
+  private async generateChartNumber(department: Department) {
     const todayDate = format(new Date(), 'yyMMdd'); // 오늘 날짜 YYMMDD 형식으로
     const departmentCode = department === Department.M ? '1' : '2'; // 진료과 코드 설정
     const baseChartNumber = `${todayDate}${departmentCode}`; // 기본 차트 번호
@@ -90,7 +77,7 @@ export class PatientsService {
     // 오늘 생성된 차트 중 가장 최신의 차트 번호 가져오기
     const lastChart = await this.getLastChartNumber(todayDate, departmentCode);
 
-    let newNum = '001'; // 기본 값 01
+    let newNum = '001'; // 기본 값 001
     if (lastChart) {
       // 가장 최신의 차트 번호 마지막 두 자리를 가져와 +1
       const lastNum = parseInt(lastChart.slice(-3));
@@ -100,10 +87,7 @@ export class PatientsService {
     return `${baseChartNumber}${newNum}`;
   }
 
-  private async getLastChartNumber(
-    todayDate: string,
-    departmentCode: string,
-  ): Promise<string | null> {
+  private async getLastChartNumber(todayDate: string, departmentCode: string) {
     const repository =
       departmentCode === '1' ? this.mChartsRepository : this.kmChartsRepository;
 
@@ -118,22 +102,20 @@ export class PatientsService {
     return latestChart ? latestChart.chartNumber : null;
   }
 
-  async searchByName(name: string): Promise<any> {
+  async searchByName(name: string) {
     const patients = await this.patientsRepository.find({
       where: { name },
       select: ['id', 'firstVisit', 'name', 'birth'],
     });
 
-    if (patients.length === 0) {
-      return null; // 초진
-    } else if (patients.length === 1) {
-      return patients[0]; // 재진
-    } else {
-      return patients; // 동명이인
-    }
+    return patients.length === 0
+      ? null
+      : patients.length === 1
+        ? patients[0]
+        : patients;
   }
 
-  async getPatientById(id: number): Promise<Patients> {
+  async getPatientById(id: number) {
     return this.patientsRepository.findOne({ where: { id } });
   }
 
@@ -149,13 +131,11 @@ export class PatientsService {
       where: { id: patientId },
     });
 
-    const memo = this.memosRepository.create({
+    return this.memosRepository.save({
       ...memoDto,
       patient,
       writer: user.name,
     });
-
-    return this.memosRepository.save(memo);
   }
 
   async updateMemo(patientId: number, memoDto: UpdateMemoDto, user: Users) {
@@ -163,12 +143,10 @@ export class PatientsService {
       where: { patient: { id: patientId } },
     });
 
-    const newMemo = this.memosRepository.create({
+    return this.memosRepository.save({
       ...memo,
       ...memoDto,
       writer: user.name,
     });
-
-    return this.memosRepository.save(newMemo);
   }
 }

@@ -16,7 +16,7 @@ import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
 export class MChartsService {
   constructor(
     @InjectRepository(M_Charts)
-    private readonly chartsRepository: Repository<M_Charts>,
+    private readonly mChartsRepository: Repository<M_Charts>,
     @InjectRepository(KM_Charts)
     private readonly kmChartsRepository: Repository<KM_Charts>,
     @InjectRepository(M_Complaints)
@@ -28,7 +28,7 @@ export class MChartsService {
   ) {}
 
   getChart(chartId: number) {
-    const chart = this.chartsRepository.findOne({
+    const chart = this.mChartsRepository.findOne({
       where: { id: chartId },
     });
 
@@ -40,7 +40,7 @@ export class MChartsService {
   }
 
   async createVitalSign(chartId: number, vitalSignDto: CreateVitalSignDto) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.mChartsRepository.findOne({
       where: { id: chartId },
     });
 
@@ -48,14 +48,14 @@ export class MChartsService {
       throw new NotFoundException();
     }
 
-    return await this.chartsRepository.save({
+    return await this.mChartsRepository.save({
       ...chart,
       ...vitalSignDto,
     });
   }
 
   async createComplaint(chartId: number, complaintDto: CreateMComplaintDto) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.mChartsRepository.findOne({
       where: { id: chartId },
       relations: { patient: true },
     });
@@ -64,16 +64,15 @@ export class MChartsService {
       throw new NotFoundException('Chart not found');
     }
 
-    const complaint = this.complaintsRepository.create({
+    return this.complaintsRepository.save({
       ...complaintDto,
       chart,
       patient: { id: chart.patient.id },
     });
-    return this.complaintsRepository.save(complaint);
   }
 
   async createHistory(chartId: number, historyDto: CreateHistoryDto) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.mChartsRepository.findOne({
       where: { id: chartId },
       relations: { patient: { history: true } },
     });
@@ -92,7 +91,7 @@ export class MChartsService {
   }
 
   async updateStatus(chartId: number, status: number) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.mChartsRepository.findOne({
       where: { id: chartId },
     });
 
@@ -101,7 +100,7 @@ export class MChartsService {
     }
 
     chart.status = status;
-    await this.chartsRepository.save(chart);
+    await this.mChartsRepository.save(chart);
 
     const order = await this.ordersRepository.findOne({
       where: { mChart: { id: chartId } },
@@ -114,7 +113,7 @@ export class MChartsService {
   }
 
   async getPrediagnosis(chartId: number) {
-    return await this.chartsRepository.findOne({
+    return await this.mChartsRepository.findOne({
       where: { id: chartId },
       relations: {
         complaints: true,
@@ -124,7 +123,7 @@ export class MChartsService {
   }
 
   async getPastCharts(patientId: number) {
-    const charts = await this.chartsRepository.find({
+    const charts = await this.mChartsRepository.find({
       where: {
         patient: { id: patientId },
         status: 6,
@@ -153,13 +152,15 @@ export class MChartsService {
   }
 
   async getComplaint(chartId: number) {
-    return this.complaintsRepository.find({
-      where: { chart: { id: chartId } },
+    return await this.mChartsRepository.find({
+      where: { id: chartId },
+      ...DEFAULT_M_CHART_FIND_OPTIONS,
+      relations: { complaints: true },
     });
   }
 
   async getHistory(chartId: number) {
-    const chart = await this.chartsRepository.findOne({
+    const chart = await this.mChartsRepository.findOne({
       where: { id: chartId },
       relations: { patient: { history: true } },
     });
@@ -168,14 +169,14 @@ export class MChartsService {
   }
 
   async getPastChart(chartId: number) {
-    return await this.chartsRepository.findOne({
+    return await this.mChartsRepository.findOne({
       ...DEFAULT_M_CHART_FIND_OPTIONS,
       where: { id: chartId },
     });
   }
 
   async getDiagnosis(chartId: number) {
-    return await this.chartsRepository.findOne({
+    return await this.mChartsRepository.findOne({
       where: { id: chartId },
       relations: {
         patient: true,
@@ -185,7 +186,7 @@ export class MChartsService {
   }
 
   async postDiagnosis(chartId: number, diagnosisDto: CreateMDiagnosisDto) {
-    return await this.chartsRepository.save({
+    return await this.mChartsRepository.save({
       id: chartId,
       presentIllness: diagnosisDto.presentIllness,
       impression: diagnosisDto.impression,
@@ -194,7 +195,7 @@ export class MChartsService {
   }
 
   async getVitalSign(chartId: number) {
-    return await this.chartsRepository.findOne({
+    return await this.mChartsRepository.findOne({
       where: { id: chartId },
       relations: { patient: true },
       select: {
@@ -214,7 +215,7 @@ export class MChartsService {
   }
 
   async getPastVitalSigns(patientId: number) {
-    return await this.chartsRepository.find({
+    return await this.mChartsRepository.find({
       where: {
         status: 6,
         patient: { id: patientId },
@@ -237,7 +238,7 @@ export class MChartsService {
   }
 
   async getPharmacy(chartId: number) {
-    return await this.chartsRepository.findOne({
+    return await this.mChartsRepository.findOne({
       ...DEFAULT_M_CHART_FIND_OPTIONS,
       where: { id: chartId },
       relations: { prescriptions: { medicine: true } },
@@ -245,7 +246,7 @@ export class MChartsService {
   }
 
   async checkChartExistsById(id: number) {
-    return this.chartsRepository.exists({
+    return this.mChartsRepository.exists({
       where: { id },
     });
   }

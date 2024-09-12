@@ -64,12 +64,11 @@ export class KmChartsService {
       throw new NotFoundException('Chart not found');
     }
 
-    const complaint = this.complaintsRepository.create({
+    return this.complaintsRepository.save({
       ...complaintDto,
       chart,
       patient: { id: chart.patient.id },
     });
-    return this.complaintsRepository.save(complaint);
   }
 
   async createHistory(chartId: number, historyDto: CreateHistoryDto) {
@@ -153,8 +152,10 @@ export class KmChartsService {
   }
 
   async getComplaint(chartId: number) {
-    return this.complaintsRepository.find({
-      where: { chart: { id: chartId } },
+    return await this.kmChartsRepository.find({
+      where: { id: chartId },
+      ...DEFAULT_KM_CHART_FIND_OPTIONS,
+      relations: { complaints: true },
     });
   }
 
