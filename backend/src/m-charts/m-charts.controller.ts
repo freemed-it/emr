@@ -192,7 +192,7 @@ export class MChartsController {
     };
   }
 
-  @Get(':chartId/vital-sign/:patientId')
+  @Get(':chartId/vital-sign')
   @ApiOperation({
     summary: 'V/S 전체 조회',
   })
