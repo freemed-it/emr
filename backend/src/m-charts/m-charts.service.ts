@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { M_Charts } from './entity/m-charts.entity';
 import { CreateVitalSignDto } from './dto/create-vital-sign.dto';
 import { M_Complaints } from 'src/m-complaints/entity/m-complaints.entity';
@@ -12,7 +8,6 @@ import { CreateMComplaintDto } from '../m-complaints/dto/create-m-complaint.dto'
 import { CreateHistoryDto } from 'src/patients/histories/dto/create-history.dto';
 import { Histories } from 'src/patients/histories/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
-import { endOfToday, startOfToday } from 'date-fns';
 import { DEFAULT_M_CHART_FIND_OPTIONS } from './const/default-m-chart-find-options.const';
 import { CreateMDiagnosisDto } from './dto/create-m-diagnosis.dto';
 import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
@@ -179,54 +174,22 @@ export class MChartsService {
     });
   }
 
-  async getTodayChartByPatientId(patientId: number) {
+  async getDiagnosis(chartId: number) {
     return await this.chartsRepository.findOne({
-      ...DEFAULT_M_CHART_FIND_OPTIONS,
-      where: {
-        status: 7,
-        patient: { id: patientId },
-        createdAt: Between(startOfToday(), endOfToday()),
+      where: { id: chartId },
+      relations: {
+        patient: true,
+        prescriptions: { medicine: true },
       },
     });
   }
 
-  async getDiagnosis(chartId: number) {
-    const chart = await this.chartsRepository.findOne({
-      where: { id: chartId },
-      relations: ['prescriptions'],
-    });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
-    if (chart.status < 2) {
-      throw new BadRequestException(
-        '해당 참여자의 예진이 완료되지 않았습니다.',
-      );
-    }
-
-    return chart;
-  }
-
-  async postDiagnosis(
-    chartId: number,
-    createDiagnosisDto: CreateMDiagnosisDto,
-  ) {
-    const chart = await this.chartsRepository.findOne({
-      where: { id: chartId },
-    });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
+  async postDiagnosis(chartId: number, diagnosisDto: CreateMDiagnosisDto) {
     return await this.chartsRepository.save({
       id: chartId,
-      ...chart,
-      presentIllness: createDiagnosisDto.presentIllness,
-      impression: createDiagnosisDto.impression,
-      treatmentNote: createDiagnosisDto.treatmentNote,
+      presentIllness: diagnosisDto.presentIllness,
+      impression: diagnosisDto.impression,
+      treatmentNote: diagnosisDto.treatmentNote,
     });
   }
 

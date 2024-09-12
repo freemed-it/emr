@@ -17,6 +17,7 @@ import { CreateKMPrescriptionDto } from '../km-prescriptions/dto/create-km-presc
 import { KmMedicinesService } from '../km-medicines/km-medicines.service';
 import { OrdersService } from '../orders/orders.service';
 import { Department } from '../orders/const/department.const';
+import { CreateKMDiagnosisDto } from './dto/create-km-diagnosis.dto';
 
 @ApiTags('한의과')
 @Controller('km/charts')
@@ -129,6 +130,79 @@ export class KmChartsController {
     return this.chartsService.getPastChart(chartId);
   }
 
+  @Get(':chartId/diagnosis')
+  @ApiOperation({
+    summary: '본진 조회',
+  })
+  async getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
+    const chart = await this.chartsService.getDiagnosis(chartId);
+    if (!chart) {
+      throw new NotFoundException();
+    }
+
+    if (chart.status < 2) {
+      throw new BadRequestException(
+        '해당 참여자의 예진이 완료되지 않았습니다.',
+      );
+    } else {
+      const chartNumber = await this.ordersService.checkTodayChart(
+        chart.patient.id,
+        Department.M,
+      );
+
+      return { ...chart, mChartNumber: chartNumber };
+    }
+  }
+
+  @Post(':chartId/diagnosis')
+  @ApiOperation({
+    summary: '본진 완료',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async postDiagnosis(
+    @Param('chartId', ParseIntPipe) chartId: number,
+    @Body() createDiagnosisDto: CreateKMDiagnosisDto,
+  ) {
+    const currentChart = await this.chartsService.getChart(chartId);
+    if (Number(currentChart.status) < 2 || Number(currentChart.status) > 3) {
+      throw new BadRequestException(
+        `예진 완료(2) 혹은 조제 대기(3) 중인 차트가 아닙니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
+      );
+    }
+
+    await this.chartsService.postDiagnosis(chartId, createDiagnosisDto);
+
+    // 조제 대기 중인 차트 -> 기존 처방 삭제
+    if (currentChart.status === 3) {
+      await this.prescriptionsService.deletePrescriptionsByChartId(chartId);
+    }
+
+    const prescriptions = await Promise.all(
+      createDiagnosisDto.prescriptions.map(async (prescription) => {
+        const medicineExists =
+          await this.medicinesService.checkMedicineExistsById(
+            prescription.medicineId,
+          );
+        if (!medicineExists) {
+          throw new NotFoundException('존재하지 않는 약품입니다.');
+        }
+        return this.prescriptionsService.createPrescription(
+          chartId,
+          prescription,
+        );
+      }),
+    );
+
+    const chart = await this.chartsService.updateStatus(chartId, 3);
+
+    return {
+      ...chart,
+      prescriptions,
+    };
+  }
+
   @Get(':chartId/vital-sign')
   @ApiOperation({
     summary: 'V/S 전체 조회',
@@ -148,9 +222,6 @@ export class KmChartsController {
   @Get(':chartId/pharmacy')
   @ApiOperation({
     summary: '약국 조회',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
   })
   getChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
     return this.chartsService.getPharmacy(chartId);
