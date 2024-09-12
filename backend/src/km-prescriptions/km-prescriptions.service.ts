@@ -15,6 +15,13 @@ export class KmPrescriptionsService {
     private readonly prescriptionsRepository: Repository<KM_Prescriptions>,
   ) {}
 
+  async getPrescriptions(chartId: number) {
+    return await this.prescriptionsRepository.find({
+      where: { chart: { id: chartId } },
+      relations: { medicine: true },
+    });
+  }
+
   async createPrescription(
     chartId: number,
     prescriptionDto: CreateKMPrescriptionDto,
@@ -43,6 +50,13 @@ export class KmPrescriptionsService {
         convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
         prescriptionDto.dosesDay,
       ...prescriptionDto,
+    });
+  }
+
+  async updatePrescriptionIsCompleted(prescriptionId: number) {
+    return await this.prescriptionsRepository.save({
+      id: prescriptionId,
+      isCompleted: true,
     });
   }
 
