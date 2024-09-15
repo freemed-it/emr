@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Histories } from '../entity/histories.entity';
+import { Histories } from '../../entity/histories.entity';
 
 export class CreateHistoryDto extends PickType(Histories, [
   'hypertension',

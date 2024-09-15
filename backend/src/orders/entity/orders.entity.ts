@@ -3,24 +3,24 @@ import { BaseModel } from 'src/common/entity/base.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { Department } from '../const/department.const';
 import { Patients } from 'src/patients/entity/patients.entity';
-import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
-import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
+import { MCharts } from 'src/m/entity/charts.entity';
+import { KmCharts } from 'src/km/entity/charts.entity';
 
 @Entity()
 export class Orders extends BaseModel {
-  @OneToOne(() => M_Charts, {
+  @OneToOne(() => MCharts, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'mChartId', referencedColumnName: 'id' })
-  mChart: M_Charts;
+  mChart: MCharts;
 
-  @OneToOne(() => KM_Charts, {
+  @OneToOne(() => KmCharts, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'kmChartId', referencedColumnName: 'id' })
-  kmChart: KM_Charts;
+  kmChart: KmCharts;
 
   @ManyToOne(() => Patients, (patient) => patient.orders, {
     nullable: false,

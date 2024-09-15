@@ -2,11 +2,11 @@ import { BaseModel } from 'src/common/entity/base.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { Gender } from '../const/gender.const';
-import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
-import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
-import { Histories } from '../histories/entity/histories.entity';
-import { M_Complaints } from 'src/m-complaints/entity/m-complaints.entity';
-import { KM_Complaints } from 'src/km-complaints/entity/km-complaints.entity';
+import { MCharts } from 'src/m/entity/charts.entity';
+import { KmCharts } from 'src/km/entity/charts.entity';
+import { Histories } from './histories.entity';
+import { MComplaints } from 'src/m/entity/complaints.entity';
+import { KmComplaints } from 'src/km/entity/complaints.entity';
 
 @Entity()
 export class Patients extends BaseModel {
@@ -80,9 +80,9 @@ export class Patients extends BaseModel {
   @OneToMany(() => Orders, (order) => order.patient)
   orders: Orders[];
 
-  @OneToMany(() => M_Charts || KM_Charts, (chart) => chart.patient)
-  charts: (M_Charts | KM_Charts)[];
+  @OneToMany(() => MCharts || KmCharts, (chart) => chart.patient)
+  charts: (MCharts | KmCharts)[];
 
-  @OneToMany(() => M_Complaints || KM_Complaints, (chart) => chart.patient)
-  complaints: (M_Complaints | KM_Complaints)[];
+  @OneToMany(() => MComplaints || KmComplaints, (chart) => chart.patient)
+  complaints: (MComplaints | KmComplaints)[];
 }

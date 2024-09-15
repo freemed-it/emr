@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsString, MaxLength } from 'class-validator';
-import { Memos } from '../entity/memos.entity';
+import { Memos } from '../../entity/memos.entity';
 
 export class CreateMemoDto extends PickType(Memos, ['memo']) {
   @ApiProperty({

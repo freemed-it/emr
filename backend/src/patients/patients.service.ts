@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patients } from './entity/patients.entity';
-import { M_Charts } from 'src/m-charts/entity/m-charts.entity';
-import { KM_Charts } from 'src/km-charts/entity/km-charts.entity';
+import { MCharts } from 'src/m/entity/charts.entity';
+import { KmCharts } from 'src/km/entity/charts.entity';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { Repository } from 'typeorm';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { Department } from 'src/orders/const/department.const';
-import { Memos } from './memos/entity/memos.entity';
+import { Memos } from './entity/memos.entity';
 import { UpdateMemoDto } from './memos/dto/update-memo.dto';
 import { CreateMemoDto } from './memos/dto/create-memo.dto';
 import { Users } from 'src/users/entity/users.entity';
@@ -18,10 +18,10 @@ export class PatientsService {
   constructor(
     @InjectRepository(Patients)
     private patientsRepository: Repository<Patients>,
-    @InjectRepository(M_Charts)
-    private mChartsRepository: Repository<M_Charts>,
-    @InjectRepository(KM_Charts)
-    private kmChartsRepository: Repository<KM_Charts>,
+    @InjectRepository(MCharts)
+    private mChartsRepository: Repository<MCharts>,
+    @InjectRepository(KmCharts)
+    private kmChartsRepository: Repository<KmCharts>,
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
     @InjectRepository(Memos)
@@ -54,7 +54,7 @@ export class PatientsService {
     department: Department,
     chartNumber: string,
   ) {
-    const chartRepository: Repository<M_Charts | KM_Charts> =
+    const chartRepository: Repository<MCharts | KmCharts> =
       department === Department.M
         ? this.mChartsRepository
         : this.kmChartsRepository;

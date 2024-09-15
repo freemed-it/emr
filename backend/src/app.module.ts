@@ -4,34 +4,34 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
-import { MMedicinesModule } from './m-medicines/m-medicines.module';
-import { M_Medicines } from './m-medicines/entity/m-medicines.entity';
-import { MMedicineCategoriesModule } from './m-medicine-categories/m-medicine-categories.module';
-import { M_Medicine_Categories } from './m-medicine-categories/entity/m_medicine_categories.entity';
-import { MChartsModule } from './m-charts/m-charts.module';
-import { M_Charts } from './m-charts/entity/m-charts.entity';
-import { MComplaintsModule } from './m-complaints/m-complaints.module';
-import { M_Complaints } from './m-complaints/entity/m-complaints.entity';
-import { MPrescriptionsModule } from './m-prescriptions/m-prescriptions.module';
-import { M_Prescriptions } from './m-prescriptions/entity/m-prescriptions.entity';
+import { MMedicinesModule } from './m/medicines/medicines.module';
+import { MMedicines } from './m/entity/medicines.entity';
+import { MMedicineCategoriesModule } from './m/medicine-categories/medicine-categories.module';
+import { MMedicineCategories } from './m/entity/medicine-categories.entity';
+import { MChartsModule } from './m/charts/charts.module';
+import { MCharts } from './m/entity/charts.entity';
+import { MComplaintsModule } from './m/charts/complaints/complaints.module';
+import { MComplaints } from './m/entity/complaints.entity';
+import { MPrescriptionsModule } from './m/charts/prescriptions/prescriptions.module';
+import { MPrescriptions } from './m/entity/prescriptions.entity';
 import { HistoriesModule } from './patients/histories/histories.module';
-import { Histories } from './patients/histories/entity/histories.entity';
+import { Histories } from './patients/entity/histories.entity';
 import { Users } from './users/entity/users.entity';
 import { UsersModule } from './users/users.module';
 import { Patients } from './patients/entity/patients.entity';
 import { PatientsModule } from './patients/patients.module';
 import { Orders } from './orders/entity/orders.entity';
 import { OrdersModule } from './orders/orders.module';
-import { Memos } from './patients/memos/entity/memos.entity';
+import { Memos } from './patients/entity/memos.entity';
 import { MemosModule } from './patients/memos/memos.module';
-import { KM_Charts } from './km-charts/entity/km-charts.entity';
-import { KmChartsModule } from './km-charts/km-charts.module';
-import { KmComplaintsModule } from './km-complaints/km-complaints.module';
-import { KmPrescriptionsModule } from './km-prescriptions/km-prescriptions.module';
-import { KmMedicinesModule } from './km-medicines/km-medicines.module';
-import { KM_Complaints } from './km-complaints/entity/km-complaints.entity';
-import { KM_Prescriptions } from './km-prescriptions/entity/km-prescriptions.entity';
-import { KM_Medicines } from './km-medicines/entity/km-medicines.entity';
+import { KmCharts } from './km/entity/charts.entity';
+import { KmChartsModule } from './km/charts/charts.module';
+import { KmComplaintsModule } from './km/charts/complaints/complaints.module';
+import { KmPrescriptionsModule } from './km/charts/prescriptions/prescriptions.module';
+import { KmMedicinesModule } from './km/medicines/medicines.module';
+import { KmComplaints } from './km/entity/complaints.entity';
+import { KmPrescriptions } from './km/entity/prescriptions.entity';
+import { KmMedicines } from './km/entity/medicines.entity';
 import {
   ENV_DB_DATABASE_KEY,
   ENV_DB_HOST_KEY,
@@ -63,20 +63,20 @@ import { AccessTokenGuard } from './auth/guard/access-token.guard';
       database: process.env[ENV_DB_DATABASE_KEY],
       timezone: '+09:00',
       entities: [
-        M_Charts,
-        M_Complaints,
-        M_Prescriptions,
-        M_Medicines,
-        M_Medicine_Categories,
+        MCharts,
+        MComplaints,
+        MPrescriptions,
+        MMedicines,
+        MMedicineCategories,
         Patients,
         Histories,
         Memos,
         Orders,
         Users,
-        KM_Charts,
-        KM_Complaints,
-        KM_Prescriptions,
-        KM_Medicines,
+        KmCharts,
+        KmComplaints,
+        KmPrescriptions,
+        KmMedicines,
       ],
       synchronize: false,
     }),
