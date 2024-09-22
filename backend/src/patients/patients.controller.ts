@@ -36,7 +36,7 @@ export class PatientsController {
     description: '이름/생년월일을 입력해주세요.',
   })
   @ApiQuery({ name: 'patientId', required: false, type: Number })
-  async createMPatient(
+  async postMPatient(
     @Body() patientDto: CreatePatientDto,
     @Query('patientId') patientId?: number,
   ) {
@@ -56,7 +56,7 @@ export class PatientsController {
     description: '이름/생년월일을 입력해주세요.',
   })
   @ApiQuery({ name: 'patientId', required: false, type: Number })
-  async createKMPatient(
+  async postKMPatient(
     @Body() patientDto: CreatePatientDto,
     @Query('patientId') patientId?: number,
   ) {

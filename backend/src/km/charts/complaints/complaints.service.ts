@@ -12,13 +12,13 @@ export class KmComplaintsService {
   ) {}
 
   async createComplaint(
-    chartId: number,
+    chartNumber: string,
     patientId: number,
     complaintDto: CreateKmComplaintDto,
   ) {
     return await this.complaintsRepository.save({
       ...complaintDto,
-      chart: { id: chartId },
+      chart: { chartNumber },
       patient: { id: patientId },
     });
   }
