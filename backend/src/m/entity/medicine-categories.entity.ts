@@ -2,22 +2,23 @@ import { BaseModel } from 'src/common/entity/base.entity';
 import { Column, DeleteDateColumn, Entity, OneToMany } from 'typeorm';
 import { MMedicines } from './medicines.entity';
 
-@Entity()
+@Entity('m_medicine_categories')
 export class MMedicineCategories extends BaseModel {
-  /** 대분류 */
   @Column({
     length: 30,
+    comment: '대분류',
   })
   mainCategory: string;
 
-  /** 소분류 */
   @Column({
     length: 50,
+    comment: '소분류',
   })
   subCategory: string;
 
-  /** 소분류 삭제 여부 */
-  @DeleteDateColumn()
+  @DeleteDateColumn({
+    comment: '소분류 삭제 여부',
+  })
   deletedAt: Date | null;
 
   @OneToMany(() => MMedicines, (medicine) => medicine.category)

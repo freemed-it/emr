@@ -6,7 +6,7 @@ import { Patients } from 'src/patients/entity/patients.entity';
 import { MCharts } from 'src/m/entity/charts.entity';
 import { KmCharts } from 'src/km/entity/charts.entity';
 
-@Entity()
+@Entity('orders')
 export class Orders extends BaseModel {
   @OneToOne(() => MCharts, {
     onDelete: 'CASCADE',
@@ -31,12 +31,14 @@ export class Orders extends BaseModel {
 
   @Column({
     default: 0,
+    comment: '대기 번호',
   })
   @IsInt()
   waitingNumber: number;
 
   @Column('enum', {
     enum: Object.values(Department),
+    comment: '진료과',
   })
   @IsEnum(Department)
   department: Department;
@@ -44,20 +46,22 @@ export class Orders extends BaseModel {
   @Column({
     type: 'bigint',
     unique: true,
+    comment: '차트 번호',
   })
   @IsString()
   chartNumber: string;
 
   @Column({
     nullable: true,
+    comment: '한의과 베드 번호',
   })
   @IsInt()
   bedNumber: number;
 
   @Column({
     default: 1,
+    comment: '차트 상태',
   })
   @IsInt()
   status: number;
-  static chartNumber: number;
 }

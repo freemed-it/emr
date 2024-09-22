@@ -1,7 +1,6 @@
 import { Length } from 'class-validator';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseModel } from 'src/common/entity/base.entity';
-import { Patients } from 'src/patients/entity/patients.entity';
 import { KmCharts } from './charts.entity';
 
 @Entity('km_complaints')
@@ -11,23 +10,19 @@ export class KmComplaints extends BaseModel {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
+  @JoinColumn({ name: 'chartNumber', referencedColumnName: 'chartNumber' })
   chart: KmCharts;
-
-  @ManyToOne(() => Patients, (patient) => patient.complaints, {
-    nullable: false,
-    onDelete: 'RESTRICT',
-    onUpdate: 'CASCADE',
-  })
-  patient: Patients;
 
   @Column({
     length: 20,
     nullable: true,
+    comment: '주호소 분류',
   })
   category: string;
 
   @Column({
     length: 100,
+    comment: '주호소',
   })
   @Length(0, 100)
   cheifComplaint: string;
@@ -35,6 +30,7 @@ export class KmComplaints extends BaseModel {
   @Column({
     length: 500,
     nullable: true,
+    comment: '주호소 상세 설명',
   })
   cheifComplaintHistory: string;
 }

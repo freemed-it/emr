@@ -17,84 +17,83 @@ export class MMedicines extends BaseModel {
   })
   category: MMedicineCategories;
 
-  /** 약품명 */
   @Column({
     length: 40,
+    comment: '약품명',
   })
   name: string;
 
-  /** 성분명/함량 */
   @Column({
     length: 300,
+    comment: '성분명/함량',
   })
   ingredient: string;
 
-  /** 용법/용량 */
   @Column({
     length: 1000,
     nullable: true,
+    comment: '용법/용량',
   })
   dosage: string;
 
-  /** 효능/효과 */
   @Column({
     length: 1000,
     nullable: true,
+    comment: '효능/효과',
   })
   efficacy: string;
 
-  /** 사무실 재고 */
   @Column({
     default: 0,
+    comment: '서울역 재고',
   })
   stationQuantity: number;
 
-  /** 서울역 재고 */
   @Column({
     nullable: true,
+    comment: '사무실 재고',
   })
   officeQuantity: number;
 
-  /** 포장단위 */
   @Column({
     default: 0,
+    comment: '포장단위',
   })
   packaging: number;
 
-  /** 총량 */
   @Column({
     default: 0,
+    comment: '총량',
   })
   totalAmount: number;
 
-  /** DUR */
   @Column({
     length: 500,
     nullable: true,
+    comment: 'DUR',
   })
   dur: string;
 
-  /** 약품통 */
   @Column({
     length: 10,
     nullable: true,
+    comment: '약품통',
   })
   bottle: string;
 
-  /** 사진 */
   @Column({
     length: 300,
     nullable: true,
+    comment: '사진',
   })
   image: string;
 
-  /** 처방 시 따로 표기 여부 */
   @Column({
     default: false,
+    comment: '처방 시 따로 표기 여부',
   })
   isExcluded: boolean;
 
-  /** 삭제 여부 */
   @DeleteDateColumn()
   deletedAt: Date | null;
 

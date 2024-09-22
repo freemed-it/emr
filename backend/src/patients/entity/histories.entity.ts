@@ -2,7 +2,7 @@ import { BaseModel } from 'src/common/entity/base.entity';
 import { Patients } from 'src/patients/entity/patients.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
-@Entity()
+@Entity('patient_histories')
 export class Histories extends BaseModel {
   @Column({
     length: 30,

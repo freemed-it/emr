@@ -3,7 +3,7 @@ import { BaseModel } from 'src/common/entity/base.entity';
 import { Patients } from 'src/patients/entity/patients.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
-@Entity()
+@Entity('pateint_memos')
 export class Memos extends BaseModel {
   @OneToOne(() => Patients, {
     nullable: false,

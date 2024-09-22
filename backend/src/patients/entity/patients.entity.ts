@@ -5,10 +5,8 @@ import { Gender } from '../const/gender.const';
 import { MCharts } from 'src/m/entity/charts.entity';
 import { KmCharts } from 'src/km/entity/charts.entity';
 import { Histories } from './histories.entity';
-import { MComplaints } from 'src/m/entity/complaints.entity';
-import { KmComplaints } from 'src/km/entity/complaints.entity';
 
-@Entity()
+@Entity('patients')
 export class Patients extends BaseModel {
   /** 첫 방문일 */
   @Column()
@@ -82,7 +80,4 @@ export class Patients extends BaseModel {
 
   @OneToMany(() => MCharts || KmCharts, (chart) => chart.patient)
   charts: (MCharts | KmCharts)[];
-
-  @OneToMany(() => MComplaints || KmComplaints, (chart) => chart.patient)
-  complaints: (MComplaints | KmComplaints)[];
 }

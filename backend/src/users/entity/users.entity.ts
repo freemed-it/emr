@@ -2,24 +2,20 @@ import { Exclude } from 'class-transformer';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { Column, Entity } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class Users extends BaseModel {
-  /** 사용자 게정 */
-  @Column({ length: 20, unique: true })
+  @Column({ length: 20, unique: true, comment: '사용자 계정' })
   account: string;
 
-  /** 사용자 비밀번호 */
-  @Column({ length: 100, select: false })
+  @Column({ length: 100, select: false, comment: '사용자 비밀번호' })
   @Exclude({
     toPlainOnly: true,
   })
   password: string;
 
-  /** 사용자 권한 */
-  @Column('char', { length: 4 })
+  @Column('char', { length: 4, comment: '사용자 권한' })
   permission: string;
 
-  /** 사용자 이름 */
-  @Column({ length: 20, unique: true })
+  @Column({ length: 20, unique: true, comment: '사용자 이름' })
   name: string;
 }

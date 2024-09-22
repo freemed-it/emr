@@ -6,38 +6,45 @@ import { KmPrescriptions } from './prescriptions.entity';
 export class KmMedicines extends BaseModel {
   @Column({
     length: 40,
+    comment: '약품명',
   })
   name: string;
 
   @Column({
     length: 1000,
     nullable: true,
+    comment: '적응증',
   })
   indication: string;
 
   @Column({
     default: 0,
+    comment: '서울역 재고',
   })
   stationQuantity: number;
 
   @Column({
     nullable: true,
+    comment: '사무실 재고',
   })
   officeQuantity: number;
 
   @Column({
     default: 0,
+    comment: '포장단위',
   })
   packaging: number;
 
   @Column({
     default: 0,
+    comment: '총량',
   })
   totalAmount: number;
 
   @Column({
     length: 300,
     nullable: true,
+    comment: '사진',
   })
   image: string;
 
