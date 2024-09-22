@@ -2,15 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateVitalSignDto } from './dto/create-vital-sign.dto';
-import { CreateKmComplaintDto } from './complaints/dto/create-complaint.dto';
 import { DEFAULT_KM_CHART_FIND_OPTIONS } from './const/default-km-chart-find-options.const';
 import { CreateKmDiagnosisDto } from './dto/create-diagnosis.dto';
 import { KmCharts } from '../entity/charts.entity';
 import { MCharts } from 'src/m/entity/charts.entity';
-import { KmComplaints } from '../entity/complaints.entity';
-import { Histories } from 'src/patients/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
-import { CreateHistoryDto } from 'src/patients/histories/dto/create-history.dto';
 
 @Injectable()
 export class KmChartsService {
@@ -19,10 +15,6 @@ export class KmChartsService {
     private readonly kmChartsRepository: Repository<KmCharts>,
     @InjectRepository(MCharts)
     private readonly mChartsRepository: Repository<MCharts>,
-    @InjectRepository(KmComplaints)
-    private readonly complaintsRepository: Repository<KmComplaints>,
-    @InjectRepository(Histories)
-    private readonly historiesRepository: Repository<Histories>,
     @InjectRepository(Orders)
     private readonly ordersRepository: Repository<Orders>,
   ) {}
@@ -30,10 +22,11 @@ export class KmChartsService {
   async getChart(chartId: number) {
     const chart = await this.kmChartsRepository.findOne({
       where: { id: chartId },
+      relations: { patient: true }, // patient 관계를 명시적으로 불러옴
     });
 
     if (!chart) {
-      throw new NotFoundException();
+      throw new NotFoundException('Chart not found');
     }
 
     return chart;
@@ -51,42 +44,6 @@ export class KmChartsService {
     return await this.kmChartsRepository.save({
       ...chart,
       ...vitalSignDto,
-    });
-  }
-
-  async createComplaint(chartId: number, complaintDto: CreateKmComplaintDto) {
-    const chart = await this.kmChartsRepository.findOne({
-      where: { id: chartId },
-      relations: { patient: true },
-    });
-
-    if (!chart) {
-      throw new NotFoundException('Chart not found');
-    }
-
-    return this.complaintsRepository.save({
-      ...complaintDto,
-      chart,
-      patient: { id: chart.patient.id },
-    });
-  }
-
-  async createHistory(chartId: number, historyDto: CreateHistoryDto) {
-    const chart = await this.kmChartsRepository.findOne({
-      where: { id: chartId },
-      relations: { patient: { history: true } },
-    });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
-    return await this.historiesRepository.save({
-      patient: {
-        id: chart.patient.id,
-      },
-      ...chart.patient.history,
-      ...historyDto,
     });
   }
 

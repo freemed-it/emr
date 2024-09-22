@@ -20,12 +20,16 @@ import { CreateKmDiagnosisDto } from './dto/create-diagnosis.dto';
 import { UpdateKMPharmacyDto } from './dto/update-pharmacy.dto';
 import { OrdersService } from 'src/orders/orders.service';
 import { Department } from 'src/orders/const/department.const';
+import { HistoriesService } from 'src/patients/histories/histories.service';
+import { KmComplaintsService } from './complaints/complaints.service';
 
 @ApiTags('한의과')
 @Controller('km/charts')
 export class KmChartsController {
   constructor(
     private readonly chartsService: KmChartsService,
+    private readonly historyService: HistoriesService,
+    private readonly complaintService: KmComplaintsService,
     private readonly prescriptionsService: KmPrescriptionsService,
     private readonly ordersService: OrdersService,
     private readonly medicinesService: KmMedicinesService,
@@ -43,16 +47,20 @@ export class KmChartsController {
     @Param('chartId') chartId: number,
     @Body() prediagnosisDto: CreateKmPrediagnosisDto,
   ) {
+    const currentChart = await this.chartsService.getChart(chartId);
+
     const vitalSign = await this.chartsService.createVitalSign(
       chartId,
       prediagnosisDto.vistalSign,
     );
-    const complaint = await this.chartsService.createComplaint(
+    const complaint = await this.complaintService.createComplaint(
       chartId,
+      currentChart.patient.id,
       prediagnosisDto.complaint,
     );
-    const history = await this.chartsService.createHistory(
-      chartId,
+
+    const history = await this.historyService.createHistory(
+      currentChart.patient.id,
       prediagnosisDto.history,
     );
 
@@ -60,8 +68,8 @@ export class KmChartsController {
 
     return {
       vitalSign,
-      history,
       complaint,
+      history,
     };
   }
 
