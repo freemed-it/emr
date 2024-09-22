@@ -3,10 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MCharts } from '../entity/charts.entity';
 import { CreateVitalSignDto } from './dto/create-vital-sign.dto';
-import { MComplaints } from '../entity/complaints.entity';
-import { CreateMComplaintDto } from './complaints/dto/create-complaint.dto';
-import { CreateHistoryDto } from 'src/patients/histories/dto/create-history.dto';
-import { Histories } from 'src/patients/entity/histories.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { DEFAULT_M_CHART_FIND_OPTIONS } from './const/default-m-chart-find-options.const';
 import { CreateMDiagnosisDto } from './dto/create-diagnosis.dto';
@@ -19,21 +15,18 @@ export class MChartsService {
     private readonly mChartsRepository: Repository<MCharts>,
     @InjectRepository(KmCharts)
     private readonly kmChartsRepository: Repository<KmCharts>,
-    @InjectRepository(MComplaints)
-    private readonly complaintsRepository: Repository<MComplaints>,
-    @InjectRepository(Histories)
-    private readonly historiesRepository: Repository<Histories>,
     @InjectRepository(Orders)
     private readonly ordersRepository: Repository<Orders>,
   ) {}
 
-  getChart(chartId: number) {
-    const chart = this.mChartsRepository.findOne({
+  async getChart(chartId: number) {
+    const chart = await this.mChartsRepository.findOne({
       where: { id: chartId },
+      relations: { patient: true }, // patient 관계를 명시적으로 불러옴
     });
 
     if (!chart) {
-      throw new NotFoundException();
+      throw new NotFoundException('Chart not found');
     }
 
     return chart;
@@ -51,42 +44,6 @@ export class MChartsService {
     return await this.mChartsRepository.save({
       ...chart,
       ...vitalSignDto,
-    });
-  }
-
-  async createComplaint(chartId: number, complaintDto: CreateMComplaintDto) {
-    const chart = await this.mChartsRepository.findOne({
-      where: { id: chartId },
-      relations: { patient: true },
-    });
-
-    if (!chart) {
-      throw new NotFoundException('Chart not found');
-    }
-
-    return this.complaintsRepository.save({
-      ...complaintDto,
-      chart,
-      patient: { id: chart.patient.id },
-    });
-  }
-
-  async createHistory(chartId: number, historyDto: CreateHistoryDto) {
-    const chart = await this.mChartsRepository.findOne({
-      where: { id: chartId },
-      relations: { patient: { history: true } },
-    });
-
-    if (!chart) {
-      throw new NotFoundException();
-    }
-
-    return await this.historiesRepository.save({
-      patient: {
-        id: chart.patient.id,
-      },
-      ...chart.patient.history,
-      ...historyDto,
     });
   }
 

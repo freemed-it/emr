@@ -20,12 +20,16 @@ import { CreateMDiagnosisDto } from './dto/create-diagnosis.dto';
 import { MMedicinesService } from '../medicines/medicines.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { Department } from 'src/orders/const/department.const';
+import { HistoriesService } from 'src/patients/histories/histories.service';
+import { MComplaintsService } from './complaints/complaints.service';
 
 @ApiTags('의과')
 @Controller('m/charts')
 export class MChartsController {
   constructor(
     private readonly chartsService: MChartsService,
+    private readonly historyService: HistoriesService,
+    private readonly complaintService: MComplaintsService,
     private readonly prescriptionsService: MPrescriptionsService,
     private readonly ordersService: OrdersService,
     private readonly medicinesService: MMedicinesService,
@@ -43,16 +47,20 @@ export class MChartsController {
     @Param('chartId') chartId: number,
     @Body() prediagnosisDto: CreatePrediagnosisDto,
   ) {
+    const currentChart = await this.chartsService.getChart(chartId);
+
     const vitalSign = await this.chartsService.createVitalSign(
       chartId,
       prediagnosisDto.vistalSign,
     );
-    const complaint = await this.chartsService.createComplaint(
+    const complaint = await this.complaintService.createComplaint(
       chartId,
+      currentChart.patient.id,
       prediagnosisDto.complaint,
     );
-    const history = await this.chartsService.createHistory(
-      chartId,
+
+    const history = await this.historyService.createHistory(
+      currentChart.patient.id,
       prediagnosisDto.history,
     );
 
@@ -60,8 +68,8 @@ export class MChartsController {
 
     return {
       vitalSign,
-      history,
       complaint,
+      history,
     };
   }
 
