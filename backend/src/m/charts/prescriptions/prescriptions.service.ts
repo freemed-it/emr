@@ -8,7 +8,7 @@ import { MPrescriptions } from '../../entity/prescriptions.entity';
 import { Repository } from 'typeorm';
 import { CreateMPrescriptionDto } from './dto/create-prescription.dto';
 import { UpdateMPrescriptionDto } from './dto/update-prescription.dto';
-import { PaginateMPrescriptionHistoryDto } from './dto/paginate-prescription-history.dto';
+import { PaginateMMedicineHistoryDto } from '../../medicines/dto/paginate-medicine-history.dto';
 import { endOfDay, startOfDay } from 'date-fns';
 import { convertDosesCountByDay } from 'src/common/util/convert.util';
 
@@ -92,7 +92,7 @@ export class MPrescriptionsService {
   async getPaginateHistory(
     startDate: string,
     endDate: string,
-    paginateDto: PaginateMPrescriptionHistoryDto,
+    paginateDto: PaginateMMedicineHistoryDto,
   ) {
     const start = startOfDay(startDate);
     const end = endOfDay(endDate);

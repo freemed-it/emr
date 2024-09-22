@@ -25,6 +25,8 @@ import { CreateMMedicineDto } from './dto/create-medicine.dto';
 import { UpdateMMedicineDto } from './dto/update-medicine.dto';
 import { PaginateMMedicineDto } from './dto/paginate-medicine.dto';
 import { MMedicineCategoriesService } from '../medicine-categories/medicine-categories.service';
+import { PaginateMMedicineHistoryDto } from './dto/paginate-medicine-history.dto';
+import { MPrescriptionsService } from '../charts/prescriptions/prescriptions.service';
 
 @ApiTags('의과')
 @Controller('m/medicines')
@@ -32,6 +34,7 @@ export class MMedicinesController {
   constructor(
     private readonly medicinesService: MMedicinesService,
     private readonly medicineCategoriesService: MMedicineCategoriesService,
+    private readonly prescriptionsService: MPrescriptionsService,
   ) {}
 
   @Get()
@@ -125,5 +128,22 @@ export class MMedicinesController {
   })
   async deleteMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
     return this.medicinesService.deleteMedicine(medicineId);
+  }
+
+  @Get('history/:startDate/:endDate')
+  @ApiOperation({
+    summary: '히스토리 조회',
+    description: 'cursor pagination - cursor 쿼리 파라미터를 이용해야 합니다.',
+  })
+  async getPrescriptionHistory(
+    @Param('startDate') startDate: string,
+    @Param('endDate') endDate: string,
+    @Query() paginateMedicineHistoryDto: PaginateMMedicineHistoryDto,
+  ) {
+    return this.prescriptionsService.getPaginateHistory(
+      startDate,
+      endDate,
+      paginateMedicineHistoryDto,
+    );
   }
 }
