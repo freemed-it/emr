@@ -7,10 +7,6 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { Repository } from 'typeorm';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { Department } from 'src/orders/const/department.const';
-import { Memos } from './entity/memos.entity';
-import { UpdateMemoDto } from './memos/dto/update-memo.dto';
-import { CreateMemoDto } from './memos/dto/create-memo.dto';
-import { Users } from 'src/users/entity/users.entity';
 import { format } from 'date-fns';
 
 @Injectable()
@@ -24,8 +20,6 @@ export class PatientsService {
     private kmChartsRepository: Repository<KmCharts>,
     @InjectRepository(Orders)
     private ordersRepository: Repository<Orders>,
-    @InjectRepository(Memos)
-    private memosRepository: Repository<Memos>,
   ) {}
 
   async createPatient(
@@ -123,30 +117,6 @@ export class PatientsService {
     return this.patientsRepository.findOne({
       where: { id: patientId },
       relations: { history: true },
-    });
-  }
-
-  async createMemo(patientId: number, memoDto: CreateMemoDto, user: Users) {
-    const patient = await this.patientsRepository.findOne({
-      where: { id: patientId },
-    });
-
-    return this.memosRepository.save({
-      ...memoDto,
-      patient,
-      writer: user.name,
-    });
-  }
-
-  async updateMemo(patientId: number, memoDto: UpdateMemoDto, user: Users) {
-    const memo = await this.memosRepository.findOne({
-      where: { patient: { id: patientId } },
-    });
-
-    return this.memosRepository.save({
-      ...memo,
-      ...memoDto,
-      writer: user.name,
     });
   }
 }

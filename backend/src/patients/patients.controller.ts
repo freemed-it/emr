@@ -17,11 +17,15 @@ import { User } from 'src/users/decorator/user.decorator';
 import { Users } from 'src/users/entity/users.entity';
 import { CreateMemoDto } from './memos/dto/create-memo.dto';
 import { UpdateMemoDto } from './memos/dto/update-memo.dto';
+import { MemosService } from './memos/memos.service';
 
 @ApiTags('참여자')
 @Controller('patients')
 export class PatientsController {
-  constructor(private readonly patientsService: PatientsService) {}
+  constructor(
+    private readonly patientsService: PatientsService,
+    private readonly memosService: MemosService,
+  ) {}
 
   @Post('/m/receipt')
   @ApiOperation({
@@ -96,26 +100,20 @@ export class PatientsController {
   }
 
   @Post(':patientId/memos')
-  @ApiOperation({
-    summary: '참여자 메모 생성',
-  })
   async postMemo(
     @Param('patientId') patientId: number,
     @Body() memoDto: CreateMemoDto,
     @User() user: Users,
   ) {
-    return this.patientsService.createMemo(patientId, memoDto, user);
+    return this.memosService.createMemos(patientId, memoDto, user);
   }
 
   @Patch(':patientId/memos')
-  @ApiOperation({
-    summary: '참여자 메모 수정',
-  })
   async pathMemo(
     @Param('patientId') patientId: number,
     @Body() memoDto: UpdateMemoDto,
     @User() user: Users,
   ) {
-    return this.patientsService.updateMemo(patientId, memoDto, user);
+    return this.memosService.updateMemos(patientId, memoDto, user);
   }
 }
