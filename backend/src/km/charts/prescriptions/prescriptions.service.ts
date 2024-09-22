@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateKmPrescriptionDto } from './dto/create-prescription.dto';
 import { convertDosesCountByDay } from 'src/common/util/convert.util';
 import { UpdateKmPrescriptionDto } from './dto/update-prescription.dto';
-import { PaginateKmPrescriptionHistoryDto } from './dto/paginate-prescription-history.dto';
+import { PaginateKmMedicineHistoryDto } from '../../medicines/dto/paginate-medicine-history.dto';
 import { endOfDay, startOfDay } from 'date-fns';
 
 @Injectable()
@@ -80,7 +80,7 @@ export class KmPrescriptionsService {
   async getPaginateHistory(
     startDate: string,
     endDate: string,
-    paginateDto: PaginateKmPrescriptionHistoryDto,
+    paginateDto: PaginateKmMedicineHistoryDto,
   ) {
     const start = startOfDay(startDate);
     const end = endOfDay(endDate);

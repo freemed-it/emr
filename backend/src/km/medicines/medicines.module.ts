@@ -4,10 +4,15 @@ import { KmMedicinesController } from './medicines.controller';
 import { KmMedicines } from '../entity/medicines.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common/common.module';
+import { KmPrescriptionsService } from '../charts/prescriptions/prescriptions.service';
+import { KmPrescriptions } from '../entity/prescriptions.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([KmMedicines]), CommonModule],
+  imports: [
+    TypeOrmModule.forFeature([KmMedicines, KmPrescriptions]),
+    CommonModule,
+  ],
   controllers: [KmMedicinesController],
-  providers: [KmMedicinesService],
+  providers: [KmMedicinesService, KmPrescriptionsService],
 })
 export class KmMedicinesModule {}

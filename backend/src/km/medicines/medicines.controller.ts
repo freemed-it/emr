@@ -23,11 +23,16 @@ import {
 import { CreateKMMedicineDto } from './dto/create-medicine.dto';
 import { PaginateKMMedicineDto } from './dto/paginate-medicine.dto';
 import { UpdateKMMedicineDto } from './dto/update-medicine.dto';
+import { PaginateKmMedicineHistoryDto } from './dto/paginate-medicine-history.dto';
+import { KmPrescriptionsService } from '../charts/prescriptions/prescriptions.service';
 
 @ApiTags('한의과')
 @Controller('km/medicines')
 export class KmMedicinesController {
-  constructor(private readonly medicinesService: KmMedicinesService) {}
+  constructor(
+    private readonly medicinesService: KmMedicinesService,
+    private readonly prescriptionsService: KmPrescriptionsService,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -92,5 +97,22 @@ export class KmMedicinesController {
   })
   async deleteMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
     return this.medicinesService.deleteMedicine(medicineId);
+  }
+
+  @Get('history/:startDate/:endDate')
+  @ApiOperation({
+    summary: '히스토리 조회',
+    description: 'cursor pagination - cursor 쿼리 파라미터를 이용해야 합니다.',
+  })
+  async getPrescriptionHistory(
+    @Param('startDate') startDate: string,
+    @Param('endDate') endDate: string,
+    @Query() paginateMedicineHistoryDto: PaginateKmMedicineHistoryDto,
+  ) {
+    return this.prescriptionsService.getPaginateHistory(
+      startDate,
+      endDate,
+      paginateMedicineHistoryDto,
+    );
   }
 }

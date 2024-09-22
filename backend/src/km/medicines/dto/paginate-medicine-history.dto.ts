@@ -2,10 +2,9 @@ import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 import { BasePaginationDto } from 'src/common/dto/base-pagination.dto';
 
-export class PaginateKmPrescriptionHistoryDto extends OmitType(
-  BasePaginationDto,
-  ['page'],
-) {
+export class PaginateKmMedicineHistoryDto extends OmitType(BasePaginationDto, [
+  'page',
+]) {
   @ApiPropertyOptional({
     description: '약품명',
   })
