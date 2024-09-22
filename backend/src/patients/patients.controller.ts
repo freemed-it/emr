@@ -108,12 +108,12 @@ export class PatientsController {
     return this.memosService.createMemos(patientId, memoDto, user);
   }
 
-  @Patch(':patientId/memos')
+  @Patch(':memoId/memos')
   async pathMemo(
-    @Param('patientId') patientId: number,
+    @Param('memoId') memoId: number,
     @Body() memoDto: UpdateMemoDto,
     @User() user: Users,
   ) {
-    return this.memosService.updateMemos(patientId, memoDto, user);
+    return this.memosService.updateMemos(memoId, memoDto, user);
   }
 }
