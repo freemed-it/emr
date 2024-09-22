@@ -7,6 +7,8 @@ import { CreateKmDiagnosisDto } from './dto/create-diagnosis.dto';
 import { KmCharts } from '../entity/charts.entity';
 import { MCharts } from 'src/m/entity/charts.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
+import { generateChartNumber } from 'src/common/util/generateChartNumber.util';
+import { Department } from 'src/orders/const/department.const';
 
 @Injectable()
 export class KmChartsService {
@@ -30,6 +32,17 @@ export class KmChartsService {
     }
 
     return chart;
+  }
+
+  async createChart(patientId: number) {
+    const chartNumber = await generateChartNumber(
+      Department.KM,
+      this.kmChartsRepository,
+    );
+    return await this.kmChartsRepository.save({
+      patient: { id: patientId },
+      chartNumber,
+    });
   }
 
   async createVitalSign(chartNumber: string, vitalSignDto: CreateVitalSignDto) {

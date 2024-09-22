@@ -10,21 +10,27 @@ import {
   Query,
 } from '@nestjs/common';
 import { PatientsService } from './patients.service';
-import { CreatePatientDto } from './dto/create-patient.dto';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Department } from 'src/orders/const/department.const';
 import { User } from 'src/users/decorator/user.decorator';
 import { Users } from 'src/users/entity/users.entity';
 import { CreateMemoDto } from './memos/dto/create-memo.dto';
 import { UpdateMemoDto } from './memos/dto/update-memo.dto';
 import { MemosService } from './memos/memos.service';
+import { MChartsService } from 'src/m/charts/charts.service';
+import { OrdersService } from 'src/orders/orders.service';
+import { ReceiptDto } from './dto/receipt.dto';
+import { KmChartsService } from 'src/km/charts/charts.service';
+import { Department } from 'src/orders/const/department.const';
 
 @ApiTags('참여자')
 @Controller('patients')
 export class PatientsController {
   constructor(
     private readonly patientsService: PatientsService,
+    private readonly mChartsService: MChartsService,
+    private readonly kmChartsService: KmChartsService,
     private readonly memosService: MemosService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   @Post('/m/receipt')
@@ -37,14 +43,23 @@ export class PatientsController {
   })
   @ApiQuery({ name: 'patientId', required: false, type: Number })
   async postMPatient(
-    @Body() patientDto: CreatePatientDto,
+    @Body() receiptDto: ReceiptDto,
     @Query('patientId') patientId?: number,
   ) {
-    return this.patientsService.createPatient(
-      patientDto,
-      Department.M,
+    const patient = await this.patientsService.createPatient(
+      receiptDto,
       patientId,
     );
+    const chart = await this.mChartsService.createChart(patient.id);
+    const order = await this.ordersService.createOrder(
+      patient.id,
+      chart.id,
+      Department.M,
+      chart.chartNumber,
+      receiptDto,
+    );
+
+    return { patient, chart, order };
   }
 
   @Post('/km/receipt')
@@ -57,14 +72,23 @@ export class PatientsController {
   })
   @ApiQuery({ name: 'patientId', required: false, type: Number })
   async postKMPatient(
-    @Body() patientDto: CreatePatientDto,
+    @Body() receiptDto: ReceiptDto,
     @Query('patientId') patientId?: number,
   ) {
-    return this.patientsService.createPatient(
-      patientDto,
-      Department.KM,
+    const patient = await this.patientsService.createPatient(
+      receiptDto,
       patientId,
     );
+    const chart = await this.kmChartsService.createChart(patient.id);
+    const order = await this.ordersService.createOrder(
+      patient.id,
+      chart.id,
+      Department.KM,
+      chart.chartNumber,
+      receiptDto,
+    );
+
+    return { patient, chart, order };
   }
 
   @Get('/search')

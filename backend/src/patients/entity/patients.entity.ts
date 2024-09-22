@@ -8,67 +8,68 @@ import { Histories } from './histories.entity';
 
 @Entity('patients')
 export class Patients extends BaseModel {
-  /** 첫 방문일 */
-  @Column()
+  @Column({
+    comment: '첫 방문일',
+  })
   firstVisit: Date;
 
-  /** 이름 */
   @Column({
     length: 10,
+    comment: '이름',
   })
   name: string;
 
-  /** 성별 */
   @Column('enum', {
     enum: Object.values(Gender),
+    comment: '성별',
   })
   gender: Gender;
 
-  /** 생년월월 */
   @Column('char', {
     length: 10,
+    comment: '생년월일',
   })
   birth: string;
 
-  /** 신장 */
   @Column({
     nullable: true,
+    comment: '신장',
   })
   height: number;
 
-  /** 체중 */
   @Column({
     nullable: true,
+    comment: '체중',
   })
   weight: number;
 
-  /** BMI */
   @Column('float', {
     nullable: true,
+    comment: 'BMI',
   })
   bmi: number;
 
-  /** 흡연량 */
   @Column('float', {
     nullable: true,
+    comment: '흡연량(갑/하루 평균)',
   })
   smokingAmount: number;
 
-  /** 흡연 경력 */
   @Column({
     nullable: true,
+    comment: '흡연 경력(년)',
   })
   smokingPeriod: number;
 
-  /** 음주량 */
   @Column('float', {
     nullable: true,
+    comment: '음주량(병/일주일 평균)',
   })
   drinkingAmount: number;
 
-  /** 음주경력 */
   @Column({
     nullable: true,
+    comment: '음주 경력(년)',
   })
   drinkingPeriod: number;
 

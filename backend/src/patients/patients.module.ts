@@ -8,12 +8,23 @@ import { KmCharts } from 'src/km/entity/charts.entity';
 import { Orders } from 'src/orders/entity/orders.entity';
 import { Memos } from './entity/memos.entity';
 import { MemosService } from './memos/memos.service';
+import { MChartsService } from 'src/m/charts/charts.service';
+import { OrdersService } from 'src/orders/orders.service';
+import { CommonService } from 'src/common/common.service';
+import { KmChartsService } from 'src/km/charts/charts.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Patients, MCharts, KmCharts, Orders, Memos]),
   ],
   controllers: [PatientsController],
-  providers: [PatientsService, MemosService],
+  providers: [
+    PatientsService,
+    MemosService,
+    MChartsService,
+    KmChartsService,
+    OrdersService,
+    CommonService,
+  ],
 })
 export class PatientsModule {}

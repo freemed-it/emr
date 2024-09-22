@@ -19,15 +19,15 @@ export class MPrescriptionsService {
     private readonly prescriptionsRepository: Repository<MPrescriptions>,
   ) {}
 
-  async getPrescriptions(chartId: number) {
+  async getPrescriptions(chartNumber: string) {
     return await this.prescriptionsRepository.find({
-      where: { chart: { id: chartId } },
+      where: { chart: { chartNumber } },
       relations: { medicine: true },
     });
   }
 
   async createPrescription(
-    chartId: number,
+    chartNumber: string,
     prescriptionDto: CreateMPrescriptionDto,
   ) {
     const { medicineId, ...restPrescriptionDto } = prescriptionDto;
@@ -38,7 +38,7 @@ export class MPrescriptionsService {
         restPrescriptionDto.doses *
         convertDosesCountByDay(restPrescriptionDto.dosesCountByDay) *
         restPrescriptionDto.dosesDay,
-      chart: { id: chartId },
+      chart: { chartNumber },
       medicine: { id: medicineId },
     });
   }
@@ -77,9 +77,9 @@ export class MPrescriptionsService {
     return prescriptionId;
   }
 
-  async deletePrescriptionsByChartId(chartId: number) {
+  async deletePrescriptionsByChartNumber(chartNumber: string) {
     return await this.prescriptionsRepository.delete({
-      chart: { id: chartId },
+      chart: { chartNumber },
     });
   }
 

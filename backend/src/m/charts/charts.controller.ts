@@ -5,7 +5,6 @@ import {
   Param,
   HttpStatus,
   Get,
-  ParseIntPipe,
   Patch,
   BadRequestException,
   NotFoundException,
@@ -35,7 +34,7 @@ export class MChartsController {
     private readonly medicinesService: MMedicinesService,
   ) {}
 
-  @Post('/:chartId/prediagnosis')
+  @Post('/:chartNumber/prediagnosis')
   @ApiOperation({
     summary: '예진 완료',
   })
@@ -44,17 +43,16 @@ export class MChartsController {
     description: '예진 완료되었습니다.',
   })
   async postPrediagnosis(
-    @Param('chartId') chartId: number,
+    @Param('chartNumber') chartNumber: string,
     @Body() prediagnosisDto: CreatePrediagnosisDto,
   ) {
-    const currentChart = await this.chartsService.getChart(chartId);
-
+    const currentChart = await this.chartsService.getChart(chartNumber);
     const vitalSign = await this.chartsService.createVitalSign(
-      chartId,
+      chartNumber,
       prediagnosisDto.vistalSign,
     );
     const complaint = await this.complaintService.createComplaint(
-      chartId,
+      chartNumber,
       currentChart.patient.id,
       prediagnosisDto.complaint,
     );
@@ -64,7 +62,7 @@ export class MChartsController {
       prediagnosisDto.history,
     );
 
-    await this.chartsService.updateStatus(chartId, 2);
+    await this.chartsService.updateStatus(chartNumber, 2);
 
     return {
       vitalSign,
@@ -73,7 +71,7 @@ export class MChartsController {
     };
   }
 
-  @Get('/:chartId/prediagnosis')
+  @Get('/:chartNumber/prediagnosis')
   @ApiOperation({
     summary: '예진 조회',
   })
@@ -81,8 +79,8 @@ export class MChartsController {
     status: HttpStatus.BAD_REQUEST,
     description: '예진이 조회되었습니다.',
   })
-  async getPrediagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
-    const chart = await this.chartsService.getPrediagnosis(chartId);
+  async getPrediagnosis(@Param('chartNumber') chartNumber: string) {
+    const chart = await this.chartsService.getPrediagnosis(chartNumber);
 
     // 차트 상태에 따른 예진 데이터 처리
     switch (chart.status) {
@@ -96,7 +94,7 @@ export class MChartsController {
           ? await this.chartsService.getVitalSignByChartNumber(chartNumber)
           : null;
 
-        const history = await this.chartsService.getHistory(chartId);
+        const history = await this.chartsService.getHistory(chartNumber);
 
         return vitalSign ? { vitalSign, history } : { history };
 
@@ -120,7 +118,7 @@ export class MChartsController {
     return this.chartsService.getPastCharts(patientId);
   }
 
-  @Get('/:chartId/complaints')
+  @Get('/:chartNumber/complaints')
   @ApiOperation({
     summary: '예진 C.C 상세 조회',
   })
@@ -128,11 +126,11 @@ export class MChartsController {
     status: HttpStatus.OK,
     description: 'C.C가 조회되었습니다.',
   })
-  getComplaint(@Param('chartId') chartId: number) {
-    return this.chartsService.getComplaint(chartId);
+  getComplaint(@Param('chartNumber') chartNumber: string) {
+    return this.chartsService.getComplaint(chartNumber);
   }
 
-  @Get('/:chartId')
+  @Get('/:chartNumber')
   @ApiOperation({
     summary: '과거 차트 상세 조회',
   })
@@ -140,19 +138,19 @@ export class MChartsController {
     status: HttpStatus.OK,
     description: '과거 차트 상세가 조회되었습니다.',
   })
-  getPastChart(@Param('chartId') chartId: number) {
-    return this.chartsService.getPastChart(chartId);
+  getPastChart(@Param('chartNumber') chartNumber: string) {
+    return this.chartsService.getPastChart(chartNumber);
   }
 
-  @Get(':chartId/diagnosis')
+  @Get(':chartNumber/diagnosis')
   @ApiOperation({
     summary: '본진 조회',
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async getDiagnosis(@Param('chartId', ParseIntPipe) chartId: number) {
-    const chart = await this.chartsService.getDiagnosis(chartId);
+  async getDiagnosis(@Param('chartNumber') chartNumber: string) {
+    const chart = await this.chartsService.getDiagnosis(chartNumber);
     if (!chart) {
       throw new NotFoundException();
     }
@@ -171,7 +169,7 @@ export class MChartsController {
     }
   }
 
-  @Post(':chartId/diagnosis')
+  @Post(':chartNumber/diagnosis')
   @ApiOperation({
     summary: '본진 완료',
   })
@@ -179,21 +177,23 @@ export class MChartsController {
     status: HttpStatus.NOT_FOUND,
   })
   async postDiagnosis(
-    @Param('chartId', ParseIntPipe) chartId: number,
+    @Param('chartNumber') chartNumber: string,
     @Body() diagnosisDto: CreateMDiagnosisDto,
   ) {
-    const currentChart = await this.chartsService.getChart(chartId);
+    const currentChart = await this.chartsService.getChart(chartNumber);
     if (Number(currentChart.status) < 2 || Number(currentChart.status) > 3) {
       throw new BadRequestException(
         `예진 완료(2) 혹은 조제 대기(3) 중인 차트가 아닙니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
       );
     }
 
-    await this.chartsService.postDiagnosis(chartId, diagnosisDto);
+    await this.chartsService.postDiagnosis(chartNumber, diagnosisDto);
 
     // 조제 대기 중인 차트 -> 기존 처방 삭제
     if (currentChart.status === 3) {
-      await this.prescriptionsService.deletePrescriptionsByChartId(chartId);
+      await this.prescriptionsService.deletePrescriptionsByChartNumber(
+        chartNumber,
+      );
     }
 
     const prescriptions = await Promise.all(
@@ -206,13 +206,13 @@ export class MChartsController {
           throw new NotFoundException('존재하지 않는 약품입니다.');
         }
         return this.prescriptionsService.createPrescription(
-          chartId,
+          chartNumber,
           prescription,
         );
       }),
     );
 
-    const chart = await this.chartsService.updateStatus(chartId, 3);
+    const chart = await this.chartsService.updateStatus(chartNumber, 3);
 
     return {
       ...chart,
@@ -220,12 +220,12 @@ export class MChartsController {
     };
   }
 
-  @Get(':chartId/vital-sign')
+  @Get(':chartNumber/vital-sign')
   @ApiOperation({
     summary: 'V/S 전체 조회',
   })
-  async getVitalSigns(@Param('chartId', ParseIntPipe) chartId: number) {
-    const chartVitalSign = await this.chartsService.getVitalSign(chartId);
+  async getVitalSigns(@Param('chartNumber') chartNumber: string) {
+    const chartVitalSign = await this.chartsService.getVitalSign(chartNumber);
     const pastVitalSigns = await this.chartsService.getPastVitalSigns(
       chartVitalSign.patient.id,
     );
@@ -236,26 +236,26 @@ export class MChartsController {
     };
   }
 
-  @Get(':chartId/pharmacy')
+  @Get(':chartNumber/pharmacy')
   @ApiOperation({
     summary: '약국 조회',
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  getChartPharmacy(@Param('chartId', ParseIntPipe) chartId: number) {
-    return this.chartsService.getPharmacy(chartId);
+  getChartPharmacy(@Param('chartNumber') chartNumber: string) {
+    return this.chartsService.getPharmacy(chartNumber);
   }
 
-  @Patch(':chartId/status')
+  @Patch(':chartNumber/status')
   @ApiOperation({
     summary: '약국 차트 상태 수정',
   })
   async patchChartPharmacyStatus(
-    @Param('chartId', ParseIntPipe) chartId: number,
+    @Param('chartNumber') chartNumber: string,
     @Body() pharmacyDto: UpdateMPharmacyDto,
   ) {
-    const currentChart = await this.chartsService.getChart(chartId);
+    const currentChart = await this.chartsService.getChart(chartNumber);
     if (currentChart.status < 3 || currentChart.status >= 6) {
       throw new BadRequestException(
         `조제 전(< 3) 혹은 복약지도 완료(6)된 차트입니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
@@ -265,7 +265,7 @@ export class MChartsController {
     // 복약지도 완료 시 약품 총량 줄이기 & 완료된 처방으로 수정
     if (pharmacyDto.status === 6) {
       const prescriptions =
-        await this.prescriptionsService.getPrescriptions(chartId);
+        await this.prescriptionsService.getPrescriptions(chartNumber);
       prescriptions.forEach(async (prescription) => {
         await this.medicinesService.updateMedicineTotalAmount(
           prescription.medicine.id,
@@ -277,10 +277,13 @@ export class MChartsController {
       });
     }
 
-    return await this.chartsService.updateStatus(chartId, pharmacyDto.status);
+    return await this.chartsService.updateStatus(
+      chartNumber,
+      pharmacyDto.status,
+    );
   }
 
-  @Post(':chartId/prescriptions')
+  @Post(':chartNumber/prescriptions')
   @ApiOperation({
     summary: '처방 생성',
   })
@@ -293,10 +296,11 @@ export class MChartsController {
     status: HttpStatus.NOT_FOUND,
   })
   async postPrescription(
-    @Param('chartId', ParseIntPipe) chartId: number,
+    @Param('chartNumber') chartNumber: string,
     @Body() prescriptionDto: CreateMPrescriptionDto,
   ) {
-    const chartExists = await this.chartsService.checkChartExistsById(chartId);
+    const chartExists =
+      await this.chartsService.checkChartExistsByChartNumber(chartNumber);
     if (!chartExists) {
       throw new NotFoundException();
     }
@@ -309,7 +313,7 @@ export class MChartsController {
     }
 
     return await this.prescriptionsService.createPrescription(
-      chartId,
+      chartNumber,
       prescriptionDto,
     );
   }

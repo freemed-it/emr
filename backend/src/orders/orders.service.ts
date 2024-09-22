@@ -7,6 +7,7 @@ import { PaginateOrderDto } from './dto/paginate-order.dto';
 import { endOfDay, endOfToday, startOfDay, startOfToday } from 'date-fns';
 import { PaginateTodayOrderDto } from './dto/paginate-today-order.dto';
 import { Department } from './const/department.const';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -15,6 +16,24 @@ export class OrdersService {
     private readonly ordersRepository: Repository<Orders>,
     private readonly commonService: CommonService,
   ) {}
+
+  async createOrder(
+    patientId: number,
+    chartId: number,
+    department: Department,
+    chartNumber: string,
+    createOrderDto: CreateOrderDto,
+  ) {
+    return this.ordersRepository.save({
+      patient: { id: patientId },
+      chartNumber,
+      ...(department === Department.M
+        ? { mChart: { id: chartId } }
+        : { kmChart: { id: chartId } }),
+      waitingNumber: createOrderDto.waitingNumber,
+      bedNumber: createOrderDto.bedNumber,
+    });
+  }
 
   async paginateOrders(
     startDate: string,
