@@ -121,23 +121,6 @@ export class MChartsService {
     });
   }
 
-  async getComplaint(chartNumber: string) {
-    return await this.mChartsRepository.find({
-      where: { chartNumber },
-      ...DEFAULT_M_CHART_FIND_OPTIONS,
-      relations: { complaints: true },
-    });
-  }
-
-  async getHistory(chartNumber: string) {
-    const chart = await this.mChartsRepository.findOne({
-      where: { chartNumber },
-      relations: { patient: { history: true } },
-    });
-
-    return chart?.patient?.history;
-  }
-
   async getPastChart(chartNumber: string) {
     return await this.mChartsRepository.findOne({
       ...DEFAULT_M_CHART_FIND_OPTIONS,
@@ -156,8 +139,11 @@ export class MChartsService {
   }
 
   async postDiagnosis(chartNumber: string, diagnosisDto: CreateMDiagnosisDto) {
+    const chart = await this.mChartsRepository.findOne({
+      where: { chartNumber },
+    });
     return await this.mChartsRepository.save({
-      chartNumber,
+      id: chart.id,
       presentIllness: diagnosisDto.presentIllness,
       impression: diagnosisDto.impression,
       treatmentNote: diagnosisDto.treatmentNote,

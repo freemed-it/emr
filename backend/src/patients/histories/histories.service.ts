@@ -16,8 +16,20 @@ export class HistoriesService {
       where: { patient: { id: patientId } },
     });
 
-    return await this.historiesRepository.save(
-      history ? { ...history, ...historyDto } : historyDto,
-    );
+    return history
+      ? await this.historiesRepository.save({
+          ...history,
+          ...historyDto,
+        })
+      : await this.historiesRepository.save({
+          patient: { id: patientId },
+          ...historyDto,
+        });
+  }
+
+  getHistoryByPatientId(patientId: number) {
+    return this.historiesRepository.findOne({
+      where: { patient: { id: patientId } },
+    });
   }
 }

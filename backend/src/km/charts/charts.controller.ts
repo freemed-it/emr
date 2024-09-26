@@ -27,8 +27,8 @@ import { KmComplaintsService } from './complaints/complaints.service';
 export class KmChartsController {
   constructor(
     private readonly chartsService: KmChartsService,
-    private readonly historyService: HistoriesService,
-    private readonly complaintService: KmComplaintsService,
+    private readonly historiesService: HistoriesService,
+    private readonly complaintsService: KmComplaintsService,
     private readonly prescriptionsService: KmPrescriptionsService,
     private readonly ordersService: OrdersService,
     private readonly medicinesService: KmMedicinesService,
@@ -52,13 +52,13 @@ export class KmChartsController {
       chartNumber,
       prediagnosisDto.vistalSign,
     );
-    const complaint = await this.complaintService.createComplaint(
+    const complaint = await this.complaintsService.createComplaint(
       chartNumber,
       currentChart.patient.id,
       prediagnosisDto.complaint,
     );
 
-    const history = await this.historyService.createHistory(
+    const history = await this.historiesService.createHistory(
       currentChart.patient.id,
       prediagnosisDto.history,
     );
@@ -82,7 +82,6 @@ export class KmChartsController {
   })
   async getPrediagnosis(@Param('chartNumber') chartNumber: string) {
     const chart = await this.chartsService.getPrediagnosis(chartNumber);
-
     switch (chart.status) {
       case 1:
         const chartNumber = await this.ordersService.checkTodayChart(
@@ -94,7 +93,9 @@ export class KmChartsController {
           ? await this.chartsService.getVitalSignByChartNumber(chartNumber)
           : null;
 
-        const history = await this.chartsService.getHistory(chartNumber);
+        const history = await this.historiesService.getHistoryByPatientId(
+          chart.patient.id,
+        );
 
         return vitalSign ? { vitalSign, history } : { history };
 
@@ -127,7 +128,7 @@ export class KmChartsController {
     description: 'C.C가 조회되었습니다.',
   })
   getComplaint(@Param('chartNumber') chartNumber: string) {
-    return this.chartsService.getComplaint(chartNumber);
+    return this.complaintsService.getComplaint(chartNumber);
   }
 
   @Get('/:chartNumber')

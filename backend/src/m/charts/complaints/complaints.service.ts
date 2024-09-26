@@ -22,4 +22,10 @@ export class MComplaintsService {
       patient: { id: patientId },
     });
   }
+
+  async getComplaint(chartNumber: string) {
+    return await this.complaintsRepository.findOne({
+      where: { chart: { chartNumber } },
+    });
+  }
 }

@@ -27,8 +27,8 @@ import { MComplaintsService } from './complaints/complaints.service';
 export class MChartsController {
   constructor(
     private readonly chartsService: MChartsService,
-    private readonly historyService: HistoriesService,
-    private readonly complaintService: MComplaintsService,
+    private readonly historiesService: HistoriesService,
+    private readonly complaintsService: MComplaintsService,
     private readonly prescriptionsService: MPrescriptionsService,
     private readonly ordersService: OrdersService,
     private readonly medicinesService: MMedicinesService,
@@ -51,13 +51,13 @@ export class MChartsController {
       chartNumber,
       prediagnosisDto.vistalSign,
     );
-    const complaint = await this.complaintService.createComplaint(
+    const complaint = await this.complaintsService.createComplaint(
       chartNumber,
       currentChart.patient.id,
       prediagnosisDto.complaint,
     );
 
-    const history = await this.historyService.createHistory(
+    const history = await this.historiesService.createHistory(
       currentChart.patient.id,
       prediagnosisDto.history,
     );
@@ -94,7 +94,9 @@ export class MChartsController {
           ? await this.chartsService.getVitalSignByChartNumber(chartNumber)
           : null;
 
-        const history = await this.chartsService.getHistory(chartNumber);
+        const history = await this.historiesService.getHistoryByPatientId(
+          chart.patient.id,
+        );
 
         return vitalSign ? { vitalSign, history } : { history };
 
@@ -127,7 +129,7 @@ export class MChartsController {
     description: 'C.C가 조회되었습니다.',
   })
   getComplaint(@Param('chartNumber') chartNumber: string) {
-    return this.chartsService.getComplaint(chartNumber);
+    return this.complaintsService.getComplaint(chartNumber);
   }
 
   @Get('/:chartNumber')

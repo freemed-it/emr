@@ -22,7 +22,7 @@ export class KmChartsService {
   ) {}
 
   async getChart(chartNumber: string) {
-    const chart = await this.mChartsRepository.findOne({
+    const chart = await this.kmChartsRepository.findOne({
       where: { chartNumber },
       relations: { patient: true },
     });
@@ -119,23 +119,6 @@ export class KmChartsService {
         'createdAt',
       ],
     });
-  }
-
-  async getComplaint(chartNumber: string) {
-    return await this.kmChartsRepository.find({
-      where: { chartNumber },
-      ...DEFAULT_KM_CHART_FIND_OPTIONS,
-      relations: { complaints: true },
-    });
-  }
-
-  async getHistory(chartNumber: string) {
-    const chart = await this.kmChartsRepository.findOne({
-      where: { chartNumber },
-      relations: { patient: { history: true } },
-    });
-
-    return chart?.patient?.history;
   }
 
   async getPastChart(chartNumber: string) {

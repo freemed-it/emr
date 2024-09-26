@@ -38,11 +38,4 @@ export class PatientsService {
   async getPatientById(id: number) {
     return this.patientsRepository.findOne({ where: { id } });
   }
-
-  getPatientHistoryById(patientId: number) {
-    return this.patientsRepository.findOne({
-      where: { id: patientId },
-      relations: { history: true },
-    });
-  }
 }

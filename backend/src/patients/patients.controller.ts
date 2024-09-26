@@ -21,6 +21,7 @@ import { OrdersService } from 'src/orders/orders.service';
 import { ReceiptDto } from './dto/receipt.dto';
 import { KmChartsService } from 'src/km/charts/charts.service';
 import { Department } from 'src/orders/const/department.const';
+import { HistoriesService } from './histories/histories.service';
 
 @ApiTags('참여자')
 @Controller('patients')
@@ -31,6 +32,7 @@ export class PatientsController {
     private readonly kmChartsService: KmChartsService,
     private readonly memosService: MemosService,
     private readonly ordersService: OrdersService,
+    private readonly historiesService: HistoriesService,
   ) {}
 
   @Post('/m/receipt')
@@ -120,7 +122,7 @@ export class PatientsController {
     summary: '참여자 과거력 조회',
   })
   async getPatientHistory(@Param('patientId', ParseIntPipe) patientId: number) {
-    return this.patientsService.getPatientHistoryById(patientId);
+    return this.historiesService.getHistoryByPatientId(patientId);
   }
 
   @Post(':patientId/memos')

@@ -27,6 +27,7 @@ export class OrdersService {
     return this.ordersRepository.save({
       patient: { id: patientId },
       chartNumber,
+      department,
       ...(department === Department.M
         ? { mChart: { id: chartId } }
         : { kmChart: { id: chartId } }),
