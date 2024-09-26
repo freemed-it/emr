@@ -7,15 +7,50 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
 } from '@nestjs/common';
 import { KmPrescriptionsService } from './prescriptions.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateKmPrescriptionDto } from './dto/update-prescription.dto';
+import { CreateKmPrescriptionDto } from './dto/create-prescription.dto';
+import { KmMedicinesService } from 'src/km/medicines/medicines.service';
 
 @ApiTags('한의과')
-@Controller('km/prescriptions')
+@Controller('km/charts/:chartNumber/prescriptions')
 export class KmPrescriptionsController {
-  constructor(private readonly prescriptionsService: KmPrescriptionsService) {}
+  constructor(
+    private readonly prescriptionsService: KmPrescriptionsService,
+    private readonly medicinesService: KmMedicinesService,
+  ) {}
+
+  @Post()
+  @ApiOperation({
+    summary: '처방 생성',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      '존재하지 않는 약품입니다. <small>medicineId에 해당하는 약품이 없는 경우</small>',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+  })
+  async postPrescription(
+    @Param('chartNumber') chartNumber: string,
+    @Body() prescriptionDto: CreateKmPrescriptionDto,
+  ) {
+    const medicineExists = await this.medicinesService.checkMedicineExistsById(
+      prescriptionDto.medicineId,
+    );
+    if (!medicineExists) {
+      throw new NotFoundException('존재하지 않는 약품입니다.');
+    }
+
+    return await this.prescriptionsService.createPrescription(
+      chartNumber,
+      prescriptionDto,
+    );
+  }
 
   @Patch(':prescriptionId')
   @ApiOperation({
@@ -25,6 +60,7 @@ export class KmPrescriptionsController {
     status: HttpStatus.NOT_FOUND,
   })
   async patchPrescription(
+    @Param('chartNumber') chartNumber: string,
     @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
     @Body() updatePrescriptionDto: UpdateKmPrescriptionDto,
   ) {
@@ -50,6 +86,7 @@ export class KmPrescriptionsController {
     status: HttpStatus.NOT_FOUND,
   })
   async deletePrescription(
+    @Param('chartNumber') chartNumber: string,
     @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
   ) {
     const prescriptionExists =

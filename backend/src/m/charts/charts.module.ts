@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MChartsService } from './charts.service';
 import { MChartsController } from './charts.controller';
 import { MCharts } from '../entity/charts.entity';
@@ -32,8 +32,8 @@ import { Patients } from 'src/patients/entity/patients.entity';
       Memos,
       Patients,
     ]),
-    MPrescriptionsModule,
-    MMedicinesModule,
+    forwardRef(() => MPrescriptionsModule),
+    forwardRef(() => MMedicinesModule),
   ],
   controllers: [MChartsController],
   providers: [
@@ -46,5 +46,6 @@ import { Patients } from 'src/patients/entity/patients.entity';
     CommonService,
     MemosService,
   ],
+  exports: [MChartsService],
 })
 export class MChartsModule {}
