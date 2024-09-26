@@ -138,12 +138,9 @@ export class MChartsService {
     });
   }
 
-  async postDiagnosis(chartNumber: string, diagnosisDto: CreateMDiagnosisDto) {
-    const chart = await this.mChartsRepository.findOne({
-      where: { chartNumber },
-    });
+  async postDiagnosis(id: number, diagnosisDto: CreateMDiagnosisDto) {
     return await this.mChartsRepository.save({
-      id: chart.id,
+      id,
       presentIllness: diagnosisDto.presentIllness,
       impression: diagnosisDto.impression,
       treatmentNote: diagnosisDto.treatmentNote,

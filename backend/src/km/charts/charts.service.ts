@@ -128,7 +128,7 @@ export class KmChartsService {
     });
   }
 
-  async checkChartExistsByNumber(chartNumber: string) {
+  async checkChartExistsByChartNumber(chartNumber: string) {
     return this.kmChartsRepository.exists({
       where: { chartNumber },
     });
@@ -144,9 +144,9 @@ export class KmChartsService {
     });
   }
 
-  async postDiagnosis(chartNumber: string, diagnosisDto: CreateKmDiagnosisDto) {
+  async postDiagnosis(id: number, diagnosisDto: CreateKmDiagnosisDto) {
     return await this.kmChartsRepository.save({
-      chartNumber,
+      id,
       presentIllness: diagnosisDto.presentIllness,
       impression: diagnosisDto.impression,
       treatmentNote: diagnosisDto.treatmentNote,

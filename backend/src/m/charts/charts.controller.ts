@@ -13,7 +13,6 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MChartsService } from './charts.service';
 import { MPrescriptionsService } from './prescriptions/prescriptions.service';
 import { CreatePrediagnosisDto } from './dto/create-prediagnosis.dto';
-import { CreateMPrescriptionDto } from './prescriptions/dto/create-prescription.dto';
 import { UpdateMPharmacyDto } from './dto/update-pharmacy.dto';
 import { CreateMDiagnosisDto } from './dto/create-diagnosis.dto';
 import { MMedicinesService } from '../medicines/medicines.service';
@@ -189,7 +188,7 @@ export class MChartsController {
       );
     }
 
-    await this.chartsService.postDiagnosis(chartNumber, diagnosisDto);
+    await this.chartsService.postDiagnosis(currentChart.id, diagnosisDto);
 
     // 조제 대기 중인 차트 -> 기존 처방 삭제
     if (currentChart.status === 3) {
@@ -251,7 +250,7 @@ export class MChartsController {
 
   @Patch(':chartNumber/status')
   @ApiOperation({
-    summary: '약국 차트 상태 수정',
+    summary: '약국 수정',
   })
   async patchChartPharmacyStatus(
     @Param('chartNumber') chartNumber: string,
@@ -282,41 +281,6 @@ export class MChartsController {
     return await this.chartsService.updateStatus(
       chartNumber,
       pharmacyDto.status,
-    );
-  }
-
-  @Post(':chartNumber/prescriptions')
-  @ApiOperation({
-    summary: '처방 생성',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description:
-      '존재하지 않는 약품입니다. <small>medicineId에 해당하는 약품이 없는 경우</small>',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-  })
-  async postPrescription(
-    @Param('chartNumber') chartNumber: string,
-    @Body() prescriptionDto: CreateMPrescriptionDto,
-  ) {
-    const chartExists =
-      await this.chartsService.checkChartExistsByChartNumber(chartNumber);
-    if (!chartExists) {
-      throw new NotFoundException();
-    }
-
-    const medicineExists = await this.medicinesService.checkMedicineExistsById(
-      prescriptionDto.medicineId,
-    );
-    if (!medicineExists) {
-      throw new NotFoundException('존재하지 않는 약품입니다.');
-    }
-
-    return await this.prescriptionsService.createPrescription(
-      chartNumber,
-      prescriptionDto,
     );
   }
 }

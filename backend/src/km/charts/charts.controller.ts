@@ -13,7 +13,6 @@ import { KmChartsService } from './charts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateKmPrediagnosisDto } from './dto/create-prediagnosis.dto';
 import { KmPrescriptionsService } from './prescriptions/prescriptions.service';
-import { CreateKmPrescriptionDto } from './prescriptions/dto/create-prescription.dto';
 import { KmMedicinesService } from '../medicines/medicines.service';
 import { CreateKmDiagnosisDto } from './dto/create-diagnosis.dto';
 import { UpdateKMPharmacyDto } from './dto/update-pharmacy.dto';
@@ -185,7 +184,7 @@ export class KmChartsController {
       );
     }
 
-    await this.chartsService.postDiagnosis(chartNumber, createDiagnosisDto);
+    await this.chartsService.postDiagnosis(currentChart.id, createDiagnosisDto);
 
     // 조제 대기 중인 차트 -> 기존 처방 삭제
     if (currentChart.status === 3) {
@@ -242,9 +241,9 @@ export class KmChartsController {
     return this.chartsService.getPharmacy(chartNumber);
   }
 
-  @Patch(':chartNumber/status')
+  @Patch(':chartNumber/pharmacy')
   @ApiOperation({
-    summary: '약국 차트 상태 수정',
+    summary: '약국 수정',
   })
   async patchChartPharmacyStatus(
     @Param('chartNumber') chartNumber: string,
@@ -276,51 +275,5 @@ export class KmChartsController {
       chartNumber,
       pharmacyDto.status,
     );
-  }
-
-  @Post(':chartNumber/prescriptions')
-  @ApiOperation({
-    summary: '처방 생성',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description:
-      '존재하지 않는 약품입니다. <small>medicineId에 해당하는 약품이 없는 경우</small>',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-  })
-  async postPrescription(
-    @Param('chartNumber') chartNumber: string,
-    @Body() prescriptionDto: CreateKmPrescriptionDto,
-  ) {
-    const chartExists =
-      await this.chartsService.checkChartExistsByNumber(chartNumber);
-    if (!chartExists) {
-      throw new NotFoundException();
-    }
-
-    const medicineExists = await this.medicinesService.checkMedicineExistsById(
-      prescriptionDto.medicineId,
-    );
-    if (!medicineExists) {
-      throw new NotFoundException('존재하지 않는 약품입니다.');
-    }
-
-    return await this.prescriptionsService.createPrescription(
-      chartNumber,
-      prescriptionDto,
-    );
-  }
-
-  @Get(':chartNumber/pharmacy')
-  @ApiOperation({
-    summary: '약국 조회',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-  })
-  getMChartPharmacy(@Param('chartNumber') chartNumber: string) {
-    return this.chartsService.getPharmacy(chartNumber);
   }
 }
