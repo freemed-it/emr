@@ -22,7 +22,7 @@ export const generateChartNumber = async (
     .orderBy('chart.chartNumber', 'DESC')
     .getOne();
 
-  if (lastChart.chartNumber) {
+  if (lastChart?.chartNumber) {
     // 가장 최신의 차트 번호 마지막 두 자리를 가져와 +1
     const lastNum = parseInt(lastChart.chartNumber.slice(-3));
     newNum = (lastNum + 1).toString().padStart(3, '0');
