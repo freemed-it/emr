@@ -39,7 +39,7 @@ export class MPrescriptionsController {
     @Param('chartNumber') chartNumber: string,
     @Body() prescriptionDto: CreateMPrescriptionDto,
   ) {
-    const medicineExists = await this.medicinesService.checkMedicineExistsById(
+    const medicineExists = await this.medicinesService.checkMedicineExists(
       prescriptionDto.medicineId,
     );
     if (!medicineExists) {
@@ -64,9 +64,7 @@ export class MPrescriptionsController {
     @Body() updatePrescriptionDto: UpdateMPrescriptionDto,
   ) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExistsById(
-        prescriptionId,
-      );
+      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }
@@ -88,9 +86,7 @@ export class MPrescriptionsController {
     @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
   ) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExistsById(
-        prescriptionId,
-      );
+      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }

@@ -39,7 +39,7 @@ export class KmPrescriptionsController {
     @Param('chartNumber') chartNumber: string,
     @Body() prescriptionDto: CreateKmPrescriptionDto,
   ) {
-    const medicineExists = await this.medicinesService.checkMedicineExistsById(
+    const medicineExists = await this.medicinesService.checkMedicineExists(
       prescriptionDto.medicineId,
     );
     if (!medicineExists) {
@@ -65,9 +65,7 @@ export class KmPrescriptionsController {
     @Body() updatePrescriptionDto: UpdateKmPrescriptionDto,
   ) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExistsById(
-        prescriptionId,
-      );
+      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }
@@ -90,9 +88,7 @@ export class KmPrescriptionsController {
     @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
   ) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExistsById(
-        prescriptionId,
-      );
+      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }

@@ -199,7 +199,7 @@ export class KmMedicinesService {
     }
   }
 
-  async checkMedicineExistsById(id: number) {
+  async checkMedicineExists(id: number) {
     return this.medicinesRepository.exists({
       where: { id },
     });

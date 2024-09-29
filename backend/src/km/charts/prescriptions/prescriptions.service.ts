@@ -15,7 +15,7 @@ export class KmPrescriptionsService {
     private readonly prescriptionsRepository: Repository<KmPrescriptions>,
   ) {}
 
-  async getPrescriptions(chartNumber: string) {
+  async getPrescriptionsByChartNumber(chartNumber: string) {
     return await this.prescriptionsRepository.find({
       where: { chart: { chartNumber } },
       relations: { medicine: true },
@@ -71,7 +71,7 @@ export class KmPrescriptionsService {
     });
   }
 
-  async checkPrescriptionExistsById(id: number) {
+  async checkPrescriptionExists(id: number) {
     return this.prescriptionsRepository.exists({
       where: { id },
     });

@@ -20,12 +20,14 @@ import { OrdersService } from 'src/orders/orders.service';
 import { Department } from 'src/orders/const/department.const';
 import { HistoriesService } from 'src/patients/histories/histories.service';
 import { KmComplaintsService } from './complaints/complaints.service';
+import { MChartsService } from 'src/m/charts/charts.service';
 
 @ApiTags('한의과')
 @Controller('km/charts')
 export class KmChartsController {
   constructor(
-    private readonly chartsService: KmChartsService,
+    private readonly kmChartsService: KmChartsService,
+    private readonly mChartsService: MChartsService,
     private readonly historiesService: HistoriesService,
     private readonly complaintsService: KmComplaintsService,
     private readonly prescriptionsService: KmPrescriptionsService,
@@ -45,9 +47,10 @@ export class KmChartsController {
     @Param('chartNumber') chartNumber: string,
     @Body() prediagnosisDto: CreateKmPrediagnosisDto,
   ) {
-    const currentChart = await this.chartsService.getChart(chartNumber);
+    const currentChart =
+      await this.kmChartsService.getChartByChartNumber(chartNumber);
 
-    const vitalSign = await this.chartsService.createVitalSign(
+    const vitalSign = await this.kmChartsService.createVitalSign(
       chartNumber,
       prediagnosisDto.vistalSign,
     );
@@ -62,7 +65,7 @@ export class KmChartsController {
       prediagnosisDto.history,
     );
 
-    await this.chartsService.updateStatus(chartNumber, 2);
+    await this.kmChartsService.updateStatus(chartNumber, 2);
 
     return {
       vitalSign,
@@ -80,7 +83,8 @@ export class KmChartsController {
     description: '예진이 조회되었습니다.',
   })
   async getPrediagnosis(@Param('chartNumber') chartNumber: string) {
-    const chart = await this.chartsService.getPrediagnosis(chartNumber);
+    const chart =
+      await this.kmChartsService.getPrediagnosisByChartNumber(chartNumber);
     switch (chart.status) {
       case 1:
         const chartNumber = await this.ordersService.checkTodayChart(
@@ -89,10 +93,10 @@ export class KmChartsController {
         );
 
         const vitalSign = chartNumber
-          ? await this.chartsService.getVitalSignByChartNumber(chartNumber)
+          ? await this.mChartsService.getVitalSignByChartNumber(chartNumber)
           : null;
 
-        const history = await this.historiesService.getHistoryByPatientId(
+        const history = await this.historiesService.getPatientHistory(
           chart.patient.id,
         );
 
@@ -115,7 +119,7 @@ export class KmChartsController {
     description: '과거 차트 목록이 조회되었습니다',
   })
   async getPastCharts(@Param('patientId') patientId: number) {
-    return this.chartsService.getPastCharts(patientId);
+    return this.kmChartsService.getPastCharts(patientId);
   }
 
   @Get('/:chartNumber/complaints')
@@ -127,7 +131,7 @@ export class KmChartsController {
     description: 'C.C가 조회되었습니다.',
   })
   getComplaint(@Param('chartNumber') chartNumber: string) {
-    return this.complaintsService.getComplaint(chartNumber);
+    return this.complaintsService.getComplaintByChartNumber(chartNumber);
   }
 
   @Get('/:chartNumber')
@@ -139,7 +143,7 @@ export class KmChartsController {
     description: '과거 차트 상세가 조회되었습니다.',
   })
   getPastChart(@Param('chartNumber') chartNumber: string) {
-    return this.chartsService.getPastChart(chartNumber);
+    return this.kmChartsService.getPastChartByChartNumber(chartNumber);
   }
 
   @Get(':chartNumber/diagnosis')
@@ -147,7 +151,8 @@ export class KmChartsController {
     summary: '본진 조회',
   })
   async getDiagnosis(@Param('chartNumber') chartNumber: string) {
-    const chart = await this.chartsService.getDiagnosis(chartNumber);
+    const chart =
+      await this.kmChartsService.getDiagnosisByChartNumber(chartNumber);
     if (!chart) {
       throw new NotFoundException();
     }
@@ -177,14 +182,18 @@ export class KmChartsController {
     @Param('chartNumber') chartNumber: string,
     @Body() createDiagnosisDto: CreateKmDiagnosisDto,
   ) {
-    const currentChart = await this.chartsService.getChart(chartNumber);
+    const currentChart =
+      await this.kmChartsService.getChartByChartNumber(chartNumber);
     if (Number(currentChart.status) < 2 || Number(currentChart.status) > 3) {
       throw new BadRequestException(
         `예진 완료(2) 혹은 조제 대기(3) 중인 차트가 아닙니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
       );
     }
 
-    await this.chartsService.postDiagnosis(currentChart.id, createDiagnosisDto);
+    await this.kmChartsService.postDiagnosis(
+      currentChart.id,
+      createDiagnosisDto,
+    );
 
     // 조제 대기 중인 차트 -> 기존 처방 삭제
     if (currentChart.status === 3) {
@@ -195,10 +204,9 @@ export class KmChartsController {
 
     const prescriptions = await Promise.all(
       createDiagnosisDto.prescriptions.map(async (prescription) => {
-        const medicineExists =
-          await this.medicinesService.checkMedicineExistsById(
-            prescription.medicineId,
-          );
+        const medicineExists = await this.medicinesService.checkMedicineExists(
+          prescription.medicineId,
+        );
         if (!medicineExists) {
           throw new NotFoundException('존재하지 않는 약품입니다.');
         }
@@ -209,7 +217,7 @@ export class KmChartsController {
       }),
     );
 
-    const chart = await this.chartsService.updateStatus(chartNumber, 3);
+    const chart = await this.kmChartsService.updateStatus(chartNumber, 3);
 
     return {
       ...chart,
@@ -222,8 +230,9 @@ export class KmChartsController {
     summary: 'V/S 전체 조회',
   })
   async getVitalSigns(@Param('chartNumber') chartNumber: string) {
-    const chartVitalSign = await this.chartsService.getVitalSign(chartNumber);
-    const pastVitalSigns = await this.chartsService.getPastVitalSigns(
+    const chartVitalSign =
+      await this.kmChartsService.getVitalSignByChartNumber(chartNumber);
+    const pastVitalSigns = await this.kmChartsService.getPastVitalSigns(
       chartVitalSign.patient.id,
     );
 
@@ -238,7 +247,7 @@ export class KmChartsController {
     summary: '약국 조회',
   })
   getChartPharmacy(@Param('chartNumber') chartNumber: string) {
-    return this.chartsService.getPharmacy(chartNumber);
+    return this.kmChartsService.getPharmacyByChartNumber(chartNumber);
   }
 
   @Patch(':chartNumber/pharmacy')
@@ -249,7 +258,8 @@ export class KmChartsController {
     @Param('chartNumber') chartNumber: string,
     @Body() pharmacyDto: UpdateKMPharmacyDto,
   ) {
-    const currentChart = await this.chartsService.getChart(chartNumber);
+    const currentChart =
+      await this.kmChartsService.getChartByChartNumber(chartNumber);
     if (currentChart.status < 3 || currentChart.status >= 6) {
       throw new BadRequestException(
         `조제 전(< 3) 혹은 복약지도 완료(6)된 차트입니다. 차트 상태를 확인해 주세요. (현재 차트 상태: ${currentChart.status})`,
@@ -259,7 +269,9 @@ export class KmChartsController {
     // 복약지도 완료 시 약품 총량 줄이기 & 완료된 처방으로 수정
     if (pharmacyDto.status === 6) {
       const prescriptions =
-        await this.prescriptionsService.getPrescriptions(chartNumber);
+        await this.prescriptionsService.getPrescriptionsByChartNumber(
+          chartNumber,
+        );
       prescriptions.forEach(async (prescription) => {
         await this.medicinesService.updateMedicineTotalAmount(
           prescription.medicine.id,
@@ -271,7 +283,7 @@ export class KmChartsController {
       });
     }
 
-    return await this.chartsService.updateStatus(
+    return await this.kmChartsService.updateStatus(
       chartNumber,
       pharmacyDto.status,
     );

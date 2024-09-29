@@ -73,7 +73,7 @@ export class MMedicinesController {
     @UploadedFile() image: Express.Multer.File,
   ) {
     const categoryExists =
-      await this.medicineCategoriesService.checkCategoryExistsById(
+      await this.medicineCategoriesService.checkCategoryExists(
         createMedicineDto.categoryId,
       );
 
@@ -104,7 +104,7 @@ export class MMedicinesController {
     @UploadedFile() image: Express.Multer.File,
   ) {
     const categoryExists =
-      await this.medicineCategoriesService.checkCategoryExistsById(
+      await this.medicineCategoriesService.checkCategoryExists(
         updateMedicineDto.categoryId,
       );
 

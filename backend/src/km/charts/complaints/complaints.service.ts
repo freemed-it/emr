@@ -23,7 +23,7 @@ export class KmComplaintsService {
     });
   }
 
-  async getComplaint(chartNumber: string) {
+  async getComplaintByChartNumber(chartNumber: string) {
     return await this.complaintsRepository.findOne({
       where: { chart: { chartNumber } },
     });

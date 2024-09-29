@@ -13,7 +13,7 @@ export class MemosService {
     private memosRepository: Repository<Memos>,
   ) {}
 
-  async createMemos(patientId: number, memoDto: CreateMemoDto, user: Users) {
+  async createMemo(patientId: number, memoDto: CreateMemoDto, user: Users) {
     return this.memosRepository.save({
       patient: {
         id: patientId,
@@ -23,7 +23,7 @@ export class MemosService {
     });
   }
 
-  async updateMemos(memoId: number, memoDto: UpdateMemoDto, user: Users) {
+  async updateMemo(memoId: number, memoDto: UpdateMemoDto, user: Users) {
     const memo = await this.memosRepository.findOne({
       where: { id: memoId },
     });

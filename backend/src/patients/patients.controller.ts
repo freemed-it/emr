@@ -73,7 +73,7 @@ export class PatientsController {
     description: '이름/생년월일을 입력해주세요.',
   })
   @ApiQuery({ name: 'patientId', required: false, type: Number })
-  async postKMPatient(
+  async postKmPatient(
     @Body() receiptDto: ReceiptDto,
     @Query('patientId') patientId?: number,
   ) {
@@ -101,8 +101,8 @@ export class PatientsController {
     status: HttpStatus.OK,
     description: '참여자 검색 결과',
   })
-  async searchPatients(@Query('name') name: string) {
-    return this.patientsService.searchByName(name);
+  async getPatients(@Query('name') name: string) {
+    return this.patientsService.searchPatients(name);
   }
 
   @Get(':patientId')
@@ -113,8 +113,8 @@ export class PatientsController {
     status: HttpStatus.OK,
     description: '참여자 상세 조회',
   })
-  async getPatient(@Param('patientId', ParseIntPipe) id: number) {
-    return this.patientsService.getPatientById(id);
+  async getPatient(@Param('patientId', ParseIntPipe) patientId: number) {
+    return this.patientsService.getPatient(patientId);
   }
 
   @Get(':patientId/histories')
@@ -122,7 +122,7 @@ export class PatientsController {
     summary: '참여자 과거력 조회',
   })
   async getPatientHistory(@Param('patientId', ParseIntPipe) patientId: number) {
-    return this.historiesService.getHistoryByPatientId(patientId);
+    return this.historiesService.getPatientHistory(patientId);
   }
 
   @Post(':patientId/memos')
@@ -131,15 +131,15 @@ export class PatientsController {
     @Body() memoDto: CreateMemoDto,
     @User() user: Users,
   ) {
-    return this.memosService.createMemos(patientId, memoDto, user);
+    return this.memosService.createMemo(patientId, memoDto, user);
   }
 
   @Patch(':memoId/memos')
-  async pathMemo(
+  async patchMemo(
     @Param('memoId') memoId: number,
     @Body() memoDto: UpdateMemoDto,
     @User() user: Users,
   ) {
-    return this.memosService.updateMemos(memoId, memoDto, user);
+    return this.memosService.updateMemo(memoId, memoDto, user);
   }
 }

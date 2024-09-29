@@ -211,9 +211,9 @@ export class MMedicinesService {
     }
   }
 
-  async checkMedicineExistsById(id: number) {
+  async checkMedicineExists(medicineId: number) {
     return this.medicinesRepository.exists({
-      where: { id },
+      where: { id: medicineId },
     });
   }
 

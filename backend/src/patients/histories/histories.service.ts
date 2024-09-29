@@ -27,7 +27,7 @@ export class HistoriesService {
         });
   }
 
-  getHistoryByPatientId(patientId: number) {
+  getPatientHistory(patientId: number) {
     return this.historiesRepository.findOne({
       where: { patient: { id: patientId } },
     });

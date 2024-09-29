@@ -155,9 +155,9 @@ export class MMedicineCategoriesService {
     return categoryId;
   }
 
-  async checkCategoryExistsById(id: number) {
+  async checkCategoryExists(categoryId: number) {
     return this.medicineCategoriesRepository.exists({
-      where: { id },
+      where: { id: categoryId },
     });
   }
 }

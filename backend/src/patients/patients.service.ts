@@ -22,7 +22,7 @@ export class PatientsService {
         });
   }
 
-  async searchByName(name: string) {
+  async searchPatients(name: string) {
     const patients = await this.patientsRepository.find({
       where: { name },
       select: ['id', 'firstVisit', 'name', 'birth'],
@@ -35,7 +35,7 @@ export class PatientsService {
         : patients;
   }
 
-  async getPatientById(id: number) {
-    return this.patientsRepository.findOne({ where: { id } });
+  async getPatient(patientId: number) {
+    return this.patientsRepository.findOne({ where: { id: patientId } });
   }
 }
