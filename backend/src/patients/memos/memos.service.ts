@@ -38,4 +38,10 @@ export class MemosService {
       writer: user.name,
     });
   }
+
+  async getMemo(memoId: number) {
+    return this.memosRepository.findOne({
+      where: { id: memoId },
+    });
+  }
 }

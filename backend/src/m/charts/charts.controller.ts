@@ -123,18 +123,6 @@ export class MChartsController {
     return this.mChartsService.getPastCharts(patientId);
   }
 
-  @Get('/:chartNumber/complaints')
-  @ApiOperation({
-    summary: '예진 C.C 상세 조회',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'C.C가 조회되었습니다.',
-  })
-  getComplaint(@Param('chartNumber') chartNumber: string) {
-    return this.complaintsService.getComplaintByChartNumber(chartNumber);
-  }
-
   @Get('/:chartNumber')
   @ApiOperation({
     summary: '과거 차트 상세 조회',
