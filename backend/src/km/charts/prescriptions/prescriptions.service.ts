@@ -40,11 +40,11 @@ export class KmPrescriptionsService {
   }
 
   async updatePrescription(
-    prescriptionId: number,
+    id: number,
     prescriptionDto: UpdateKmPrescriptionDto,
   ) {
     return await this.prescriptionsRepository.save({
-      id: prescriptionId,
+      id,
       dosesTotal:
         prescriptionDto.doses *
         convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
@@ -53,16 +53,16 @@ export class KmPrescriptionsService {
     });
   }
 
-  async updatePrescriptionIsCompleted(prescriptionId: number) {
+  async updatePrescriptionIsCompleted(id: number) {
     return await this.prescriptionsRepository.save({
-      id: prescriptionId,
+      id,
       isCompleted: true,
     });
   }
 
-  async deletePrescription(prescriptionId: number) {
-    await this.prescriptionsRepository.delete(prescriptionId);
-    return prescriptionId;
+  async deletePrescription(id: number) {
+    await this.prescriptionsRepository.delete(id);
+    return id;
   }
 
   async deletePrescriptionsByChartNumber(chartNumber: string) {

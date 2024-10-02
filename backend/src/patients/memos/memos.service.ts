@@ -23,9 +23,9 @@ export class MemosService {
     });
   }
 
-  async updateMemo(memoId: number, memoDto: UpdateMemoDto, user: Users) {
+  async updateMemo(id: number, memoDto: UpdateMemoDto, user: Users) {
     const memo = await this.memosRepository.findOne({
-      where: { id: memoId },
+      where: { id },
     });
 
     if (!memo) {
@@ -39,9 +39,9 @@ export class MemosService {
     });
   }
 
-  async getMemo(memoId: number) {
+  async getMemo(id: number) {
     return this.memosRepository.findOne({
-      where: { id: memoId },
+      where: { id },
     });
   }
 }

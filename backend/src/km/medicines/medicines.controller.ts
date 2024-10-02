@@ -50,8 +50,8 @@ export class KmMedicinesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async getMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
-    return this.medicinesService.getMedicine(medicineId);
+  async getMedicine(@Param('medicineId', ParseIntPipe) id: number) {
+    return this.medicinesService.getMedicine(id);
   }
 
   @Post()
@@ -77,15 +77,11 @@ export class KmMedicinesController {
     status: HttpStatus.NOT_FOUND,
   })
   async patchMedicine(
-    @Param('medicineId', ParseIntPipe) medicineId: number,
+    @Param('medicineId', ParseIntPipe) id: number,
     @Body() updateMedicineDto: UpdateKMMedicineDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    return this.medicinesService.updateMedicine(
-      medicineId,
-      updateMedicineDto,
-      image,
-    );
+    return this.medicinesService.updateMedicine(id, updateMedicineDto, image);
   }
 
   @Delete(':medicineId')
@@ -95,8 +91,8 @@ export class KmMedicinesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async deleteMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
-    return this.medicinesService.deleteMedicine(medicineId);
+  async deleteMedicine(@Param('medicineId', ParseIntPipe) id: number) {
+    return this.medicinesService.deleteMedicine(id);
   }
 
   @Get('history/:startDate/:endDate')

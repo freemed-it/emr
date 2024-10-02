@@ -53,8 +53,8 @@ export class MMedicinesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async getMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
-    return this.medicinesService.getMedicine(medicineId);
+  async getMedicine(@Param('medicineId', ParseIntPipe) id: number) {
+    return this.medicinesService.getMedicine(id);
   }
 
   @Post()
@@ -99,7 +99,7 @@ export class MMedicinesController {
     status: HttpStatus.NOT_FOUND,
   })
   async patchMedicine(
-    @Param('medicineId', ParseIntPipe) medicineId: number,
+    @Param('medicineId', ParseIntPipe) id: number,
     @Body() updateMedicineDto: UpdateMMedicineDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
@@ -112,11 +112,7 @@ export class MMedicinesController {
       throw new NotFoundException('존재하지 않는 분류입니다.');
     }
 
-    return this.medicinesService.updateMedicine(
-      medicineId,
-      updateMedicineDto,
-      image,
-    );
+    return this.medicinesService.updateMedicine(id, updateMedicineDto, image);
   }
 
   @Delete(':medicineId')
@@ -126,8 +122,8 @@ export class MMedicinesController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async deleteMedicine(@Param('medicineId', ParseIntPipe) medicineId: number) {
-    return this.medicinesService.deleteMedicine(medicineId);
+  async deleteMedicine(@Param('medicineId', ParseIntPipe) id: number) {
+    return this.medicinesService.deleteMedicine(id);
   }
 
   @Get('history/:startDate/:endDate')

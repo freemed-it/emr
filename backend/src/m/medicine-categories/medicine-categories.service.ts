@@ -122,11 +122,11 @@ export class MMedicineCategoriesService {
   }
 
   async updateSubCategory(
-    categoryId: number,
+    id: number,
     subCategoryDto: UpdateMMedicineSubCategoryDto,
   ) {
     const category = await this.medicineCategoriesRepository.findOne({
-      where: { id: categoryId },
+      where: { id },
     });
 
     if (!category) {
@@ -134,30 +134,30 @@ export class MMedicineCategoriesService {
     }
 
     const newCategory = await this.medicineCategoriesRepository.preload({
-      id: categoryId,
+      id,
       ...subCategoryDto,
     });
 
     return await this.medicineCategoriesRepository.save(newCategory);
   }
 
-  async deleteSubCategory(categoryId: number) {
+  async deleteSubCategory(id: number) {
     const category = await this.medicineCategoriesRepository.findOne({
-      where: { id: categoryId },
+      where: { id },
     });
 
     if (!category) {
       throw new NotFoundException();
     }
 
-    await this.medicineCategoriesRepository.softDelete(categoryId);
+    await this.medicineCategoriesRepository.softDelete(id);
 
-    return categoryId;
+    return id;
   }
 
-  async checkCategoryExists(categoryId: number) {
+  async checkCategoryExists(id: number) {
     return this.medicineCategoriesRepository.exists({
-      where: { id: categoryId },
+      where: { id },
     });
   }
 }

@@ -11,10 +11,10 @@ export class PatientsService {
     private patientsRepository: Repository<Patients>,
   ) {}
 
-  async createPatient(patientDto: CreatePatientDto, patientId?: number) {
-    return patientId
+  async createPatient(patientDto: CreatePatientDto, id?: number) {
+    return id
       ? await this.patientsRepository.save({
-          id: patientId,
+          id,
           ...patientDto,
         })
       : await this.patientsRepository.save({
@@ -35,7 +35,7 @@ export class PatientsService {
         : patients;
   }
 
-  async getPatient(patientId: number) {
-    return this.patientsRepository.findOne({ where: { id: patientId } });
+  async getPatient(id: number) {
+    return this.patientsRepository.findOne({ where: { id } });
   }
 }

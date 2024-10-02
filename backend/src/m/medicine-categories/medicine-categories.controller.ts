@@ -94,11 +94,11 @@ export class MMedicineCategoriesController {
     status: HttpStatus.NOT_FOUND,
   })
   async patchMedicineSubCategory(
-    @Param('categoryId', ParseIntPipe) categoryId: number,
+    @Param('categoryId', ParseIntPipe) id: number,
     @Body() updateMedicineSubCategoryDto: UpdateMMedicineSubCategoryDto,
   ) {
     return this.medicineCategoriesService.updateSubCategory(
-      categoryId,
+      id,
       updateMedicineSubCategoryDto,
     );
   }
@@ -115,15 +115,15 @@ export class MMedicineCategoriesController {
     status: HttpStatus.NOT_FOUND,
   })
   async deleteMedicineSubCategory(
-    @Param('categoryId', ParseIntPipe) categoryId: number,
+    @Param('categoryId', ParseIntPipe) id: number,
   ) {
     const idDeleted =
-      await this.medicinesService.checkDeletedMedicineByCategoryId(categoryId);
+      await this.medicinesService.checkDeletedMedicineByCategoryId(id);
 
     if (!idDeleted) {
       throw new BadRequestException('삭제되지 않은 약품이 존재합니다.');
     }
 
-    return this.medicineCategoriesService.deleteSubCategory(categoryId);
+    return this.medicineCategoriesService.deleteSubCategory(id);
   }
 }

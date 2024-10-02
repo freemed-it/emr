@@ -41,12 +41,9 @@ export class PatientsController {
   @ApiQuery({ name: 'patientId', required: false, type: Number })
   async postMPatient(
     @Body() receiptDto: ReceiptDto,
-    @Query('patientId') patientId?: number,
+    @Query('patientId') id?: number,
   ) {
-    const patient = await this.patientsService.createPatient(
-      receiptDto,
-      patientId,
-    );
+    const patient = await this.patientsService.createPatient(receiptDto, id);
     const chart = await this.mChartsService.createChart(patient.id);
     const order = await this.ordersService.createOrder(
       patient.id,
@@ -70,12 +67,9 @@ export class PatientsController {
   @ApiQuery({ name: 'patientId', required: false, type: Number })
   async postKmPatient(
     @Body() receiptDto: ReceiptDto,
-    @Query('patientId') patientId?: number,
+    @Query('patientId') id?: number,
   ) {
-    const patient = await this.patientsService.createPatient(
-      receiptDto,
-      patientId,
-    );
+    const patient = await this.patientsService.createPatient(receiptDto, id);
     const chart = await this.kmChartsService.createChart(patient.id);
     const order = await this.ordersService.createOrder(
       patient.id,
@@ -108,7 +102,7 @@ export class PatientsController {
     status: HttpStatus.OK,
     description: '참여자 상세 조회',
   })
-  async getPatient(@Param('patientId', ParseIntPipe) patientId: number) {
-    return this.patientsService.getPatient(patientId);
+  async getPatient(@Param('patientId', ParseIntPipe) id: number) {
+    return this.patientsService.getPatient(id);
   }
 }

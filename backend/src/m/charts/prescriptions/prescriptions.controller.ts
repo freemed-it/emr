@@ -60,17 +60,17 @@ export class MPrescriptionsController {
     status: HttpStatus.NOT_FOUND,
   })
   async patchPrescription(
-    @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
+    @Param('prescriptionId', ParseIntPipe) id: number,
     @Body() updatePrescriptionDto: UpdateMPrescriptionDto,
   ) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
+      await this.prescriptionsService.checkPrescriptionExists(id);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }
 
     return this.prescriptionsService.updatePrescription(
-      prescriptionId,
+      id,
       updatePrescriptionDto,
     );
   }
@@ -82,15 +82,13 @@ export class MPrescriptionsController {
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
   })
-  async deletePrescription(
-    @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
-  ) {
+  async deletePrescription(@Param('prescriptionId', ParseIntPipe) id: number) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
+      await this.prescriptionsService.checkPrescriptionExists(id);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }
 
-    return this.prescriptionsService.deletePrescription(prescriptionId);
+    return this.prescriptionsService.deletePrescription(id);
   }
 }

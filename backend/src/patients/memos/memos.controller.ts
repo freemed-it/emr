@@ -22,15 +22,15 @@ export class MemosController {
 
   @Patch(':memoId')
   async patchMemo(
-    @Param('memoId') memoId: number,
+    @Param('memoId') id: number,
     @Body() memoDto: UpdateMemoDto,
     @User() user: Users,
   ) {
-    return this.memosService.updateMemo(memoId, memoDto, user);
+    return this.memosService.updateMemo(id, memoDto, user);
   }
 
   @Get(':memoId')
-  async getMemo(@Param('memoId') memoId: number) {
-    return this.memosService.getMemo(memoId);
+  async getMemo(@Param('memoId') id: number) {
+    return this.memosService.getMemo(id);
   }
 }

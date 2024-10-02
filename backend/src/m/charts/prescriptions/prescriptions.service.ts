@@ -44,11 +44,11 @@ export class MPrescriptionsService {
   }
 
   async updatePrescription(
-    prescriptionId: number,
+    id: number,
     prescriptionDto: UpdateMPrescriptionDto,
   ) {
     return await this.prescriptionsRepository.save({
-      id: prescriptionId,
+      id,
       dosesTotal:
         prescriptionDto.doses *
         convertDosesCountByDay(prescriptionDto.dosesCountByDay) *
@@ -57,9 +57,9 @@ export class MPrescriptionsService {
     });
   }
 
-  async updatePrescriptionIsCompleted(prescriptionId: number) {
+  async updatePrescriptionIsCompleted(id: number) {
     const prescription = await this.prescriptionsRepository.findOne({
-      where: { id: prescriptionId },
+      where: { id },
     });
 
     if (!prescription) {
@@ -67,14 +67,14 @@ export class MPrescriptionsService {
     }
 
     return await this.prescriptionsRepository.save({
-      id: prescriptionId,
+      id,
       isCompleted: true,
     });
   }
 
-  async deletePrescription(prescriptionId: number) {
-    await this.prescriptionsRepository.delete(prescriptionId);
-    return prescriptionId;
+  async deletePrescription(id: number) {
+    await this.prescriptionsRepository.delete(id);
+    return id;
   }
 
   async deletePrescriptionsByChartNumber(chartNumber: string) {

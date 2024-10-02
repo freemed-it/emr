@@ -61,17 +61,17 @@ export class KmPrescriptionsController {
   })
   async patchPrescription(
     @Param('chartNumber') chartNumber: string,
-    @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
+    @Param('prescriptionId', ParseIntPipe) id: number,
     @Body() updatePrescriptionDto: UpdateKmPrescriptionDto,
   ) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
+      await this.prescriptionsService.checkPrescriptionExists(id);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }
 
     return this.prescriptionsService.updatePrescription(
-      prescriptionId,
+      id,
       updatePrescriptionDto,
     );
   }
@@ -85,14 +85,14 @@ export class KmPrescriptionsController {
   })
   async deletePrescription(
     @Param('chartNumber') chartNumber: string,
-    @Param('prescriptionId', ParseIntPipe) prescriptionId: number,
+    @Param('prescriptionId', ParseIntPipe) id: number,
   ) {
     const prescriptionExists =
-      await this.prescriptionsService.checkPrescriptionExists(prescriptionId);
+      await this.prescriptionsService.checkPrescriptionExists(id);
     if (!prescriptionExists) {
       throw new NotFoundException();
     }
 
-    return this.prescriptionsService.deletePrescription(prescriptionId);
+    return this.prescriptionsService.deletePrescription(id);
   }
 }
